@@ -1,0 +1,417 @@
+use anyhow::Result;
+use once_cell::sync::Lazy;
+use crate::core::player::player_ins;
+use crate::core::chr_ins::ChrInsExt;
+
+#[derive(Clone, Copy)]
+pub struct TalkCommand {
+    pub name: &'static str,
+    pub command_id: i32,
+    pub params: &'static [i32],
+    pub handle: Option<fn() -> Result<u64>>,
+    pub dlc: bool,
+}
+
+pub fn shops_array(dlc_available: bool) -> &'static [TalkCommand] {
+    if dlc_available {
+        &SHOPS
+    } else {
+        &SHOPS_NO_DLC
+    }
+}
+
+static SHOPS_NO_DLC: Lazy<Vec<TalkCommand>> = Lazy::new(|| {
+    SHOPS.iter().filter(|shop| !shop.dlc).cloned().collect()
+});
+
+
+pub static MENUS: [TalkCommand; 12] = [
+    TalkCommand {
+        name: "Blacksmith",
+        command_id: 24,
+        params: &[0],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Level Up",
+        command_id: 31,
+        params: &[],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Allot Flasks",
+        command_id: 105,
+        params: &[],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Memorize Spells",
+        command_id: 28,
+        params: &[-1, -1],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Ashes of War",
+        command_id: 48,
+        params: &[],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Great Runes",
+        command_id: 137,
+        params: &[],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Wondrous Physick Mix",
+        command_id: 130,
+        params: &[],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Sell Item",
+        command_id: 46,
+        params: &[-1, -1],
+        handle: Some(|| player_ins().handle()),
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Sort Chest",
+        command_id: 30,
+        params: &[],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Rebirth",
+        command_id: 113,
+        params: &[],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Alter Garments",
+        command_id: 142,
+        params: &[11000, 111399],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Cosmetics",
+        command_id: 81,
+        params: &[0],
+        handle: None,
+        dlc: false,
+    },
+];
+
+pub static SHOPS: [TalkCommand; 43] = [
+    TalkCommand {
+        name: "Blackguard Big Boggart",
+        command_id: 22,
+        params: &[100150, 100174],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Borther Corhyn",
+        command_id: 22,
+        params: &[100350, 100399],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "D, Hunter of the Dead",
+        command_id: 22,
+        params: &[100125, 100149],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Dragon Communion (Bayle)",
+        command_id: 135,
+        params: &[102350, 102351],
+        handle: None,
+        dlc: true,
+    },
+    TalkCommand {
+        name: "Dragon Communion (Caelid)",
+        command_id: 135,
+        params: &[101950, 101974],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Dragon Communion (Limgrave)",
+        command_id: 135,
+        params: &[101975, 101999],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Enia (Equipment)",
+        command_id: 148,
+        params: &[101500, 101574],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Enia (Remembrances)",
+        command_id: 111,
+        params: &[101898, 101949],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Gatekeeper Gostoc",
+        command_id: 22,
+        params: &[100000, 100024],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Gowry (Incantations)",
+        command_id: 22,
+        params: &[100185, 100199],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Gowry (Sorceries)",
+        command_id: 22,
+        params: &[100175, 100184],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Hermit Merchant (Leyndell)",
+        command_id: 22,
+        params: &[100725, 100749],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Imprisoned Merchant (Mohgwyn)",
+        command_id: 22,
+        params: &[100975, 100999],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Isolated Merchant (Dragonbarrow)",
+        command_id: 22,
+        params: &[100875, 100899],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Isolated Mechant (Liurnia)",
+        command_id: 22,
+        params: &[100625, 100649],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Knight Bernahl",
+        command_id: 22,
+        params: &[100075, 100099],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Merchant Kale",
+        command_id: 22,
+        params: &[100500, 100524],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Merchant (Academy of Raya Lucaria)",
+        command_id: 22,
+        params: &[100675, 100699],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Merchant (Ainsel)",
+        command_id: 22,
+        params: &[100950, 100974],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Merchant (Altus Plateau)",
+        command_id: 22,
+        params: &[100750, 100774],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Merchant (Caelid Highway North)",
+        command_id: 22,
+        params: &[100800, 100824],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Merchant (Coastal Cave)",
+        command_id: 22,
+        params: &[100575, 100599],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Merchant (East Limgrave)",
+        command_id: 22,
+        params: &[100550, 100574],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Merchant (East Weeping Peninsula)",
+        command_id: 22,
+        params: &[100600, 100624],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Merchant (Mountaintops)",
+        command_id: 22,
+        params: &[100900, 100924],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Merchant (Mt. Gelmir)",
+        command_id: 22,
+        params: &[100775, 100799],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Merchant (North Limgrave)",
+        command_id: 22,
+        params: &[100525, 100549],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Merchant (North Liurnia)",
+        command_id: 22,
+        params: &[100700, 100724],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Merchant (Siofra)",
+        command_id: 22,
+        params: &[100925, 100949],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Merchant (South Caelid)",
+        command_id: 22,
+        params: &[100825, 100849],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Merchant (Weeping Peninsula)",
+        command_id: 22,
+        params: &[100650, 100674],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Miriel (Incantations)",
+        command_id: 22,
+        params: &[100425, 100474],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Miriel (Sorceries)",
+        command_id: 22,
+        params: &[100400, 100424],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Moore",
+        command_id: 22,
+        params: &[102250, 102289],
+        handle: None,
+        dlc: true,
+    },
+    TalkCommand {
+        name: "Patches",
+        command_id: 22,
+        params: &[100100, 100124],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Pidia, Carian Servant",
+        command_id: 22,
+        params: &[100325, 100349],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Seluvis (Puppets)",
+        command_id: 144,
+        params: &[100300, 100324],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Seluvis (Sorceries)",
+        command_id: 22,
+        params: &[100275, 100299],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Sorcerer Rogier",
+        command_id: 22,
+        params: &[100200, 100224],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Sorceress Sellen",
+        command_id: 22,
+        params: &[100050, 100074],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "Thiollier",
+        command_id: 22,
+        params: &[102270, 102289],
+        handle: None,
+        dlc: true,
+    },
+    TalkCommand {
+        name: "Twin Maiden Husks",
+        command_id: 22,
+        params: &[101800, 101899],
+        handle: None,
+        dlc: false,
+    },
+    TalkCommand {
+        name: "War Counselor Iji",
+        command_id: 22,
+        params: &[100225, 100249],
+        handle: None,
+        dlc: false,
+    },
+];

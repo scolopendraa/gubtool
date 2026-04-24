@@ -1,0 +1,24 @@
+[package]
+name = "gubtool"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+nix = { version = "0.31.1", features = ["ptrace", "uio"] }
+pelite = "0.10.0"
+once_cell = "1.21.3"
+clap = { version = "4.5.57", features = ["derive"] }
+anyhow = "1.0.101"
+ratatui = "0.30.0"
+crossterm = "0.29.0"
+color-eyre = "0.6.5"
+num-format = "0.4.4"
+nucleo-matcher = "0.3.1"
+unicode-segmentation = "1.12.0"
+unicode-width = "0.2.0"
+toml = "1.0.6"
+serde = { version = "1.0.228", features = ["derive"]}
+serde_derive = "1.0.228"
+thiserror = "2.0.18"
+ratatui-themes = "0.2.0"
+phf = { version = "0.13.1", features = ["macros"]}
