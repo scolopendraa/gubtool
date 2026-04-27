@@ -104,7 +104,7 @@ impl ChrInsExt for ChrIns {
     }
 
     fn set_hp(&self, val: i32) -> Result<()> {
-        write::<i32>(0 + data_offsets::HEALTH, val)
+        write::<i32>(self.data_pointer()? + data_offsets::HEALTH, val)
     }
 
     fn set_hp_pct(&self, pct: i32) -> Result<()> {
