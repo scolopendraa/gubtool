@@ -1,22 +1,25 @@
 use anyhow::{Result, anyhow, bail};
 use nix::unistd::Pid;
+use pelite::{
+    FileMap,
+    image::VS_VERSION,
+    pe32::{self, Pe as Pe32},
+    pe64::{self, Pe as Pe64},
+};
 use std::{
     fmt,
     fs::{self, DirEntry},
     io::{BufRead, BufReader},
     path::{Path, PathBuf},
 };
-use pelite::{
-    pe64::{Pe, PeFile},
-    FileMap,
-};
 
 pub static mut ATTACHED_PROCESS: GameProcess = GameProcess::detached();
 
-const VALID_COMMS: &[(&str, Game); 3] = &[
+const VALID_COMMS: &[(&str, Game); 4] = &[
     ("eldenring.exe", Game::EldenRing),
     ("start_protected", Game::EldenRing),
     ("start_protected_game.exe", Game::EldenRing),
+    ("DarkSoulsII.exe", Game::DarkSoulsII),
 ];
 
 pub struct GameProcess {
@@ -36,7 +39,7 @@ impl GameProcess {
             comm: "",
             path: PathBuf::new(),
             game: Game::EldenRing,
-            version: Version::Invalid,
+            version: Version::ERUnknown,
             module_handle: 0,
             attach_result: Ok(()),
         }
@@ -95,9 +98,9 @@ fn parse_process(process: DirEntry) -> Option<GameProcess> {
                 (PathBuf::default(), 0x140000000)
             });
 
-            let mut version = Version::Invalid;
+            let mut version = Version::ERUnknown;
             if path != PathBuf::default() {
-                match get_version(&path) {
+                match get_version(*game, &path) {
                     Ok(v) => version = v,
                     Err(err) => {
                         if attach_result.is_ok() {
@@ -143,54 +146,107 @@ fn get_path_and_handle(pid: Pid, game: &Game) -> Result<(PathBuf, u64)> {
     bail!("exe not found in memory maps")
 }
 
-fn get_version(path: &PathBuf) -> Result<Version> {
+fn get_version(game: Game, path: &PathBuf) -> Result<Version> {
     let file_map = FileMap::open(path)?;
-    let pe = PeFile::from_bytes(&file_map)?;
-    let resources = pe.resources()?;
-    let version_info = resources.version_info()?;
-    let product_version = version_info.fixed().unwrap().dwProductVersion;
-    let version = match (
+    if let Ok(pe) = pe64::PeFile::from_bytes(&file_map) {
+        let resources = pe.resources()?;
+        let version_info = resources.version_info()?;
+        let product_version = version_info.fixed().unwrap().dwProductVersion;
+        match game {
+            Game::EldenRing => match_er_version(product_version),
+            Game::DarkSoulsII => match_scholar_version(product_version),
+        }
+    } else {
+        let pe = pe32::PeFile::from_bytes(&file_map)?;
+        let resources = pe.resources()?;
+        let version_info = resources.version_info()?;
+        let product_version = version_info.fixed().unwrap().dwProductVersion;
+        match_vanilla_version(product_version)
+    }
+}
+
+fn match_er_version(product_version: VS_VERSION) -> Result<Version> {
+    Ok(match (
         product_version.Major,
         product_version.Minor,
         product_version.Patch,
     ) {
-        (1, 2, 0) => Version::V1_2_0,
-        (1, 2, 1) => Version::V1_2_1,
-        (1, 2, 2) => Version::V1_2_2,
-        (1, 2, 3) => Version::V1_2_3,
-        (1, 3, 0) => Version::V1_3_0,
-        (1, 3, 1) => Version::V1_3_1,
-        (1, 3, 2) => Version::V1_3_2,
-        (1, 4, 0) => Version::V1_4_0,
-        (1, 4, 1) => Version::V1_4_1,
-        (1, 5, 0) => Version::V1_5_0,
-        (1, 6, 0) => Version::V1_6_0,
-        (1, 7, 0) => Version::V1_7_0,
-        (1, 8, 0) => Version::V1_8_0,
-        (1, 8, 1) => Version::V1_8_1,
-        (1, 9, 0) => Version::V1_9_0,
-        (1, 9, 1) => Version::V1_9_1,
-        (2, 0, 0) => Version::V2_0_0,
-        (2, 0, 1) => Version::V2_0_1,
-        (2, 2, 0) => Version::V2_2_0,
-        (2, 2, 3) => Version::V2_2_3,
-        (2, 3, 0) => Version::V2_3_0,
-        (2, 4, 0) => Version::V2_4_0,
-        (2, 5, 0) => Version::V2_5_0,
-        (2, 6, 0) => Version::V2_6_0,
-        (2, 6, 1) => Version::V2_6_1,
+        (1, 2, 0) => Version::ER1_2_0,
+        (1, 2, 1) => Version::ER1_2_1,
+        (1, 2, 2) => Version::ER1_2_2,
+        (1, 2, 3) => Version::ER1_2_3,
+        (1, 3, 0) => Version::ER1_3_0,
+        (1, 3, 1) => Version::ER1_3_1,
+        (1, 3, 2) => Version::ER1_3_2,
+        (1, 4, 0) => Version::ER1_4_0,
+        (1, 4, 1) => Version::ER1_4_1,
+        (1, 5, 0) => Version::ER1_5_0,
+        (1, 6, 0) => Version::ER1_6_0,
+        (1, 7, 0) => Version::ER1_7_0,
+        (1, 8, 0) => Version::ER1_8_0,
+        (1, 8, 1) => Version::ER1_8_1,
+        (1, 9, 0) => Version::ER1_9_0,
+        (1, 9, 1) => Version::ER1_9_1,
+        (2, 0, 0) => Version::ER2_0_0,
+        (2, 0, 1) => Version::ER2_0_1,
+        (2, 2, 0) => Version::ER2_2_0,
+        (2, 2, 3) => Version::ER2_2_3,
+        (2, 3, 0) => Version::ER2_3_0,
+        (2, 4, 0) => Version::ER2_4_0,
+        (2, 5, 0) => Version::ER2_5_0,
+        (2, 6, 0) => Version::ER2_6_0,
+        (2, 6, 1) => Version::ER2_6_1,
         _ => bail!("Could not match product version ({}, {}, {})",
         product_version.Major,
         product_version.Minor,
         product_version.Patch,
         ),
-    };
-    Ok(version)
+    })
+}
+
+fn match_vanilla_version(product_version: VS_VERSION) -> Result<Version> {
+    Ok(match (
+        product_version.Major,
+        product_version.Minor,
+        product_version.Patch,
+    ) {
+        (1, 0, 3) => Version::Vanilla1_0_3,
+        (1, 0, 4) => Version::Vanilla1_0_4,
+        (1, 0, 5) => Version::Vanilla1_0_5,
+        (1, 0, 6) => Version::Vanilla1_0_5,
+        (1, 0, 7) => Version::Vanilla1_0_7,
+        (1, 0, 10) => Version::Vanilla1_0_10,
+        (1, 0, 11) => Version::Vanilla1_0_11,
+        (1, 0, 12) => Version::Vanilla1_0_12,
+        _ => bail!("Could not match product version ({}, {}, {})",
+        product_version.Major,
+        product_version.Minor,
+        product_version.Patch,
+        ),
+    })
+}
+
+fn match_scholar_version(product_version: VS_VERSION) -> Result<Version> {
+    Ok(match (
+        product_version.Major,
+        product_version.Minor,
+        product_version.Patch,
+    ) {
+        (1, 0, 1) => Version::Scholar1_0_1,
+        (1, 0, 2) => Version::Scholar1_0_2,
+        (1, 0, 3) => Version::Scholar1_0_3,
+        _ => bail!("Could not match product version ({}, {}, {})",
+        product_version.Major,
+        product_version.Minor,
+        product_version.Patch,
+        ),
+    })
 }
 
 fn get_valid_exe_names(game: &Game) -> &'static [&'static str] {
     match game {
-        Game::EldenRing => &["eldenring.exe", "start_protected_game.exe"]
+        Game::EldenRing => &["eldenring.exe", "start_protected_game.exe"],
+        Game::DarkSoulsII => &["DarkSoulsII.exe"],
     }
 }
 
@@ -205,15 +261,34 @@ pub fn is_pid_valid() -> bool {
     false
 }
 
+pub fn pid() -> Pid {
+    unsafe { ATTACHED_PROCESS.pid }
+}
+
+pub fn game() -> Game {
+    unsafe { ATTACHED_PROCESS.game }
+}
+
+pub fn module_handle() -> u64 {
+    unsafe { ATTACHED_PROCESS.module_handle }
+}
+
+pub fn version() -> Version {
+    unsafe { ATTACHED_PROCESS.version }
+}
+
+#[derive(PartialEq)]
 #[derive(Clone, Copy)]
 pub enum Game {
     EldenRing,
+    DarkSoulsII,
 }
 
 impl fmt::Display for Game {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let name = match self {
             Game::EldenRing => "Elden Ring",
+            Game::DarkSoulsII => "Dark Souls II",
         };
         write!(f, "{}", name)
     }
@@ -221,63 +296,63 @@ impl fmt::Display for Game {
 
 #[derive(Clone, Copy)]
 pub enum Version {
-    V1_2_0,
-    V1_2_1,
-    V1_2_2,
-    V1_2_3,
-    V1_3_0,
-    V1_3_1,
-    V1_3_2,
-    V1_4_0,
-    V1_4_1,
-    V1_5_0,
-    V1_6_0,
-    V1_7_0,
-    V1_8_0,
-    V1_8_1,
-    V1_9_0,
-    V1_9_1,
-    V2_0_0,
-    V2_0_1,
-    V2_2_0,
-    V2_2_3,
-    V2_3_0,
-    V2_4_0,
-    V2_5_0,
-    V2_6_0,
-    V2_6_1,
-    Invalid,
+    ER1_2_0, ER1_2_1, ER1_2_2, ER1_2_3,
+    ER1_3_0, ER1_3_1, ER1_3_2, ER1_4_0,
+    ER1_4_1, ER1_5_0, ER1_6_0, ER1_7_0,
+    ER1_8_0, ER1_8_1, ER1_9_0, ER1_9_1,
+    ER2_0_0, ER2_0_1, ER2_2_0, ER2_2_3,
+    ER2_3_0, ER2_4_0, ER2_5_0, ER2_6_0,
+    ER2_6_1, ERUnknown,
+
+    Vanilla1_0_3, Vanilla1_0_4, Vanilla1_0_5, Vanilla1_0_6,
+    Vanilla1_0_7, Vanilla1_0_10, Vanilla1_0_11, Vanilla1_0_12,
+    Scholar1_0_1, Scholar1_0_2, Scholar1_0_3, VanillaUnknown,
+    ScholarUnknown,
 }
 
 impl fmt::Display for Version {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let name = match self {
-            Version::V1_2_0 => "1.02",
-            Version::V1_2_1 => "1.02.1",
-            Version::V1_2_2 => "1.02.2",
-            Version::V1_2_3 => "1.02.3",
-            Version::V1_3_0 => "1.03",
-            Version::V1_3_1 => "1.03.1",
-            Version::V1_3_2 => "1.03.2",
-            Version::V1_4_0 => "1.04",
-            Version::V1_4_1 => "1.04.1",
-            Version::V1_5_0 => "1.05",
-            Version::V1_6_0 => "1.06",
-            Version::V1_7_0 => "1.07",
-            Version::V1_8_0 => "1.08",
-            Version::V1_8_1 => "1.08.1",
-            Version::V1_9_0 => "1.09",
-            Version::V1_9_1 => "1.09.1",
-            Version::V2_0_0 => "1.10",
-            Version::V2_0_1 => "1.10.1",
-            Version::V2_2_0 => "1.12",
-            Version::V2_2_3 => "1.12.3",
-            Version::V2_3_0 => "1.13",
-            Version::V2_4_0 => "1.14",
-            Version::V2_5_0 => "1.15",
-            Version::V2_6_0 => "1.16",
-            Version::V2_6_1 => "1.16.1",
-            Version::Invalid => "Unknown",
+            Version::ER1_2_0 => "Elden Ring v1.02",
+            Version::ER1_2_1 => "Elden Ring v1.02.1",
+            Version::ER1_2_2 => "Elden Ring v1.02.2",
+            Version::ER1_2_3 => "Elden Ring v1.02.3",
+            Version::ER1_3_0 => "Elden Ring v1.03",
+            Version::ER1_3_1 => "Elden Ring v1.03.1",
+            Version::ER1_3_2 => "Elden Ring v1.03.2",
+            Version::ER1_4_0 => "Elden Ring v1.04",
+            Version::ER1_4_1 => "Elden Ring v1.04.1",
+            Version::ER1_5_0 => "Elden Ring v1.05",
+            Version::ER1_6_0 => "Elden Ring v1.06",
+            Version::ER1_7_0 => "Elden Ring v1.07",
+            Version::ER1_8_0 => "Elden Ring v1.08",
+            Version::ER1_8_1 => "Elden Ring v1.08.1",
+            Version::ER1_9_0 => "Elden Ring v1.09",
+            Version::ER1_9_1 => "Elden Ring v1.09.1",
+            Version::ER2_0_0 => "Elden Ring v1.10",
+            Version::ER2_0_1 => "Elden Ring v1.10.1",
+            Version::ER2_2_0 => "Elden Ring v1.12",
+            Version::ER2_2_3 => "Elden Ring v1.12.3",
+            Version::ER2_3_0 => "Elden Ring v1.13",
+            Version::ER2_4_0 => "Elden Ring v1.14",
+            Version::ER2_5_0 => "Elden Ring v1.15",
+            Version::ER2_6_0 => "Elden Ring v1.16",
+            Version::ER2_6_1 => "Elden Ring v1.16.1",
+            Version::ERUnknown => "Unknown",
+
+            Version::Vanilla1_0_3 => "Dark Souls II v1.0.3",
+            Version::Vanilla1_0_4 => "Dark Souls II v1.0.4",
+            Version::Vanilla1_0_5 => "Dark Souls II v1.0.5",
+            Version::Vanilla1_0_6 => "Dark Souls II v1.0.6",
+            Version::Vanilla1_0_7 => "Dark Souls II v1.0.7",
+            Version::Vanilla1_0_10 => "Dark Souls II v1.0.10",
+            Version::Vanilla1_0_11 => "Dark Souls II v1.0.11",
+            Version::Vanilla1_0_12 => "Dark Souls II v1.0.12",
+            Version::VanillaUnknown => "Unknown",
+            Version::Scholar1_0_1 => "Dark Souls II (Scholar) v1.0.1",
+            Version::Scholar1_0_2 => "Dark Souls II (Scholar) v1.0.2",
+            Version::Scholar1_0_3 => "Dark Souls II (Scholar) v1.0.3",
+            Version::ScholarUnknown => "Unknown",
         };
         write!(f, "{}", name)
     }

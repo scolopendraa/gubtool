@@ -6,8 +6,8 @@
 mod cli;
 mod config;
 mod core;
-mod offsets;
-mod resources;
+mod ds2;
+mod er;
 mod tui;
 
 fn main() -> anyhow::Result<()> {

@@ -1,17 +1,19 @@
-use std::{thread, time::Duration};
+use crate::{
+    core::attach,
+    er::{
+        chr_ins::ChrInsExt,
+        item,
+        offsets::chr_dbg_flags::ChrDbgOffsets,
+        player::{self, player_ins},
+        resources::items,
+        target,
+        utility::{self, is_freeze_world_on},
+    },
+    tui::tui,
+};
 use anyhow::Result;
 use clap::{Parser, Subcommand, ValueEnum};
-use crate::{
-    core::{
-        chr_ins::ChrInsExt,
-        player::{self, player_ins},
-        utility::{self, is_freeze_world_on},
-        attach, item, target,
-    },
-    offsets::chr_dbg_flags::ChrDbgOffsets,
-    resources::items,
-    tui::tui
-};
+use std::{thread, time::Duration};
 
 #[derive(Parser)]
 #[command(name = "gubtool")]

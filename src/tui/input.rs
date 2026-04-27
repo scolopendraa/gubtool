@@ -181,7 +181,7 @@ impl Input {
         self.clear_range(self.idx..);
     }
 
-    pub fn update(&mut self, key: KeyEvent) -> bool {
+    pub fn handle_keys(&mut self, key: KeyEvent) {
         self.change = None;
 
         match (key.code, key.modifiers) {
@@ -204,9 +204,8 @@ impl Input {
                 self.pop_key();
             }
             (KeyCode::Char(c), _) => self.insert_key(c),
-            _ => {}
+            _ => (),
         }
-        self.change.is_some()
     }
 
     pub fn update_width(&mut self, width: u16) {

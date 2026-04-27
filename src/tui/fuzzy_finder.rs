@@ -1,26 +1,26 @@
+use crate::tui::{
+    common::{block, centered_rect},
+    input::Input,
+    theme::{self, theme},
+};
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use nucleo_matcher::{
-    pattern::{CaseMatching, Normalization, Pattern},
     Config, Matcher, Utf32String,
+    pattern::{CaseMatching, Normalization, Pattern},
 };
 use ratatui::{
+    Frame,
     layout::{Constraint, Direction, Layout, Margin},
     style::Style,
     text::{Line, Span},
     widgets::{Block, Borders, Clear, List, ListItem, ListState, Paragraph},
-    Frame,
-};
-use crate::tui::{
-    app::{App, CurrentScreen},
-    input::Input,
-    block, centered_rect, theme,
 };
 
 pub struct FuzzyFinder {
     pub matcher: Matcher,
     pub input: Input,
     pattern: Pattern,
-    pub picker: Option<Box<dyn Picker>>,
+    pub list: Option<Vec<Utf32String>>,
     pub matched: StatefulList<Matched>,
     pub total_count: usize,
     pub match_count: usize,
@@ -32,7 +32,7 @@ impl Default for FuzzyFinder {
             matcher: Matcher::new(Config::DEFAULT.match_paths()),
             input: Input::new(theme::HIGHLIGHT_SYMBOL),
             pattern: Pattern::default(),
-            picker: None,
+            list: None,
             matched: StatefulList::with_items(Vec::new()),
             total_count: 0,
             match_count: 0,
@@ -41,13 +41,9 @@ impl Default for FuzzyFinder {
 }
 
 impl FuzzyFinder {
-    pub fn set_picker(&mut self, picker: Box<dyn Picker>) {
-        self.total_count = picker.items().len();
-        self.picker = Some(picker);
-    }
-
-    fn items(&self) -> Option<Vec<Utf32String>> {
-        self.picker.as_ref().map(|picker| picker.items())
+    pub fn set_items(&mut self, list: Vec<Utf32String>) {
+        self.total_count = list.len();
+        self.list = Some(list);
     }
 
     pub fn selected_idx(&self) -> Option<usize> {
@@ -56,20 +52,16 @@ impl FuzzyFinder {
 
     pub fn reset(&mut self) {
         self.input.set_text("");
-        self.picker.take();
+        self.list.take();
     }
 
     pub fn update_matches(&mut self) {
-        let Some(items) = self.items() else {
-            return;
-        };
-
         self.pattern
             .reparse(&self.input.text, CaseMatching::Smart, Normalization::Smart);
 
         self.matched.items.clear();
 
-        for (idx, path) in items.iter().enumerate() {
+        for (idx, path) in self.list.as_deref().into_iter().flatten().enumerate() {
             let mut indices = Vec::new();
             let score = self
                 .pattern
@@ -87,140 +79,126 @@ impl FuzzyFinder {
         self.matched.items.sort_by(|a, b| b.score.cmp(&a.score));
         self.matched.select_first();
     }
-}
 
-pub fn draw(frame: &mut Frame, fuzzy_finder: &mut FuzzyFinder) {
-    let layout = centered_rect(75, 75, frame.area());
-    frame.render_widget(Clear, layout);
+    pub fn draw(&mut self, frame: &mut Frame) {
+        let layout = centered_rect(75, 75, frame.area());
+        frame.render_widget(Clear, layout);
 
-    let [search_area, results_area] = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints(vec![
-            Constraint::Length(3),
-            Constraint::Fill(1),
-        ])
-        .areas(layout);
+        let [search_area, results_area] = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints(vec![
+                Constraint::Length(3),
+                Constraint::Fill(1),
+            ])
+            .areas(layout);
 
-    let search_block = block(Some("Search"), None);
-    frame.render_widget(&search_block, search_area);
-    let search_area = search_block.inner(search_area);
+        let search_block = block(Some("Search"), None);
+        frame.render_widget(&search_block, search_area);
+        let search_area = search_block.inner(search_area);
 
-    let [prompt_area, input_area, mut counter_area] = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints(vec![
-            Constraint::Length(fuzzy_finder.input.cursor_offset),
-            Constraint::Length(fuzzy_finder.input.visible_width() as u16),
-            Constraint::Fill(1),
-        ])
-        .areas(search_area);
+        let [prompt_area, input_area, mut counter_area] = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints(vec![
+                Constraint::Length(self.input.cursor_offset),
+                Constraint::Length(self.input.visible_width() as u16),
+                Constraint::Fill(1),
+            ])
+            .areas(search_area);
 
-    let prompt = Paragraph::new(fuzzy_finder.input.prompt.clone());
-    frame.render_widget(prompt, prompt_area);
+        let prompt = Paragraph::new(self.input.prompt.clone());
+        frame.render_widget(prompt, prompt_area);
 
-    fuzzy_finder.input.update_width(search_area.width);
-    let input = Paragraph::new(fuzzy_finder.input.to_string()).style(theme().fg);
-    fuzzy_finder.input.set_cursor(frame, prompt_area);
-    frame.render_widget(input, input_area);
+        self.input.update_width(search_area.width);
+        let input = Paragraph::new(self.input.to_string()).style(theme().fg);
+        self.input.set_cursor(frame, prompt_area);
+        frame.render_widget(input, input_area);
 
-    counter_area = counter_area.inner(Margin::new(1, 0));
-    let counter = format!("{} / {}",
-        fuzzy_finder.match_count, fuzzy_finder.total_count
-    );
-    if counter.len() <= counter_area.width.into() {
-        let counter = Paragraph::new(counter).right_aligned().style(theme().fg);
-        frame.render_widget(counter, counter_area);
+        counter_area = counter_area.inner(Margin::new(1, 0));
+        let counter = format!("{} / {}",
+            self.match_count, self.total_count
+        );
+        if counter.len() <= counter_area.width.into() {
+            let counter = Paragraph::new(counter).right_aligned().style(theme().fg);
+            frame.render_widget(counter, counter_area);
+        }
+        let selected_idx = self.matched.state.selected().unwrap_or(0);
+        let mut names = Vec::new();
+        let mut labels = Vec::new();
+        let mut labels_len = 0;
+
+        self.matched.items.iter().enumerate()
+            .for_each(|(idx, item)| {
+                let mut name_span = item.highlight_line().0;
+                name_span.insert(0, (if selected_idx == idx { theme::HIGHLIGHT_SYMBOL } else { "  " }, false));
+                names.push(Self::highlighted_list_item(idx, selected_idx, name_span, Style::from(theme().fg)));
+
+                if let (Some(label), Some(label_span)) = (&item.label, item.highlight_line().1) {
+                    labels_len = labels_len.max(label.chars().count() + 3);
+                    labels.push(Self::highlighted_list_item(idx, selected_idx, label_span, Style::from(theme().muted)));
+                }
+            });
+
+        let results_block = block(Some("Results"), None);
+        frame.render_widget(&results_block, results_area);
+        let inner = results_block.inner(results_area);
+
+        let [name_area, label_area] = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints(vec![
+                Constraint::Min(40),
+                Constraint::Max(labels_len as u16),
+            ])
+            .areas(inner);
+        frame.render_stateful_widget(
+            List::new(names),
+            name_area,
+            &mut self.matched.state
+        );
+        frame.render_stateful_widget(
+            List::new(labels).block(Block::default().borders(Borders::LEFT)),
+            label_area,
+            &mut self.matched.state
+        );
     }
-    let selected_idx = fuzzy_finder.matched.state.selected().unwrap_or(0);
-    let mut names = Vec::new();
-    let mut labels = Vec::new();
-    let mut labels_len = 0;
 
-    fuzzy_finder.matched.items.iter().enumerate()
-        .for_each(|(idx, item)| {
-            let mut name_span = item.highlight_line().0;
-            name_span.insert(0, (if selected_idx == idx { theme::HIGHLIGHT_SYMBOL } else { "  " }, false));
-            names.push(highlighted_list_item(idx, selected_idx, name_span, Style::from(theme().fg)));
+    fn highlighted_list_item(idx: usize, selected_idx: usize, line: Vec<(&str, bool)>, style: Style) -> ListItem<'static> {
+        let spans = line.into_iter()
+            .map(|(slice, highlighted)| {
+                let content = slice.to_string();
+                if highlighted {
+                    Span::raw(content).style(theme().warning)
+                } else if selected_idx == idx {
+                    Span::raw(content).style(theme().accent)
+                } else {
+                    Span::raw(content)
+                }
+            })
+            .collect::<Vec<Span>>();
+        ListItem::new(Line::from(spans)).style(style)
+    }
 
-            if let (Some(label), Some(label_span)) = (&item.label, item.highlight_line().1) {
-                labels_len = labels_len.max(label.chars().count() + 3);
-                labels.push(highlighted_list_item(idx, selected_idx, label_span, Style::from(theme().muted)));
+    pub fn handle_keys(&mut self, key: KeyEvent) {
+        match (key.code, key.modifiers) {
+            (KeyCode::Char('d'), KeyModifiers::CONTROL) => {
+                self.matched.increment(28);
             }
-        });
-
-    let results_block = block(Some("Results"), None);
-    frame.render_widget(&results_block, results_area);
-    let inner = results_block.inner(results_area);
-
-    let [name_area, label_area] = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints(vec![
-            Constraint::Min(40),
-            Constraint::Max(labels_len as u16),
-        ])
-        .areas(inner);
-    frame.render_stateful_widget(
-        List::new(names),
-        name_area,
-        &mut fuzzy_finder.matched.state
-    );
-    frame.render_stateful_widget(
-        List::new(labels).block(Block::default().borders(Borders::LEFT)),
-        label_area,
-        &mut fuzzy_finder.matched.state
-    );
-}
-
-fn highlighted_list_item(idx: usize, selected_idx: usize, line: Vec<(&str, bool)>, style: Style) -> ListItem<'static> {
-    let spans = line.into_iter()
-        .map(|(slice, highlighted)| {
-            let content = slice.to_string();
-            if highlighted {
-                Span::raw(content).style(theme().warning)
-            } else if selected_idx == idx {
-                Span::raw(content).style(theme().accent)
-            } else {
-                Span::raw(content)
+            (KeyCode::Char('u'), KeyModifiers::CONTROL) => {
+                self.matched.decrement(28);
             }
-        })
-        .collect::<Vec<Span>>();
-    ListItem::new(Line::from(spans)).style(style)
-}
-
-pub fn handle_keys(app: &mut App, key: KeyEvent) {
-    match (key.code, key.modifiers) {
-        (KeyCode::Enter, _) => {
-            app.jump_to_entry();
-            app.fuzzy_finder.reset();
-            app.current_screen = CurrentScreen::Tab;
-        }
-        (KeyCode::Esc, _) => {
-            app.fuzzy_finder.matched.state.select(None);
-            app.fuzzy_finder.reset();
-            app.current_screen = CurrentScreen::Tab;
-        }
-        (KeyCode::Char('d'), KeyModifiers::CONTROL) => {
-            app.fuzzy_finder.matched.increment(28);
-        }
-        (KeyCode::Char('u'), KeyModifiers::CONTROL) => {
-            app.fuzzy_finder.matched.decrement(28);
-        }
-        (KeyCode::Down, _) | (KeyCode::Tab, _) | (KeyCode::Char('j'), KeyModifiers::CONTROL) => {
-            app.fuzzy_finder.matched.increment(1);
-        }
-        (KeyCode::Up, _) | (KeyCode::BackTab, _) | (KeyCode::Char('k'), KeyModifiers::CONTROL) => {
-            app.fuzzy_finder.matched.decrement(1);
-        }
-        _ => {
-            let _ = app.fuzzy_finder.input.update(key);
-            app.fuzzy_finder.update_matches();
+            (KeyCode::Down, _) | (KeyCode::Tab, _) | (KeyCode::Char('j'), KeyModifiers::CONTROL) => {
+                self.matched.increment(1);
+            }
+            (KeyCode::Up, _) | (KeyCode::BackTab, _) | (KeyCode::Char('k'), KeyModifiers::CONTROL) => {
+                self.matched.decrement(1);
+            }
+            _ => {
+                let _ = self.input.handle_keys(key);
+                self.update_matches();
+            }
         }
     }
 }
 
-pub trait Picker {
-    fn items(&self) -> Vec<Utf32String>;
-    fn jump(&self, idx: usize, app: &mut App);
-}
 
 pub struct StatefulList<T> {
     pub state: ListState,

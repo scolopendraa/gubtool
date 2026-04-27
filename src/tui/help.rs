@@ -1,11 +1,11 @@
+use crate::tui::{
+    common::{block, centered_rect},
+    theme::theme,
+};
 use ratatui::{
     Frame,
     text::{Line, Span, Text},
-    widgets::{Clear, Paragraph, Wrap}
-};
-use crate::tui::{
-    theme::theme,
-    block, centered_rect,
+    widgets::{Clear, Paragraph, Wrap},
 };
 
 const ENTRIES: &[(&str, &str)] = &[

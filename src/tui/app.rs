@@ -1,130 +1,85 @@
-use std::{
-    time::Duration,
-    sync::{RwLock, mpsc},
-    fmt, thread,
+use crate::{
+    config::ui_state::UiState,
+    core::attach::{self, ATTACHED_PROCESS, Game, GameProcess, game, pid, version},
+    tui::{
+        er::EldenRing,
+        event::{Event, ResultExt, start_event_loop_thread},
+        fuzzy_finder::FuzzyFinder,
+        help,
+        input::Input,
+        process_selection::ProcessSelector,
+        theme::{THEME, ThemeSelector, theme},
+    },
 };
 use color_eyre::eyre::Result;
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use ratatui::{
+    DefaultTerminal, Frame,
     layout::{Alignment, Constraint, Direction, Layout},
-    style::{Style, Stylize},
-    text::{Line, Text},
-    widgets::{Block, ListState, Paragraph, TableState, Tabs as RatatuiTabs, Wrap},
-    DefaultTerminal, Frame, symbols,
+    style::Stylize,
+    widgets::{Block, Paragraph},
 };
 use ratatui_themes::ThemeName;
-use crate::{
-    config::{Preferences, UiState},
-    core::{
-        attach::{self, ATTACHED_PROCESS, GameProcess},
-        chr_ins::{ChrIns, ChrInsExt},
-        game_state::GameStateHandler,
-        player::{self, player_ins},
-        target::{self, target_ins},
-    },
-    tui::{
-        elden_beast_map::{self, EldenBeastMap},
-        event::{Event, start_event_loop_thread},
-        fuzzy_finder::{self, FuzzyFinder, Picker},
-        input::Input,
-        input_handler::{self, InputField},
-        ResultExt, block, help, process_selection,
-        tabs::{
-            event_tab::{self, EventTab},
-            items_tab::{self, ItemTab},
-            player_tab::{self, PlayerTab},
-            target_tab::{self, TargetTab},
-            travel_tab::{self, TravelTab},
-            utility_tab::{self, UtilityTab}
-        },
-        theme::{self, THEME, theme},
-    }
-};
+use std::{sync::RwLock, thread, time::Duration};
 
 pub struct App {
     running: bool,
-    current_tab: Tabs,
     pub current_screen: CurrentScreen,
+    pub game_screen: Game,
     pub attached: bool,
-
-    pub player_ins: ChrIns,
-    pub target_ins: ChrIns,
-
-    pub theme: ThemeName,
-    pub sender: mpsc::Sender<Event>,
-    pub input: Input,
-    pub input_field: InputField,
-    pub fuzzy_finder: FuzzyFinder,
-    pub game_state: GameStateHandler,
-
     show_help: bool,
     show_dbg: bool,
     show_err: bool,
     err_message: String,
 
-    pub player: PlayerTab,
-    pub target: TargetTab,
-    pub item: ItemTab,
-    pub utility: UtilityTab,
-    pub travel: TravelTab,
-    pub event: EventTab,
+    pub theme: ThemeName,
+    pub theme_selector: ThemeSelector,
+    pub input: Input,
+    pub input_enter_fn: fn(String, &mut App),
+    pub fuzzy_finder: FuzzyFinder,
+    pub fuzzy_picker: fn(&mut App),
+    pub process_selector: ProcessSelector,
 
-    pub elden_beast_map: EldenBeastMap,
-
-    pub theme_list: ListState,
-    pub processes_state: TableState,
-    pub available_processes: Vec<GameProcess>,
+    pub elden_ring: EldenRing,
 }
 
 impl App {
     pub fn new() -> App {
         App {
             running: true,
-            current_tab: Tabs::Player,
-            current_screen: CurrentScreen::Tab,
-            player_ins: player_ins(),
-            target_ins: target_ins(),
-            sender: { let (tx, _rx) = mpsc::channel(); tx },
-            input: Input::default(),
-            input_field: InputField::GiveRunes,
-            fuzzy_finder: FuzzyFinder::default(),
-            game_state: GameStateHandler::new(),
-            theme: ThemeName::default(),
-
+            game_screen: Game::EldenRing,
+            current_screen: CurrentScreen::Game,
+            attached: false,
             show_help: false,
             show_dbg: false,
             show_err: false,
             err_message: "".to_string(),
-            attached: false,
 
-            player: PlayerTab::new(),
-            target: TargetTab::new(),
-            travel: TravelTab::new(),
-            item: ItemTab::new(),
-            utility: UtilityTab::new(),
-            event: EventTab::new(),
+            theme: ThemeName::default(),
+            theme_selector: ThemeSelector::new(),
+            input: Input::default(),
+            input_enter_fn: |_,_| {},
+            fuzzy_finder: FuzzyFinder::default(),
+            fuzzy_picker: |_| {},
+            process_selector: ProcessSelector::new(),
 
-            elden_beast_map: EldenBeastMap::default(),
-            theme_list: ListState::default().with_selected(Some(0)),
-            processes_state: TableState::default().with_selected(0),
-            available_processes: Vec::new(),
+            elden_ring: EldenRing::new(),
         }
     }
 
     pub fn run(mut self, mut terminal: DefaultTerminal) -> Result<()> {
         UiState::apply(&mut self);
         THEME.set(RwLock::new(self.theme.palette())).unwrap();
-        let (tx, rx) = start_event_loop_thread();
-        self.sender = tx;
+        let rx = start_event_loop_thread();
 
-        self.try_attach(None, false).send_error(self.sender.clone());
+        self.try_attach(None, false).send_error();
 
         while self.running {
             terminal.draw(|frame| Self::draw(&mut self, frame))?;
 
             match rx.recv()? {
                 Event::Key(key) => {
-                    Self::handle_keys(&mut self, key);
+                    Self::handle_keys(&mut self, key)
                 }
                 Event::Error(err) => {
                     self.err_message = err;
@@ -132,27 +87,34 @@ impl App {
                 }
                 Event::BackgroundTick => {
                     if !self.attached {
-                        self.try_attach(None, true).send_error(self.sender.clone());
-                    } else {
-                        if !attach::is_pid_valid() {
-                            unsafe {
-                                ATTACHED_PROCESS = GameProcess::detached()
-                            }
-                            self.game_state = GameStateHandler::new();
-                            self.attached = false;
-                        }
-                        self.game_state.poll().ok();
-                        self.player_ins = player_ins();
-
-                        if self.current_screen == CurrentScreen::ProcessSelection {
-                            self.available_processes = attach::get_processes();
+                        self.try_attach(None, true).send_error()
+                    } else if !attach::is_pid_valid() {
+                        self.detach()
+                    }
+                    if self.attached && game() == self.game_screen {
+                        match self.game_screen {
+                            Game::EldenRing => self.elden_ring.background_tick(),
+                            Game::DarkSoulsII => (),
                         }
                     }
                 }
                 Event::RenderTick => {
-                    if self.attached {
-                        self.target_ins = target_ins();
+                    if self.attached && game() == self.game_screen {
+                        match self.game_screen {
+                            Game::EldenRing => self.elden_ring.render_tick(),
+                            Game::DarkSoulsII => (),
+                        }
                     }
+                }
+                Event::Search((list, f)) => {
+                    self.fuzzy_finder.list = Some(list);
+                    self.fuzzy_finder.update_matches();
+                    self.fuzzy_picker = f;
+                    self.current_screen = CurrentScreen::Search
+                }
+                Event::Input(f) => {
+                    self.input_enter_fn = f;
+                    self.current_screen = CurrentScreen::Input;
                 }
             }
         }
@@ -163,25 +125,15 @@ impl App {
         let background = Block::default().bg(theme().bg);
         frame.render_widget(background, frame.area());
 
-        if self.show_dbg {
-            frame.render_widget(dbg_paragraph(self), frame.area());
-            return
-        }
-        if self.current_screen == CurrentScreen::EldenBeast {
-            elden_beast_map::draw(self, frame);
-            return
-        }
         let constraints = if self.show_err || self.current_screen == CurrentScreen::Input {
             vec![
                 Constraint::Length(1),
-                Constraint::Length(3),
                 Constraint::Fill(1),
                 Constraint::Length(1),
             ]
         } else {
             vec![
                 Constraint::Length(1),
-                Constraint::Length(3),
                 Constraint::Fill(1),
             ]
         };
@@ -199,52 +151,34 @@ impl App {
             ])
             .areas(layout[0]);
 
-        let pid_paragraph = if self.attached {
-            Paragraph::new(format!("Process ID: {}", unsafe { ATTACHED_PROCESS.pid }))
-        } else {
-            Paragraph::new("Scanning for game...")
-        }.style(theme().fg);
-
-        let version_paragraph = if self.attached {
-            Paragraph::new(format!("Version: {}", unsafe { ATTACHED_PROCESS.version }))
-        } else {
-            Paragraph::new("")
-        }
-        .style(theme().fg)
-        .alignment(Alignment::Right);
-
-        frame.render_widget(pid_paragraph, pid_area);
-        frame.render_widget(version_paragraph, version_area);
-        frame.render_widget(self.tabs_widget(), layout[1]);
+        frame.render_widget(self.pid_paragraph(), pid_area);
+        frame.render_widget(self.version_paragraph(), version_area);
 
         if self.show_err {
             let err_paragraph = Paragraph::new(self.err_message.to_string()).style(theme().error);
-            frame.render_widget(err_paragraph, layout[3]);
+            frame.render_widget(err_paragraph, layout[2]);
         } else if self.current_screen == CurrentScreen::Input {
             let input = Paragraph::new(self.input.to_string()).style(theme().fg);
-            self.input.set_cursor(frame, layout[3]);
-            frame.render_widget(input, layout[3]);
+            self.input.set_cursor(frame, layout[2]);
+            frame.render_widget(input, layout[2]);
         }
 
-        match self.current_tab {
-            Tabs::Player => player_tab::draw(frame, self, layout[2]),
-            Tabs::Target => target_tab::draw(frame, self, layout[2]),
-            Tabs::Utility => utility_tab::draw(frame, self, layout[2]),
-            Tabs::Items => items_tab::draw(frame, self, layout[2]),
-            Tabs::Travel => travel_tab::draw(frame, self, layout[2]),
-            Tabs::Event => event_tab::draw(frame, self, layout[2]),
+        match self.game_screen {
+            Game::EldenRing => self.elden_ring.draw(frame, layout[1]),
+            Game::DarkSoulsII => (),
         }
 
         match self.current_screen {
             CurrentScreen::Search => {
-                fuzzy_finder::draw(frame, &mut self.fuzzy_finder)
+                self.fuzzy_finder.draw(frame)
             }
             CurrentScreen::ProcessSelection => {
-                process_selection::draw(frame, self)
+                self.process_selector.draw(frame);
             }
-            CurrentScreen::ThemeSelection => theme::draw(frame, self),
+            CurrentScreen::ThemeSelection => self.theme_selector.draw(frame, &self.theme),
             _ => (),
         }
+
         if self.show_help {
             help::draw(frame);
         }
@@ -265,79 +199,75 @@ impl App {
             self.show_help = false;
         }
         match self.current_screen {
-            CurrentScreen::Search => fuzzy_finder::handle_keys(self, key),
-            CurrentScreen::Input => input_handler::handle_keys(self, key),
-            CurrentScreen::ProcessSelection => process_selection::handle_keys(self, key),
-            CurrentScreen::ThemeSelection => theme::handle_keys(self, key),
-            CurrentScreen::EldenBeast => elden_beast_map::handle_keys(self, key),
-            CurrentScreen::Tab => {
+            CurrentScreen::ProcessSelection => {
+                match key.code {
+                    KeyCode::Char('q') | KeyCode::Esc => self.current_screen = CurrentScreen::Game,
+                    KeyCode::Enter => {
+                        if let Some(selected) = self.process_selector.state.selected() {
+                            let mut processes = attach::get_processes();
+                            if selected < processes.len() {
+                                let process = processes.remove(selected);
+                                self.try_attach(Some(process), false).send_error();
+                            }
+                        }
+                    }
+                    _ => self.process_selector.handle_keys(key)
+                }
+            },
+            CurrentScreen::ThemeSelection => {
+                match key.code {
+                    KeyCode::Char('q') | KeyCode::Esc => self.current_screen = CurrentScreen::Game,
+                    _ => self.theme_selector.handle_keys(key, &mut self.theme)
+                }
+            },
+            CurrentScreen::Search => {
+                match key.code {
+                    KeyCode::Enter => {
+                        (self.fuzzy_picker)(self);
+                        self.fuzzy_finder.matched.state.select(None);
+                        self.fuzzy_finder.reset();
+                        self.current_screen = CurrentScreen::Game;
+                    }
+                    KeyCode::Esc => {
+                        self.fuzzy_finder.matched.state.select(None);
+                        self.fuzzy_finder.reset();
+                        self.current_screen = CurrentScreen::Game;
+                    }
+                    _ => {
+                        self.fuzzy_finder.handle_keys(key)
+                    }
+                }
+            }
+            CurrentScreen::Input => {
+                match key.code {
+                    KeyCode::Enter => {
+                        let text = self.input.text.clone();
+                        (self.input_enter_fn)(text, self);
+                        self.input.set_text("");
+                        self.current_screen = CurrentScreen::Game;
+                    }
+                    KeyCode::Esc => {
+                        self.input.set_text("");
+                        self.current_screen = CurrentScreen::Game;
+                    }
+                    _ => {
+                        self.input.handle_keys(key);
+                    }
+                }
+            },
+            CurrentScreen::Game => {
                 match (key.code, key.modifiers) {
-                    (KeyCode::BackTab, _) => {
-                        let tabs_len = Tabs::ARRAY.len() as i64;
-                        let val = ((self.current_tab.clone() as i64) + tabs_len - 1) % tabs_len;
-                        self.current_tab = Tabs::from(val);
-                    }
-                    (KeyCode::Tab, _) => {
-                        let tabs_len = Tabs::ARRAY.len() as i64;
-                        let val = ((self.current_tab.clone() as i64) + tabs_len + 1) % tabs_len;
-                        self.current_tab = Tabs::from(val);
-                    }
-                    (KeyCode::Char('1'), _) => self.current_tab = Tabs::Player,
-                    (KeyCode::Char('2'), _) => self.current_tab = Tabs::Target,
-                    (KeyCode::Char('3'), _) => self.current_tab = Tabs::Utility,
-                    (KeyCode::Char('4'), _) => self.current_tab = Tabs::Items,
-                    (KeyCode::Char('5'), _) => self.current_tab = Tabs::Travel,
-                    (KeyCode::Char('6'), _) => self.current_tab = Tabs::Event,
                     (KeyCode::F(1), _) => self.show_help = true,
                     (KeyCode::F(2), _) => self.current_screen = CurrentScreen::ProcessSelection,
-                    /*
-                    (KeyCode::F(11), _) => {
-                        self.current_screen = CurrentScreen::EldenBeast;
-                        self.elden_beast_map = EldenBeastMap::default()
-                    }
-                    (KeyCode::F(12), KeyModifiers::CONTROL) => self.show_dbg = true,
-                    */
                     (KeyCode::F(12), _) => self.current_screen = CurrentScreen::ThemeSelection,
                     _ => ()
                 }
-                match self.current_tab {
-                    Tabs::Player => player_tab::handle_keys(self, key),
-                    Tabs::Target => target_tab::handle_keys(self, key),
-                    Tabs::Utility => utility_tab::handle_keys(self, key),
-                    Tabs::Items => items_tab::handle_keys(self, key),
-                    Tabs::Travel => travel_tab::handle_keys(self, key),
-                    Tabs::Event => event_tab::handle_keys(self, key),
+                match self.game_screen {
+                    Game::EldenRing => self.elden_ring.handle_keys(key),
+                    Game::DarkSoulsII => (),
                 }
             }
         }
-    }
-
-    pub fn open_input(&mut self, input_field: InputField) {
-        self.input_field = input_field;
-        self.current_screen = CurrentScreen::Input;
-    }
-
-    pub fn jump_to_entry(&mut self) {
-        if let Some(idx) = self.fuzzy_finder.selected_idx()
-            && let Some(picker) = self.fuzzy_finder.picker.take()
-        {
-            picker.jump(idx, self);
-        }
-    }
-
-    fn tabs_widget(&self) -> RatatuiTabs<'static> {
-        let titles: Vec<String> = Tabs::ARRAY.iter().map(|t| t.to_string()).collect();
-        RatatuiTabs::new(titles)
-            .block(block(None, None))
-            .highlight_style(Style::from(theme().accent).bold())
-            .select(self.current_tab.clone() as usize)
-            .divider(symbols::line::VERTICAL)
-    }
-
-    pub fn set_fuzzy_finder(&mut self, picker: Box<dyn Picker>) {
-        self.fuzzy_finder.set_picker(picker);
-        self.fuzzy_finder.update_matches();
-        self.current_screen = CurrentScreen::Search;
     }
 
     pub fn try_attach(&mut self, process: Option<GameProcess>, wait: bool) -> anyhow::Result<()> {
@@ -355,104 +285,51 @@ impl App {
         if wait {
             thread::sleep(Duration::from_millis(500));
         }
-        if let Err(err) = Preferences::apply()
-            && result.is_ok() {
-                result = Err(err);
-        }
-        target::install_target_hook().ok();
         self.attached = true;
-        self.game_state = GameStateHandler::new();
+        self.game_screen = game();
+
+        if let Err(err) = match self.game_screen {
+            Game::EldenRing => self.elden_ring.on_attach(),
+            Game::DarkSoulsII => Ok(()),
+        } && result.is_ok() {
+            result = Err(err)
+        }
         result
+    }
+
+    fn detach(&mut self) {
+        match game() {
+            Game::EldenRing => self.elden_ring.on_unattach(),
+            Game::DarkSoulsII => (),
+        }
+        unsafe {
+            ATTACHED_PROCESS = GameProcess::detached()
+        }
+        self.attached = false;
+    }
+
+    fn pid_paragraph(&self) -> Paragraph<'static> {
+        if self.attached {
+            Paragraph::new(format!("Process ID: {}", pid()))
+        } else {
+            Paragraph::new("Scanning for game...")
+        }.style(theme().fg)
+    }
+    fn version_paragraph(&self) -> Paragraph<'static> {
+        if self.attached {
+            Paragraph::new(format!("{}", version()))
+        } else {
+            Paragraph::new("")
+        } .style(theme().fg)
+            .alignment(Alignment::Right)
     }
 }
 
 #[derive(PartialEq)]
 pub enum CurrentScreen {
-    Tab,
+    Game,
     Search,
     Input,
     ProcessSelection,
     ThemeSelection,
-    EldenBeast,
-}
-
-#[derive(Clone)]
-#[derive(PartialEq)]
-pub enum Tabs {
-    Player,
-    Target,
-    Utility,
-    Items,
-    Travel,
-    Event,
-}
-
-impl Tabs {
-    pub const ARRAY: [Tabs; 6] = [
-        Self::Player,
-        Self::Target,
-        Self::Utility,
-        Self::Items,
-        Self::Travel,
-        Self::Event,
-    ];
-}
-
-impl From<i64> for Tabs {
-    fn from(v: i64) -> Self {
-        match v {
-            0 => Tabs::Player,
-            1 => Tabs::Target,
-            2 => Tabs::Utility,
-            3 => Tabs::Items,
-            4 => Tabs::Travel,
-            5 => Tabs::Event,
-            _ => Tabs::Player,
-        }
-    }
-}
-
-impl fmt::Display for Tabs {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let name = match self {
-            Self::Player => "Player",
-            Self::Target => "Target",
-            Self::Utility => "Utility",
-            Self::Items => "Items",
-            Self::Travel => "Travel",
-            Self::Event => "Events",
-        };
-        write!(f, "{}", name)
-    }
-}
-
-fn dbg_paragraph(app: &App) -> Paragraph<'static> {
-    let lcoords = app.player_ins.local_coords().unwrap_or_default();
-    let mcoords = app.player_ins.map_coords().unwrap_or_default();
-
-    let debug_info = [
-        format!("Attached: {}", app.attached),
-        format!("Module Handle: {:#X}", unsafe { ATTACHED_PROCESS.module_handle }),
-        format!("DLC: {}", app.game_state.dlc),
-        format!("Loaded: {}", app.game_state.loaded),
-        format!("Player Handle: {:#X}", app.player_ins.handle().unwrap_or_default()),
-        format!("Player Map ID: {}", app.player_ins.block_id().unwrap_or_default()),
-        format!("Player Local Coords: x:{:.2}, y:{:.2}, z:{:.2}, angle:{:.2}",
-            lcoords[0],
-            lcoords[1],
-            lcoords[2],
-            player::map_angle().unwrap_or_default()
-        ),
-        format!("Player Map Coords: x:{:.2}, y:{:.2}, z:{:.2}",
-            mcoords[0],
-            mcoords[1],
-            mcoords[2],
-        ),
-        format!("{:?}", app.target_ins.get_lua_timers().unwrap_or_default()),
-        format!("Target Entity ID {}", app.target_ins.entity_id().unwrap_or_default()),
-    ];
-
-    let lines: Vec<Line> = debug_info.iter().map(|f| Line::raw(f.to_string())).collect();
-    Paragraph::new(Text::from(lines))
-        .wrap(Wrap { trim:true })
 }
