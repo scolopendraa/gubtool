@@ -4,9 +4,10 @@ pub mod ds2;
 pub mod er;
 mod event;
 mod fuzzy_finder;
+mod game_screen_selector;
 mod help;
 mod input;
-mod process_selection;
+mod process_selector;
 mod theme;
 
 use app::App;

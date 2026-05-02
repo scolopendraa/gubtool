@@ -1,9 +1,10 @@
 use anyhow::{Result, anyhow, ensure};
+use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use ratatui::{
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::Stylize,
     text::{Line, Span},
-    widgets::{Block, Borders, List, ListItem},
+    widgets::{Block, Borders, List, ListItem, TableState},
 };
 use ratatui_themes::Style;
 
@@ -12,6 +13,7 @@ use crate::tui::{
     theme::{self, theme},
 };
 
+pub mod stateful_list;
 pub mod tab_state;
 pub mod tabs_widget;
 
@@ -77,7 +79,14 @@ pub fn block<'a>(title: Option<&'a str>, style: Option<Style>) -> Block<'a> {
         .border_type(theme::BORDER_TYPE)
 }
 
-pub fn list<'a>(items: Vec<ListItem<'a>>, title: Option<&'a str>, tabstate: &TabState, list_idx: usize) -> List<'a> {
+pub fn list<'a>(items: Vec<ListItem<'a>>, title: Option<&'a str>) -> List<'a> {
+    List::new(items)
+        .block(block(title, None))
+        .highlight_style(Style::from(theme().accent).bold())
+        .highlight_symbol(theme::HIGHLIGHT_SYMBOL)
+}
+
+pub fn tabs_list<'a>(items: Vec<ListItem<'a>>, title: Option<&'a str>, tabstate: &TabState, list_idx: usize) -> List<'a> {
     List::new(items)
         .block(block(title, Some(tabstate.block_style(list_idx))))
         .highlight_style(tabstate.highlight_style(list_idx))
@@ -86,6 +95,7 @@ pub fn list<'a>(items: Vec<ListItem<'a>>, title: Option<&'a str>, tabstate: &Tab
 
 pub fn blockless_list<'a>(items: Vec<ListItem<'a>>, tabstate: &TabState, list_idx: usize) -> List<'a> {
     List::new(items)
+        .style(tabstate.block_style(list_idx))
         .highlight_style(tabstate.highlight_style(list_idx))
         .highlight_symbol(theme::HIGHLIGHT_SYMBOL)
 }
@@ -95,6 +105,34 @@ pub fn label_list<'a>(items: Vec<ListItem<'a>>, tabstate: &TabState, list_idx: u
         .block(Block::default().borders(Borders::LEFT))
         .highlight_style(tabstate.highlight_style(list_idx))
 }
+
+pub trait ListExt {
+    fn handle_keys(&mut self, key: KeyEvent);
+}
+
+macro_rules! impl_handle_keys {
+    ($t:ty) => {
+        impl ListExt for $t {
+            fn handle_keys(&mut self, key: KeyEvent) {
+                match (key.code, key.modifiers) {
+                    (KeyCode::Char('u'), KeyModifiers::CONTROL) => {
+                        for _ in 0..28 { self.select_previous() }
+                    }
+                    (KeyCode::Char('d'), KeyModifiers::CONTROL) => {
+                        for _ in 0..28 { self.select_next() }
+                    }
+                    (KeyCode::Char('j') | KeyCode::Down, _) => self.select_next(),
+                    (KeyCode::Char('k') | KeyCode::Up, _) => self.select_previous(),
+                    (KeyCode::Char('G'), _) => self.select_first(),
+                    (KeyCode::Char('g'), _) => self.select_last(),
+                    _ => ()
+                }
+            }
+        }
+    };
+}
+impl_handle_keys!(TableState);
+
 
 pub fn parse_act_sequence(input: String) -> Result<Vec<i32>> {
     input

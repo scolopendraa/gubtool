@@ -56,16 +56,16 @@ pub const SHOULD_CHECK_QUANTITY: u64 = 0x124;           // u8
 pub const STATE_HANDLER_FLAGS: u64 = 0xF00;             // [u8; 256]
 
 // Hooks
-pub const TARGET_HOOK_ASM: u64 = 0x1000;                // [u8; 19]
-pub const TARGET_NO_STAGGER_ASM: u64 = 0x1020;          // [u8; 28]
-pub const FORCE_ACT_SEQUENCE_ASM: u64 = 0x1040;         // [u8; 78]
-pub const INFINITE_POISE_ASM: u64 = 0x1090;             // [u8; 111]
-pub const NO_GRAB_ASM: u64 = 0x1100;                    // [u8; 40]
-pub const WARP_COORDS_ASM: u64 = 0x1130;                // [u8; 19]
-pub const WARP_ANGLE_ASM: u64 = 0x1150;                 // [u8; 19]
+pub const TARGET_POINTER_HOOK: u64 = 0x1000;                // [u8; 19]
+pub const TARGET_NO_STAGGER_HOOK: u64 = 0x1020;          // [u8; 28]
+pub const FORCE_ACT_SEQUENCE_HOOK: u64 = 0x1040;         // [u8; 78]
+pub const INFINITE_POISE_HOOK: u64 = 0x1090;             // [u8; 111]
+pub const NO_GRAB_HOOK: u64 = 0x1100;                    // [u8; 40]
+pub const WARP_COORDS_HOOK: u64 = 0x1130;                // [u8; 19]
+pub const WARP_ANGLE_HOOK: u64 = 0x1150;                 // [u8; 19]
 
 // Shellcode
-pub const RUN_THREAD_ASM: u64 = 0x2000;                 // [u8; 29]
+pub const RUN_THREAD_ASM: u64 = 0x2000;                 // [u8; 39]
 // Keep at least 16 bytes of buffer
 // for completion flag and appended asm bytes
 pub const RUNE_GIVE_ASM: u64 = 0x2030;                  // [u8; 41]

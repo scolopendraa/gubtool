@@ -1,72 +1,70 @@
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
-use ratatui::widgets::ListState;
+use ratatui::{style::Modifier, widgets::ListState};
+use ratatui_themes::Style;
+
+use crate::tui::{common::stateful_list::StatefulList, theme::theme};
 
 #[derive(Clone)]
 pub struct TabState {
     pub current_list: usize,
-    pub lists: Vec<ListState>,
-    pub list_sizes: Vec<usize>,
-}
-
-impl Default for TabState {
-    fn default() -> Self {
-        Self {
-            current_list: 0,
-            lists: vec![ListState::default().with_selected(Some(0)); 2],
-            list_sizes: vec![0; 2],
-        }
-    }
+    pub lists_states: Vec<StatefulList>,
 }
 
 impl TabState {
+    pub fn new(list_states: Vec<StatefulList>) -> Self {
+        Self {
+            current_list: 0,
+            lists_states: list_states
+        }
+    }
+    pub fn get_list_state(&mut self, idx: usize) -> &mut ListState {
+        &mut self.lists_states[idx].state
+    }
+    pub fn get_list_selected(&self, list_idx: usize) -> Option<usize> {
+        self.lists_states[list_idx].selected()
+    }
+    pub fn set_list_selected(&mut self, list_idx: usize, selected: usize) {
+        self.lists_states[list_idx].select(selected)
+    }
+    pub fn set_length(&mut self, idx: usize, len: usize) {
+        self.lists_states[idx].size = len
+    }
+
     pub fn handle_keys(&mut self, key: KeyEvent) {
         match (key.code, key.modifiers) {
-            (KeyCode::Char('u'), KeyModifiers::CONTROL) => self.decrement_current_list(28),
-            (KeyCode::Char('d'), KeyModifiers::CONTROL) => self.increment_current_list(28),
-
             (KeyCode::Char('h') | KeyCode::Left, KeyModifiers::CONTROL) => self.current_list = 0,
-            (KeyCode::Char('l') | KeyCode::Right, KeyModifiers::CONTROL) => self.current_list = 1,
+            (KeyCode::Char('l') | KeyCode::Right, KeyModifiers::CONTROL) => {
+                if !matches!(self.current_list, 2 | 3) {
+                    self.current_list = 1
+                }
+            },
             (KeyCode::Char('j') | KeyCode::Down, KeyModifiers::CONTROL) => {
-                if self.lists.len() > 2 && self.current_list == 1 {
+                if self.lists_states.len() > 2 && self.current_list == 1 {
                     self.current_list = 2
                 }
             }
             (KeyCode::Char('k') | KeyCode::Up, KeyModifiers::CONTROL) => {
-                if self.lists.len() > 2 && self.current_list == 2 {
+                if self.lists_states.len() > 2 && self.current_list == 2 {
                     self.current_list = 1
                 }
             }
-            (KeyCode::Char('j') | KeyCode::Down, _) => self.increment_current_list(1),
-            (KeyCode::Char('k') | KeyCode::Up, _) => self.decrement_current_list(1),
-
-            (KeyCode::Char('G'), _) => self.select_last_entry(),
-            (KeyCode::Char('g'), _) => self.select_first_entry(),
-            _ => ()
+            _ => {
+                self.lists_states[self.current_list].handle_keys(key)
+            }
         }
     }
-
-    fn decrement_current_list(&mut self, val: usize) {
-        if let Some(current) = self.lists[self.current_list].selected() {
-            let new_val = current.saturating_sub(val);
-            *self.lists[self.current_list].selected_mut() = Some(new_val);
+    pub fn block_style(&self, list_idx: usize) -> Style {
+        if self.current_list == list_idx {
+            Style::new().fg(theme().fg)
+        } else {
+            Style::new().fg(theme().fg).add_modifier(Modifier::DIM)
         }
     }
-
-    fn increment_current_list(&mut self, val: usize) {
-        if let Some(current) = self.lists[self.current_list].selected() {
-            let new_val = current
-                .saturating_add(val)
-                .min(self.list_sizes[self.current_list].saturating_sub(1));
-            *self.lists[self.current_list].selected_mut() = Some(new_val);
+    pub fn highlight_style(&self, list_idx: usize) -> Style {
+        if self.current_list == list_idx {
+            Style::from(theme().accent).bold()
+        } else {
+            Style::from(theme().accent).bold().add_modifier(Modifier::DIM)
         }
-    }
-
-    fn select_first_entry(&mut self) {
-        *self.lists[self.current_list].selected_mut() = Some(0);
-    }
-
-    fn select_last_entry(&mut self) {
-        let idx = self.list_sizes[self.current_list].saturating_sub(1);
-        *self.lists[self.current_list].selected_mut() = Some(idx);
     }
 }

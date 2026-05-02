@@ -1,14 +1,19 @@
 use crate::{
-    er::item,
-    er::resources::{
-        self,
-        aow::{AFFINITIES, Affinity, Aow, aow_array},
-        items::{Categories, Item, items_array},
+    er::{
+        item,
+        resources::{
+            self,
+            aow::{AFFINITIES, Affinity, Aow, aow_array},
+            items::{Categories, Item, items_array},
+        },
     },
     send_input_event,
     tui::{
         app::App,
-        common::{block, blockless_list, label_list, list, tab_state::TabState},
+        common::{
+            block, blockless_list, label_list, stateful_list::StatefulList, tab_state::TabState,
+            tabs_list,
+        },
         er::ErInfo,
         event::{Event, ResultExt, send_event},
         theme::theme,
@@ -21,7 +26,7 @@ use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Modifier, Style, Stylize},
     text::Line,
-    widgets::{List, ListItem, ListState},
+    widgets::{List, ListItem},
 };
 use std::thread;
 
@@ -48,16 +53,12 @@ const MASS_SPAWN_IDX: usize = 2;
 
 impl ItemTab {
     pub fn new() -> Self {
-        let mut sizes = vec![0; 3];
-        sizes[ITEMS_IDX] = 0;
-        sizes[OPTIONS_IDX] = OptionsItems::ARRAY.len();
-        sizes[MASS_SPAWN_IDX] = Categories::ARRAY.len();
+        let mut list_states = vec![StatefulList::new(0); 3];
+        list_states[ITEMS_IDX] = StatefulList::new(0);
+        list_states[OPTIONS_IDX] = StatefulList::new(OptionsItems::ARRAY.len());
+        list_states[MASS_SPAWN_IDX] = StatefulList::new(Categories::ARRAY.len());
         ItemTab {
-            tab: TabState {
-                lists: vec![ListState::default().with_selected(Some(0)); 3],
-                list_sizes: sizes,
-                ..TabState::default()
-            },
+            tab: TabState::new(list_states),
             item: items_array(false)[0],
             quantity: 1,
             upgrade: 0,
@@ -98,28 +99,30 @@ impl ItemTab {
         frame.render_stateful_widget(
             item_names,
             item_name,
-            &mut self.tab.lists[ITEMS_IDX]
+            &mut self.tab.get_list_state(ITEMS_IDX),
         );
         frame.render_stateful_widget(
             item_labels,
             item_category,
-            &mut self.tab.lists[ITEMS_IDX]
+            &mut self.tab.get_list_state(ITEMS_IDX),
         );
         frame.render_stateful_widget(
             OptionsItems::list(&self),
             options,
-            &mut self.tab.lists[OPTIONS_IDX]
+            &mut self.tab.get_list_state(OPTIONS_IDX),
         );
         frame.render_stateful_widget(
             self.mass_spawn_list(),
             mass_spawn,
-            &mut self.tab.lists[MASS_SPAWN_IDX]
+            &mut self.tab.get_list_state(MASS_SPAWN_IDX),
         );
     }
 
     pub fn handle_keys(&mut self, key: KeyEvent, er: &ErInfo) {
         self.handle_item_switch(er.dlc);
-        self.tab.list_sizes[ITEMS_IDX] = items_array(er.dlc).len();
+        if self.tab.current_list == ITEMS_IDX {
+            self.tab.set_length(ITEMS_IDX, items_array(er.dlc).len());
+        }
 
         self.tab.handle_keys(key);
 
@@ -132,15 +135,17 @@ impl ItemTab {
                     .map(|item| Utf32String::from(format!("{}|{}", item.name, item.category)))
                     .collect();
                 let function = |app: &mut App| {
-                    *app.elden_ring.item.tab.lists[ITEMS_IDX].selected_mut() =
-                    Some(app.fuzzy_finder.selected_idx().unwrap());
-                    app.elden_ring.item.handle_item_switch(app.elden_ring.game_state.dlc)
+                    app.elden_ring.items.tab.set_list_selected(
+                        ITEMS_IDX,
+                        app.fuzzy_finder.selected_idx().unwrap(),
+                    );
+                    app.elden_ring.items.handle_item_switch(app.elden_ring.game_state.dlc)
                 };
                 send_event(Event::Search((list, function)))
             }
             KeyCode::Char('s') => {
                 if self.tab.current_list == OPTIONS_IDX &&
-                let Some(selected_idx) = self.tab.lists[OPTIONS_IDX].selected() {
+                let Some(selected_idx) = self.tab.get_list_selected(OPTIONS_IDX) {
                     OptionsItems::ARRAY[selected_idx].set_input(self);
                 }
             }
@@ -151,9 +156,9 @@ impl ItemTab {
 
     fn handle_select(&self) {
         if self.tab.current_list == MASS_SPAWN_IDX &&
-        let Some(selected_idx) = self.tab.lists[self.tab.current_list].selected() {
+        let Some(selected) = self.tab.get_list_selected(MASS_SPAWN_IDX) {
             thread::spawn(move || {
-                item::mass_spawn(Categories::ARRAY[selected_idx]).send_error();
+                item::mass_spawn(Categories::ARRAY[selected]).send_error();
             });
         }
 
@@ -182,11 +187,11 @@ impl ItemTab {
 
     fn mass_spawn_list(&self) -> List<'static> {
         let items: Vec<ListItem> = Categories::ARRAY.iter().map(|item| ListItem::from(Line::raw(item.to_string()))).collect();
-        list(items, Some("Mass Spawn"), &self.tab, MASS_SPAWN_IDX)
+        tabs_list(items, Some("Mass Spawn"), &self.tab, MASS_SPAWN_IDX)
     }
 
     pub fn handle_item_switch(&mut self, dlc_available: bool) {
-        let Some(new_idx) = self.tab.lists[ITEMS_IDX].selected() else { return };
+        let Some(new_idx) = self.tab.get_list_selected(ITEMS_IDX) else { return };
         let new_item = items_array(dlc_available)[new_idx];
         self.item = new_item;
 
@@ -226,8 +231,8 @@ impl OptionsItems {
                 if item_tab.can_quantity() {
                     send_input_event!(text, app, {
                         if let Ok(v) = text.parse() {
-                            app.elden_ring.item.quantity = v;
-                            app.elden_ring.item.handle_item_switch(
+                            app.elden_ring.items.quantity = v;
+                            app.elden_ring.items.handle_item_switch(
                                 app.elden_ring.er_info.dlc
                             )
                         }
@@ -238,8 +243,8 @@ impl OptionsItems {
                 if item_tab.can_upgrade() {
                     send_input_event!(text, app, {
                         if let Ok(v) = text.parse() {
-                            app.elden_ring.item.upgrade = v;
-                            app.elden_ring.item.handle_item_switch(
+                            app.elden_ring.items.upgrade = v;
+                            app.elden_ring.items.handle_item_switch(
                                 app.elden_ring.er_info.dlc
                             )
                         }
@@ -254,9 +259,9 @@ impl OptionsItems {
                         .collect();
                     let function = |app: &mut App| {
                         let entries: Vec<Aow> = aow_array().iter()
-                            .filter(|aow| aow.supports_item(app.elden_ring.item.item))
+                            .filter(|aow| aow.supports_item(app.elden_ring.items.item))
                             .cloned().collect();
-                        app.elden_ring.item.aow = entries[app.fuzzy_finder.selected_idx().unwrap()];
+                        app.elden_ring.items.aow = entries[app.fuzzy_finder.selected_idx().unwrap()];
                     };
                     send_event(Event::Search((list, function)))
                 }
@@ -269,9 +274,9 @@ impl OptionsItems {
                         .collect();
                     let function = |app: &mut App| {
                         let entries: Vec<resources::aow::Affinity> = AFFINITIES.iter()
-                            .filter(|affinity| app.elden_ring.item.aow.supports_affinity(affinity.flag))
+                            .filter(|affinity| app.elden_ring.items.aow.supports_affinity(affinity.flag))
                             .cloned().collect();
-                        app.elden_ring.item.affinity = entries[app.fuzzy_finder.selected_idx().unwrap()];
+                        app.elden_ring.items.affinity = entries[app.fuzzy_finder.selected_idx().unwrap()];
                     };
                     send_event(Event::Search((list, function)))
                 }
@@ -306,7 +311,7 @@ impl OptionsItems {
     ];
     fn list(item_tab: &ItemTab) -> List<'static> {
         let items: Vec<ListItem> = Self::ARRAY.iter().map(|i| i.to_list_item(item_tab)).collect();
-        list(items, None, &item_tab.tab, OPTIONS_IDX)
+        tabs_list(items, None, &item_tab.tab, OPTIONS_IDX)
     }
 }
 fn options_style(show: bool) -> Style {

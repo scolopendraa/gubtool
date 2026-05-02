@@ -60,12 +60,12 @@ fn hook_warp_coord_writes(coords: [f32; 3], angle: f32, is_night: bool) -> Resul
 
     let mut asm = asm::HOOK_WARP_COORD_ANGLE;
 
-    let warp_code_location = code_cave::base() + code_cave::WARP_COORDS_ASM;
+    let warp_code_location = code_cave::base() + code_cave::WARP_COORDS_HOOK;
     write_to_slice::<i32>(&mut asm, 3, rel_i32(target_coords_location, warp_code_location + 7)?)?;
     write_to_slice::<i32>(&mut asm, 15, rel_i32(hooks::warp_coord_write() + 7, warp_code_location + 19)?)?;
     write(warp_code_location, asm)?;
 
-    let angle_code_location = code_cave::base() + code_cave::WARP_ANGLE_ASM;
+    let angle_code_location = code_cave::base() + code_cave::WARP_ANGLE_HOOK;
     write_to_slice::<i32>(&mut asm, 3, rel_i32(target_angle_location, angle_code_location + 7)?)?;
     write_to_slice::<i32>(&mut asm, 10, angle_offset_in_struct)?;
     write_to_slice::<i32>(&mut asm, 15, rel_i32(hooks::warp_angle_write() + 7, angle_code_location + 19)?)?;

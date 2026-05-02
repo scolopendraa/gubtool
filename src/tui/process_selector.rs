@@ -1,11 +1,18 @@
 use crate::{
     core::attach::{self, ATTACHED_PROCESS, GameProcess},
     tui::{
-        common::{block, centered_rect, controls_line},
+        app::CurrentScreen,
+        common::{ListExt, block, centered_rect, controls_line},
+        event::ResultExt,
         theme::{self, theme},
     },
 };
-use crossterm::event::{KeyCode, KeyEvent};
+use anyhow::Result;
+use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use nix::{
+    sys::signal::{self, Signal},
+    unistd::Pid,
+};
 use ratatui::{
     Frame,
     layout::{Alignment, Constraint, Direction, Layout},
@@ -14,25 +21,27 @@ use ratatui::{
 };
 
 const CONTROLS: &[(&str, &str)] = &[
+    ("ctrl-k", "Kill"),
     ("Enter", "Attach"),
     ("q", "Exit"),
 ];
 
 pub struct ProcessSelector {
-    pub state: TableState,
-    pub available_processes: Vec<GameProcess>,
+    pub table: TableState,
+    available_processes: Vec<GameProcess>,
 }
 
 impl ProcessSelector {
     pub fn new() -> Self {
         Self {
-            state: TableState::default().with_selected(0),
+            table: TableState::default().with_selected(0),
             available_processes: Vec::new(),
         }
     }
 
     pub fn draw(&mut self, frame: &mut Frame) {
-        self.available_processes = attach::get_processes();
+        self.update_processes();
+
         let layout = centered_rect(75, 75, frame.area());
         frame.render_widget(Clear, layout);
         let [_padding, path_area, help_area] = Layout::default()
@@ -44,8 +53,8 @@ impl ProcessSelector {
             ])
             .areas(layout);
 
-        frame.render_stateful_widget(Self::table(&self.available_processes), layout, &mut self.state);
-        frame.render_widget(Self::path_paragraph(&self.available_processes, self.state.selected()), path_area);
+        frame.render_stateful_widget(Self::table(&self.available_processes), layout, &mut self.table);
+        frame.render_widget(Self::path_paragraph(&self.available_processes, self.table.selected()), path_area);
         frame.render_widget(controls_line(CONTROLS), help_area);
     }
 
@@ -74,6 +83,7 @@ impl ProcessSelector {
                 Cell::from(comm),
                 Cell::from(process.pid.to_string()),
                 Cell::from(format!("{}", process.version)),
+                Cell::from(format!("{:#X}", process.module_handle)),
             ]);
             rows.push(row);
         }
@@ -81,10 +91,12 @@ impl ProcessSelector {
             Cell::from("Name"),
             Cell::from("PID"),
             Cell::from("Game Version"),
+            Cell::from("Module Handle"),
         ]).bold();
         let widths = [
             Constraint::Max(20),
             Constraint::Max(10),
+            Constraint::Fill(1),
             Constraint::Fill(1),
         ];
         Table::new(rows, widths)
@@ -94,11 +106,34 @@ impl ProcessSelector {
             .block(block(Some("Valid Processes"), None))
     }
 
-    pub fn handle_keys(&mut self, key: KeyEvent) {
+    pub fn handle_keys(&mut self, key: KeyEvent, current_screen: &mut CurrentScreen) -> Option<GameProcess> {
+        self.table.handle_keys(key);
         match (key.code, key.modifiers) {
-            (KeyCode::Char('j') | KeyCode::Down, _) => self.state.select_next(),
-            (KeyCode::Char('k') | KeyCode::Up, _) => self.state.select_previous(),
-            _ => ()
+            (KeyCode::Char('q') | KeyCode::Esc, _) => *current_screen = CurrentScreen::Game,
+            (KeyCode::Enter, _) => {
+                if let Some(selected) = self.table.selected() {
+                    let mut processes = attach::get_processes();
+                    if selected < processes.len() {
+                        return Some(processes.remove(selected))
+                    }
+                }
+            }
+            (KeyCode::Char('k'), KeyModifiers::CONTROL) => {
+                if let Some(selected) = self.table.selected() {
+                    Self::kill_process(self.available_processes[selected].pid).send_error();
+                }
+
+            }
+            _ => (),
         }
+        None
+    }
+
+    fn kill_process(pid: Pid) -> Result<()> {
+        Ok(signal::kill(pid, Signal::SIGTERM)?)
+    }
+
+    pub fn update_processes(&mut self)  {
+        self.available_processes = attach::get_processes()
     }
 }

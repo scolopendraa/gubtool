@@ -77,7 +77,7 @@ pub fn map_angle() -> Result<f32> {
 
 fn install_grab_hook() -> Result<()> {
     let mut asm = asm::GRAB_HOOK;
-    let location = code_cave::base() + code_cave::NO_GRAB_ASM;
+    let location = code_cave::base() + code_cave::NO_GRAB_HOOK;
     let skip_grab_jmp_location = hooks::no_grab() + 0x95;
 
     write_to_slice::<i32>(&mut asm, 4, rel_i32(world_chr_man::base(), location + 8)?)?;
@@ -98,7 +98,7 @@ fn uninstall_grab_hook() -> Result<()> {
 
 fn install_infinite_poise_hook() -> Result<()> {
     let mut asm = asm::INFINITE_POISE_HOOK;
-    let location = code_cave::base() + code_cave::INFINITE_POISE_ASM;
+    let location = code_cave::base() + code_cave::INFINITE_POISE_HOOK;
 
     write_to_slice::<i32>(&mut asm, 11, rel_i32(world_chr_man::base(), location + 15)?)?;
     write_to_slice::<i32>(&mut asm, 18, world_chr_man::player_ins())?;

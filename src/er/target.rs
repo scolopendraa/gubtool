@@ -17,7 +17,7 @@ pub fn target_ins() -> ChrIns {
 }
 
 pub fn install_target_hook() -> Result<()> {
-    let location = code_cave::base() + code_cave::TARGET_HOOK_ASM;
+    let location = code_cave::base() + code_cave::TARGET_POINTER_HOOK;
     let saved_pointer = code_cave::base() + code_cave::TARGET_POINTER;
 
     let mut asm = asm::TARGET_HOOK;
@@ -43,7 +43,7 @@ pub fn is_target_hook_active() -> Result<bool> {
 pub fn force_act_sequence(act_sequence: Vec<i32>, npc_think_param_id: i32) -> Result<()> {
     ensure!(act_sequence.len() <= 10, "Max number of acts is 10");
 
-    let location = code_cave::base() + code_cave::FORCE_ACT_SEQUENCE_ASM;
+    let location = code_cave::base() + code_cave::FORCE_ACT_SEQUENCE_HOOK;
     let current_idx_location = code_cave::base() + code_cave::CURRENT_IDX;
     let should_run_flag_location = code_cave::base() + code_cave::SHOULD_RUN;
     let act_array_location = code_cave::base() + code_cave::ACT_ARRAY;
@@ -75,7 +75,7 @@ pub fn force_act_sequence(act_sequence: Vec<i32>, npc_think_param_id: i32) -> Re
 }
 
 pub fn install_stagger_hook() -> Result<()> {
-    let location = code_cave::base() + code_cave::TARGET_NO_STAGGER_ASM;
+    let location = code_cave::base() + code_cave::TARGET_NO_STAGGER_HOOK;
     let target_ptr_location = code_cave::base() + code_cave::TARGET_POINTER;
 
     let mut asm = asm::TARGET_STAGGER_HOOK;

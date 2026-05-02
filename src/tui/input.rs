@@ -5,13 +5,6 @@ use unicode_segmentation::UnicodeSegmentation;
 use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 
 #[derive(Clone)]
-enum InputChange {
-    Insert,
-    Append,
-    Delete,
-}
-
-#[derive(Clone)]
 pub struct Input {
     pub text: String,
     pub prompt: String,
@@ -20,7 +13,6 @@ pub struct Input {
     cursor_position: u16,
     pub cursor_offset: u16,
     available_width: usize,
-    change: Option<InputChange>,
 }
 
 impl Default for Input {
@@ -33,7 +25,6 @@ impl Default for Input {
             cursor_position: 0,
             cursor_offset: 0,
             available_width: usize::MAX,
-            change: None,
         }
     }
 }
@@ -66,17 +57,14 @@ impl Input {
 
     fn clear_range<R: RangeBounds<usize>>(&mut self, range: R) {
         if self.text.drain(range).next().is_some() {
-            self.change = Some(InputChange::Delete);
         }
     }
 
     fn insert_key(&mut self, ch: char) {
         if self.idx == self.text.len() {
             self.text.push(ch);
-            self.change = Some(InputChange::Append);
         } else {
             self.text.insert(self.idx, ch);
-            self.change = Some(InputChange::Insert);
         }
 
         self.idx += ch.len_utf8();
@@ -173,7 +161,6 @@ impl Input {
             self.idx = 0;
             self.offset = 0;
             self.cursor_position = 0;
-            self.change = Some(InputChange::Delete);
         }
     }
 
@@ -182,8 +169,6 @@ impl Input {
     }
 
     pub fn handle_keys(&mut self, key: KeyEvent) {
-        self.change = None;
-
         match (key.code, key.modifiers) {
             (KeyCode::Left, KeyModifiers::CONTROL) => self.move_cursor_one_word_left(),
             (KeyCode::Right, KeyModifiers::CONTROL) => self.move_cursor_one_word_right(),

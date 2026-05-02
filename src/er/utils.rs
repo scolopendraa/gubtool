@@ -1,12 +1,10 @@
 use anyhow::{Result, anyhow, ensure};
-use nix::unistd::Pid;
 use thiserror::Error;
 
 use crate::{
-    core::attach::{Game, Version, game, pid, version},
+    core::attach::{Game, Version, game, module_handle, version},
     er::{
-        mem::*,
-        offsets::{cs_dlc_imp, world_chr_man},
+        game_state::is_loaded, mem::*, offsets::{cs_dlc_imp}
     },
 };
 
@@ -30,7 +28,7 @@ pub fn dlc_check() -> Result<()> {
 }
 
 pub fn is_version_dlc_compat() -> bool {
-    if game() == Game::EldenRing && pid() != Pid::from_raw(-1) {
+    if game() == Game::EldenRing && module_handle() != 0 {
         matches!(version(),
             Version::ER2_2_0 |
             Version::ER2_2_3 |
@@ -49,13 +47,8 @@ pub fn version_check() -> Result<()> {
     Ok(())
 }
 
-pub fn is_character_loaded() -> Result<bool> {
-    read::<u64>(world_chr_man::base())
-        .and_then(|addr| read::<u64>(addr + world_chr_man::player_ins()))
-        .map(|val| val != 0)
-}
-
 pub fn character_loaded_check() -> Result<()> {
-    is_character_loaded().map_err(|_| anyhow!("Character not loaded"))?;
+    let loaded = is_loaded().map_err(|_| anyhow!("Character not loaded"))?;
+    ensure!(loaded, "Character not loaded");
     Ok(())
 }

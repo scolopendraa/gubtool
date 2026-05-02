@@ -12,7 +12,7 @@ use anyhow::Result;
 #[derive(Default)]
 pub struct GameStateHandler {
     pub loaded: bool,
-    has_invoked_faded_in: bool,
+    has_invoked_load_delayed: bool,
     has_invoked_loaded: bool,
     pub dlc: bool,
 }
@@ -21,7 +21,7 @@ impl GameStateHandler {
     pub fn new() -> Self {
         Self {
             loaded: true,
-            has_invoked_faded_in: true,
+            has_invoked_load_delayed: true,
             has_invoked_loaded: true,
             dlc: is_version_dlc_compat(),
         }
@@ -29,35 +29,35 @@ impl GameStateHandler {
 
     pub fn poll(&mut self) -> Result<()> {
         if is_loaded().unwrap_or_default() {
-            if !self.has_invoked_faded_in && self.has_invoked_loaded && is_faded_in()? {
-                let _ = self.on_faded_in();
-                self.has_invoked_faded_in = true;
+            if !self.has_invoked_load_delayed && self.has_invoked_loaded && is_faded_in()? {
+                self.on_load_delayed()?;
+                self.has_invoked_load_delayed = true;
             }
             if !self.loaded {
                 self.loaded = true;
-                let _ = self.on_loaded();
+                self.on_loaded()?;
                 self.has_invoked_loaded = true;
 
                 if is_new_game().unwrap_or_default() {
-                    self.on_new_game();
+                    self.on_new_game()?;
                 }
             }
         } else if self.loaded {
             self.on_unloaded();
-            self.has_invoked_faded_in = false;
+            self.has_invoked_load_delayed = false;
             self.has_invoked_loaded = false;
             self.loaded = false;
         }
         Ok(())
     }
     fn on_loaded(&mut self) -> Result<()> {
-        if get_state_flag(GameStateFlags::PlayerNoDamage).unwrap_or_default() {
+        if get_state_flag(GameStateFlags::PlayerNoDamage) {
             player_ins().set_no_damage(true)?;
         }
-        if get_state_flag(GameStateFlags::TitleCards).unwrap_or_default() {
+        if get_state_flag(GameStateFlags::TitleCards) {
             event::disable_title_card()?;
         }
-        if get_state_flag(GameStateFlags::RuneArc).unwrap_or_default() {
+        if get_state_flag(GameStateFlags::RuneArc) {
             player::set_rune_arc(true)?;
         }
 
@@ -68,11 +68,11 @@ impl GameStateHandler {
         Ok(())
     }
 
-    fn on_faded_in(&self) -> Result<()> {
-        if get_state_flag(GameStateFlags::Rfbs).unwrap_or_default() {
+    fn on_load_delayed(&self) -> Result<()> {
+        if get_state_flag(GameStateFlags::Rfbs) {
             player::set_rfbs()?;
         }
-        if get_state_flag(GameStateFlags::TorrentNoDeath).unwrap_or_default() {
+        if get_state_flag(GameStateFlags::TorrentNoDeath) {
             torrent_ins().set_no_death(true)?;
         }
         Ok(())
@@ -82,7 +82,8 @@ impl GameStateHandler {
         write::<u64>(code_cave::base() + code_cave::TARGET_HANDLE, target_ins().handle().unwrap_or_default()).ok();
     }
 
-    fn on_new_game(&self) {
+    fn on_new_game(&self) -> Result<()> {
+        Ok(())
     }
 }
 
@@ -92,13 +93,13 @@ pub fn is_loaded() -> Result<bool> {
         .map(|val| val != 0)
 }
 
-pub fn is_faded_in() -> Result<bool> {
+fn is_faded_in() -> Result<bool> {
     read::<u64>(menu_man::base())
         .and_then(|addr| read::<u8>(addr + menu_man::is_fading()))
         .map(|val| val == 0x0)
 }
 
-pub fn is_new_game() -> Result<bool> {
+fn is_new_game() -> Result<bool> {
     read::<u64>(game_data_man::base())
         .and_then(|addr| read::<u64>(addr + game_data_man::IGT))
         .map(|val| val < 5000)
@@ -113,11 +114,12 @@ pub enum GameStateFlags {
     TorrentNoDeath = 0x4,
 }
 
-pub fn get_state_flag(flag: GameStateFlags) -> Result<bool> {
-    read::<u8>(code_cave::base() + code_cave::STATE_HANDLER_FLAGS + flag as u64)
+pub fn get_state_flag(flag_offset: GameStateFlags) -> bool {
+    read::<u8>(code_cave::base() + code_cave::STATE_HANDLER_FLAGS + flag_offset as u64)
         .map(|val| val == 0x1)
+        .unwrap_or_default()
 }
 
-pub fn set_state_flag(flag: GameStateFlags, state: bool) -> Result<()> {
-    write::<u8>(code_cave::base() + code_cave::STATE_HANDLER_FLAGS + flag as u64, state as u8)
+pub fn set_state_flag(flag_offset: GameStateFlags, state: bool) -> Result<()> {
+    write::<u8>(code_cave::base() + code_cave::STATE_HANDLER_FLAGS + flag_offset as u64, state as u8)
 }

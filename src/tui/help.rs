@@ -23,6 +23,7 @@ const ENTRIES: &[(&str, &str)] = &[
     ("backtab", "Select previous tab"),
     ("f1", "Help"),
     ("f2", "Show valid processes"),
+    ("f3", "Pick game screen"),
     ("f12", "Change TUI theme"),
 ];
 

@@ -1,13 +1,15 @@
 use crate::{
-    config::ui_state::UiState,
+    config::{Config, ui_state::UiState},
     core::attach::{self, ATTACHED_PROCESS, Game, GameProcess, game, pid, version},
     tui::{
+        ds2::DarkSouls2,
         er::EldenRing,
         event::{Event, ResultExt, start_event_loop_thread},
         fuzzy_finder::FuzzyFinder,
+        game_screen_selector::GameScreenSelector,
         help,
         input::Input,
-        process_selection::ProcessSelector,
+        process_selector::ProcessSelector,
         theme::{THEME, ThemeSelector, theme},
     },
 };
@@ -24,23 +26,23 @@ use std::{sync::RwLock, thread, time::Duration};
 
 pub struct App {
     running: bool,
-    pub current_screen: CurrentScreen,
+    current_screen: CurrentScreen,
     pub game_screen: Game,
-    pub attached: bool,
-    show_help: bool,
-    show_dbg: bool,
+    attached: bool,
     show_err: bool,
     err_message: String,
 
     pub theme: ThemeName,
-    pub theme_selector: ThemeSelector,
-    pub input: Input,
-    pub input_enter_fn: fn(String, &mut App),
+    theme_selector: ThemeSelector,
+    input: Input,
+    input_enter_fn: fn(String, &mut App),
     pub fuzzy_finder: FuzzyFinder,
-    pub fuzzy_picker: fn(&mut App),
-    pub process_selector: ProcessSelector,
+    fuzzy_picker: fn(&mut App),
+    process_selector: ProcessSelector,
+    game_screen_selector: GameScreenSelector,
 
     pub elden_ring: EldenRing,
+    pub dark_souls_2: DarkSouls2,
 }
 
 impl App {
@@ -50,8 +52,6 @@ impl App {
             game_screen: Game::EldenRing,
             current_screen: CurrentScreen::Game,
             attached: false,
-            show_help: false,
-            show_dbg: false,
             show_err: false,
             err_message: "".to_string(),
 
@@ -62,8 +62,10 @@ impl App {
             fuzzy_finder: FuzzyFinder::default(),
             fuzzy_picker: |_| {},
             process_selector: ProcessSelector::new(),
+            game_screen_selector: GameScreenSelector::new(),
 
             elden_ring: EldenRing::new(),
+            dark_souls_2: DarkSouls2::new(),
         }
     }
 
@@ -94,7 +96,7 @@ impl App {
                     if self.attached && game() == self.game_screen {
                         match self.game_screen {
                             Game::EldenRing => self.elden_ring.background_tick(),
-                            Game::DarkSoulsII => (),
+                            Game::DarkSoulsII => self.dark_souls_2.background_tick(),
                         }
                     }
                 }
@@ -102,12 +104,12 @@ impl App {
                     if self.attached && game() == self.game_screen {
                         match self.game_screen {
                             Game::EldenRing => self.elden_ring.render_tick(),
-                            Game::DarkSoulsII => (),
+                            Game::DarkSoulsII => self.dark_souls_2.render_tick(),
                         }
                     }
                 }
                 Event::Search((list, f)) => {
-                    self.fuzzy_finder.list = Some(list);
+                    self.fuzzy_finder.entries = Some(list);
                     self.fuzzy_finder.update_matches();
                     self.fuzzy_picker = f;
                     self.current_screen = CurrentScreen::Search
@@ -165,7 +167,7 @@ impl App {
 
         match self.game_screen {
             Game::EldenRing => self.elden_ring.draw(frame, layout[1]),
-            Game::DarkSoulsII => (),
+            Game::DarkSoulsII => self.dark_souls_2.draw(frame, layout[1]),
         }
 
         match self.current_screen {
@@ -173,14 +175,20 @@ impl App {
                 self.fuzzy_finder.draw(frame)
             }
             CurrentScreen::ProcessSelection => {
-                self.process_selector.draw(frame);
+                self.process_selector.draw(frame)
             }
-            CurrentScreen::ThemeSelection => self.theme_selector.draw(frame, &self.theme),
+            CurrentScreen::ThemeSelection => {
+                self.theme_selector.draw(frame, &self.theme)
+            }
+            CurrentScreen::GameScreenSelection => {
+                self.game_screen_selector.draw(frame)
+            }
+            CurrentScreen::Help => {
+                help::draw(frame)
+            }
+            CurrentScreen::Debug => {
+            }
             _ => (),
-        }
-
-        if self.show_help {
-            help::draw(frame);
         }
     }
 
@@ -192,44 +200,29 @@ impl App {
         if self.show_err {
             self.show_err = false;
         }
-        if self.show_dbg {
-            self.show_dbg = false;
-        }
-        if self.show_help {
-            self.show_help = false;
-        }
         match self.current_screen {
             CurrentScreen::ProcessSelection => {
-                match key.code {
-                    KeyCode::Char('q') | KeyCode::Esc => self.current_screen = CurrentScreen::Game,
-                    KeyCode::Enter => {
-                        if let Some(selected) = self.process_selector.state.selected() {
-                            let mut processes = attach::get_processes();
-                            if selected < processes.len() {
-                                let process = processes.remove(selected);
-                                self.try_attach(Some(process), false).send_error();
-                            }
-                        }
-                    }
-                    _ => self.process_selector.handle_keys(key)
+                if let Some(process) = self.process_selector.handle_keys(key, &mut self.current_screen) {
+                    self.try_attach(Some(process), false).send_error()
                 }
             },
+            CurrentScreen::GameScreenSelection => {
+                self.game_screen_selector.handle_keys(key, &mut self.game_screen, &mut self.current_screen)
+            },
             CurrentScreen::ThemeSelection => {
-                match key.code {
-                    KeyCode::Char('q') | KeyCode::Esc => self.current_screen = CurrentScreen::Game,
-                    _ => self.theme_selector.handle_keys(key, &mut self.theme)
-                }
+                self.theme_selector.handle_keys(key, &mut self.theme, &mut self.current_screen)
+            },
+            CurrentScreen::Help | CurrentScreen::Debug => {
+                self.current_screen = CurrentScreen::Game
             },
             CurrentScreen::Search => {
                 match key.code {
                     KeyCode::Enter => {
                         (self.fuzzy_picker)(self);
-                        self.fuzzy_finder.matched.state.select(None);
                         self.fuzzy_finder.reset();
                         self.current_screen = CurrentScreen::Game;
                     }
                     KeyCode::Esc => {
-                        self.fuzzy_finder.matched.state.select(None);
                         self.fuzzy_finder.reset();
                         self.current_screen = CurrentScreen::Game;
                     }
@@ -256,21 +249,25 @@ impl App {
                 }
             },
             CurrentScreen::Game => {
-                match (key.code, key.modifiers) {
-                    (KeyCode::F(1), _) => self.show_help = true,
-                    (KeyCode::F(2), _) => self.current_screen = CurrentScreen::ProcessSelection,
-                    (KeyCode::F(12), _) => self.current_screen = CurrentScreen::ThemeSelection,
-                    _ => ()
-                }
                 match self.game_screen {
                     Game::EldenRing => self.elden_ring.handle_keys(key),
-                    Game::DarkSoulsII => (),
+                    Game::DarkSoulsII => self.dark_souls_2.handle_keys(key),
                 }
             }
         }
+        match (key.code, key.modifiers) {
+            (KeyCode::F(1), _) => self.current_screen = CurrentScreen::Help,
+            (KeyCode::F(2), _) => self.current_screen = {
+                self.process_selector.update_processes();
+                CurrentScreen::ProcessSelection
+            },
+            (KeyCode::F(3), _) => self.current_screen = CurrentScreen::GameScreenSelection,
+            (KeyCode::F(12), _) => self.current_screen = CurrentScreen::ThemeSelection,
+            _ => ()
+        }
     }
 
-    pub fn try_attach(&mut self, process: Option<GameProcess>, wait: bool) -> anyhow::Result<()> {
+    fn try_attach(&mut self, process: Option<GameProcess>, wait: bool) -> anyhow::Result<()> {
         let mut result = Ok(());
         if let Some(process) = process {
             if let Err(err) = attach::attach_to_process(process) {
@@ -287,6 +284,7 @@ impl App {
         }
         self.attached = true;
         self.game_screen = game();
+        let _ = UiState::update(|c| c.global.game_screen = game() );
 
         if let Err(err) = match self.game_screen {
             Game::EldenRing => self.elden_ring.on_attach(),
@@ -298,12 +296,12 @@ impl App {
     }
 
     fn detach(&mut self) {
+        unsafe {
+            ATTACHED_PROCESS = GameProcess::detached()
+        }
         match game() {
             Game::EldenRing => self.elden_ring.on_unattach(),
             Game::DarkSoulsII => (),
-        }
-        unsafe {
-            ATTACHED_PROCESS = GameProcess::detached()
         }
         self.attached = false;
     }
@@ -330,6 +328,9 @@ pub enum CurrentScreen {
     Game,
     Search,
     Input,
+    Help,
     ProcessSelection,
     ThemeSelection,
+    GameScreenSelection,
+    Debug,
 }

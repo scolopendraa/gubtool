@@ -5,12 +5,12 @@ use crate::{
     },
     er::{
         game_state::{self, GameStateFlags},
-        resources::talk_commands::{MENUS, SHOPS, shops_array},
+        resources::talk_commands::{MENUS, shops_array},
         utility,
     },
     send_input_event,
     tui::{
-        common::{StrExt, block, blockless_list, list, tab_state::TabState},
+        common::{StrExt, block, blockless_list, stateful_list::StatefulList, tab_state::TabState, tabs_list},
         er::ErInfo,
         event::ResultExt,
         theme::theme,
@@ -21,7 +21,7 @@ use ratatui::{
     Frame,
     layout::{Constraint, Direction, Layout, Rect},
     symbols,
-    widgets::{List, ListItem, ListState, Paragraph, Tabs, Wrap},
+    widgets::{List, ListItem, Paragraph, Tabs, Wrap},
 };
 
 enum OptionsItems {
@@ -65,17 +65,13 @@ pub struct UtilityTab {
 
 impl UtilityTab {
     pub fn new() -> Self {
-        let mut sizes = vec![0; 4];
-        sizes[OPTIONS_IDX] = OptionsItems::ARRAY.len();
-        sizes[PREFERENCES_IDX] = PreferencesItems::ARRAY.len();
-        sizes[MENUS_IDX] = MENUS.len();
-        sizes[SHOPS_IDX] = SHOPS.len();
+        let mut list_states = vec![StatefulList::new(0); 4];
+        list_states[OPTIONS_IDX] = StatefulList::new(OptionsItems::ARRAY.len());
+        list_states[PREFERENCES_IDX] = StatefulList::new(PreferencesItems::ARRAY.len());
+        list_states[MENUS_IDX] = StatefulList::new(MENUS.len());
+        list_states[SHOPS_IDX] = StatefulList::new(0);
         UtilityTab {
-            tab: TabState {
-                lists: vec![ListState::default().with_selected(Some(0)); 4],
-                list_sizes: sizes,
-                ..TabState::default()
-            },
+            tab: TabState::new(list_states),
             preferences: Preferences::read().unwrap_or_default(),
             menu_shop_idx: 0,
         }
@@ -119,19 +115,27 @@ impl UtilityTab {
         frame.render_stateful_widget(
             OptionsItems::list(self),
             layout[OPTIONS_IDX],
-            &mut self.tab.lists[OPTIONS_IDX],
+            &mut self.tab.get_list_state(OPTIONS_IDX),
         );
         frame.render_widget(Self::preferences_paragraph(), prefs_paragraph);
         frame.render_stateful_widget(
             PreferencesItems::list(self),
             prefs_list,
-            &mut self.tab.lists[PREFERENCES_IDX],
+            &mut self.tab.get_list_state(PREFERENCES_IDX),
         );
 
         if self.menu_shop_idx == 1 {
-            frame.render_stateful_widget(self.shops_list(er.dlc), layout[MENUS_IDX], &mut self.tab.lists[SHOPS_IDX]);
+            frame.render_stateful_widget(
+                self.shops_list(er.dlc),
+                layout[MENUS_IDX],
+                &mut self.tab.get_list_state(SHOPS_IDX),
+            );
         } else {
-            frame.render_stateful_widget(self.menus_list(), layout[MENUS_IDX], &mut self.tab.lists[MENUS_IDX]);
+            frame.render_stateful_widget(
+                self.menus_list(),
+                layout[MENUS_IDX],
+                &mut self.tab.get_list_state(MENUS_IDX),
+            );
         }
         frame.render_widget(self.menu_shop_tab(), layout[MENUS_IDX]);
     }
@@ -149,6 +153,9 @@ impl UtilityTab {
     }
 
     pub fn handle_keys(&mut self, key: KeyEvent, er: &ErInfo) {
+        if self.tab.current_list == SHOPS_IDX {
+            self.tab.set_length(SHOPS_IDX, shops_array(er.dlc).len())
+        }
         self.tab.handle_keys(key);
         match self.tab.current_list {
             MENUS_IDX if self.menu_shop_idx == 1 => self.tab.current_list = SHOPS_IDX,
@@ -182,24 +189,22 @@ impl UtilityTab {
     }
 
     fn handle_input(&self) {
-        let current_list = self.tab.current_list;
-        if let Some(selected_idx) = self.tab.lists[current_list].selected() {
-            match current_list {
-                OPTIONS_IDX => OptionsItems::ARRAY[selected_idx].set_input(),
-                PREFERENCES_IDX => PreferencesItems::ARRAY[selected_idx].set_input(),
+        if let Some(selected) = self.tab.get_list_selected(self.tab.current_list) {
+            match self.tab.current_list {
+                OPTIONS_IDX => OptionsItems::ARRAY[selected].set_input(),
+                PREFERENCES_IDX => PreferencesItems::ARRAY[selected].set_input(),
                 _ => (),
             }
         }
     }
 
     fn handle_enter(&self, dlc: bool) {
-        let current_list = self.tab.current_list;
-        if let Some(selected_idx) = self.tab.lists[current_list].selected() {
-            match current_list {
-                OPTIONS_IDX => OptionsItems::ARRAY[selected_idx].execute(),
-                PREFERENCES_IDX => PreferencesItems::ARRAY[selected_idx].execute(),
-                MENUS_IDX => MENUS[selected_idx].execute().send_error(),
-                SHOPS_IDX => shops_array(dlc)[selected_idx].execute().send_error(),
+        if let Some(selected) = self.tab.get_list_selected(self.tab.current_list) {
+            match self.tab.current_list {
+                OPTIONS_IDX => OptionsItems::ARRAY[selected].execute(),
+                PREFERENCES_IDX => PreferencesItems::ARRAY[selected].execute(),
+                MENUS_IDX => MENUS[selected].execute().send_error(),
+                SHOPS_IDX => shops_array(dlc)[selected].execute().send_error(),
                 _ => (),
             }
         }
@@ -213,12 +218,12 @@ impl UtilityTab {
 
     fn menus_list(&self) -> List<'static> {
         let items: Vec<ListItem> = MENUS.iter().map(|menu| ListItem::new(menu.name)).collect();
-        list(items, None, &self.tab, MENUS_IDX)
+        tabs_list(items, None, &self.tab, MENUS_IDX)
     }
 
     fn shops_list(&self, dlc: bool) -> List<'static> {
         let items: Vec<ListItem> = shops_array(dlc).iter().map(|shop| ListItem::from(shop.name)).collect();
-        list(items, None, &self.tab, SHOPS_IDX)
+        tabs_list(items, None, &self.tab, SHOPS_IDX)
     }
 }
 
@@ -277,7 +282,7 @@ impl OptionsItems {
                 utility::set_freeze_world(new_state).send_error()
             }
             Self::DisableAreaTitleCards => {
-                let new_state = !game_state::get_state_flag(GameStateFlags::TitleCards).unwrap_or_default();
+                let new_state = !game_state::get_state_flag(GameStateFlags::TitleCards);
                 game_state::set_state_flag(GameStateFlags::TitleCards, new_state).send_error();
             }
             Self::DrawHitboxesA => {
@@ -339,7 +344,7 @@ impl OptionsItems {
                 "Freeze World".create_toggle_str(state)
             }
             Self::DisableAreaTitleCards => {
-                let state = game_state::get_state_flag(GameStateFlags::TitleCards).unwrap_or_default();
+                let state = game_state::get_state_flag(GameStateFlags::TitleCards);
                 "Disable Area Title Cards".create_toggle_str(state)
             }
             Self::DrawHitboxesA => {
@@ -366,7 +371,7 @@ impl OptionsItems {
     ];
     fn list(utility_tab: &UtilityTab) -> List<'static> {
         let items: Vec<ListItem> = Self::ARRAY.iter().map(|i| i.to_list_item()).collect();
-        list(items, None, &utility_tab.tab, OPTIONS_IDX)
+        tabs_list(items, None, &utility_tab.tab, OPTIONS_IDX)
     }
 }
 

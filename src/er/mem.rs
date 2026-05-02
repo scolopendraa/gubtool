@@ -1,10 +1,7 @@
 use crate::{
     core::{
         attach::{Game, game},
-        sys::{
-            append_64bit_flag_setter, read_unsafe, run_win64_thread_wait, write_bytes_unsafe,
-            write_unsafe,
-        },
+        sys::*,
     },
     er::offsets::{self, code_cave},
 };
@@ -35,10 +32,11 @@ pub fn write_bytes(address: u64, data: &[u8]) -> Result<()> {
 
 pub fn run_thread(address: u64) -> Result<()> {
     ensure!(game() == Game::EldenRing, "Not attached to Elden Ring");
-    run_win64_thread_wait(
+    run_win_thread_wait(
         address,
         code_cave::base() + code_cave::RUN_THREAD_ASM,
-        offsets::kernel32_create_thread()
+        offsets::kernel32_create_thread(),
+        false,
     )
 }
 

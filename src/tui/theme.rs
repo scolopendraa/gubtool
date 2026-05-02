@@ -1,12 +1,14 @@
 use crate::{
     config::{Config, ui_state::UiState},
-    tui::common::{block, centered_rect, tab_state::TabState},
+    tui::{
+        app::CurrentScreen,
+        common::{centered_rect, list, stateful_list::StatefulList},
+    },
 };
 use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::{
     Frame,
-    style::{Modifier, Style},
-    widgets::{BorderType, Clear, List, ListItem, ListState},
+    widgets::{BorderType, Clear, List, ListItem},
 };
 use ratatui_themes::{ThemeName, ThemePalette};
 use std::sync::{OnceLock, RwLock};
@@ -21,25 +23,27 @@ pub const HIGHLIGHT_SYMBOL: &str = "> ";
 pub const BORDER_TYPE: BorderType = BorderType::Rounded;
 
 pub struct ThemeSelector {
-    list: ListState,
+    list: StatefulList,
 }
 
 impl ThemeSelector {
     pub fn new() -> Self {
         Self {
-            list: ListState::default().with_selected(Some(0)),
+            list: StatefulList::new(ThemeName::all().len()),
         }
     }
+
     pub fn draw(&mut self, frame: &mut Frame, current_theme: &ThemeName) {
         let layout = centered_rect(75, 75, frame.area());
         frame.render_widget(Clear, layout);
-        frame.render_stateful_widget(Self::themes_list(current_theme), layout, &mut self.list);
+        frame.render_stateful_widget(Self::themes_list(current_theme), layout, &mut self.list.state);
     }
-    pub fn handle_keys(&mut self, key: KeyEvent, current_theme: &mut ThemeName) {
-        match (key.code, key.modifiers) {
-            (KeyCode::Char('j') | KeyCode::Down, _) => self.list.select_next(),
-            (KeyCode::Char('k') | KeyCode::Up, _) => self.list.select_previous(),
-            (KeyCode::Enter, _) => {
+
+    pub fn handle_keys(&mut self, key: KeyEvent, current_theme: &mut ThemeName, current_screen: &mut CurrentScreen) {
+        self.list.handle_keys(key);
+        match key.code {
+            KeyCode::Char('q') | KeyCode::Esc => *current_screen = CurrentScreen::Game,
+            KeyCode::Enter => {
                 if let Some(idx) = self.list.selected() {
                     let theme = ThemeName::all()[idx];
                     *current_theme = theme;
@@ -51,9 +55,7 @@ impl ThemeSelector {
         }
     }
     fn themes_list(selected_theme: &ThemeName) -> List<'static> {
-        List::new(
-        ThemeName::all()
-            .iter()
+        let items = ThemeName::all().iter()
             .map(|theme| {
                 let name = if selected_theme == theme {
                     format!("*{}", theme.display_name())
@@ -61,28 +63,7 @@ impl ThemeSelector {
                     format!(" {}", theme.display_name())
                 };
                 ListItem::new(name)
-            })
-            .collect::<Vec<ListItem>>())
-            .block(block(Some("Themes"), None))
-            .highlight_style(Style::from(theme().accent).bold())
-            .highlight_symbol(HIGHLIGHT_SYMBOL)
-    }
-}
-
-impl TabState {
-    pub fn block_style(&self, list_idx: usize) -> Style {
-        if self.current_list == list_idx {
-            Style::new().fg(theme().fg)
-        } else {
-            Style::new().fg(theme().fg).add_modifier(Modifier::DIM)
-        }
-    }
-
-    pub fn highlight_style(&self, list_idx: usize) -> Style {
-        if self.current_list == list_idx {
-            Style::from(theme().accent).bold()
-        } else {
-            Style::from(theme().accent).bold().add_modifier(Modifier::DIM)
-        }
+            }).collect();
+        list(items, Some("Theme Selection"))
     }
 }

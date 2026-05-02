@@ -2,7 +2,7 @@ use crate::{
     er::resources::{bosses::bosses_array, graces::graces_array},
     tui::{
         app::App,
-        common::{block, blockless_list, label_list, tab_state::TabState},
+        common::{block, blockless_list, label_list, stateful_list::StatefulList, tab_state::TabState},
         er::ErInfo,
         event::{Event, ResultExt, send_event},
         theme::theme,
@@ -28,11 +28,11 @@ pub struct TravelTab {
 
 impl TravelTab {
     pub fn new() -> Self {
+        let mut list_states = vec![StatefulList::new(0); 2];
+        list_states[BOSSES_IDX] = StatefulList::new(0);
+        list_states[GRACES_IDX] = StatefulList::new(0);
         TravelTab {
-            tab: TabState {
-                list_sizes: vec![0, 0],
-                ..TabState::default()
-            },
+            tab: TabState::new(list_states),
         }
     }
 
@@ -61,12 +61,12 @@ impl TravelTab {
         frame.render_stateful_widget(
             boss_names,
             boss_name,
-            &mut self.tab.lists[BOSSES_IDX],
+            &mut self.tab.get_list_state(BOSSES_IDX),
         );
         frame.render_stateful_widget(
             boss_areas,
             boss_area,
-            &mut self.tab.lists[BOSSES_IDX],
+            &mut self.tab.get_list_state(BOSSES_IDX),
         );
 
         let graces_block = block(Some("Graces"), Some(self.tab.block_style(GRACES_IDX)));
@@ -85,18 +85,18 @@ impl TravelTab {
         frame.render_stateful_widget(
             grace_names,
             grace_name,
-            &mut self.tab.lists[GRACES_IDX],
+            &mut self.tab.get_list_state(GRACES_IDX),
         );
         frame.render_stateful_widget(
             grace_areas,
             grace_area,
-            &mut self.tab.lists[GRACES_IDX],
+            &mut self.tab.get_list_state(GRACES_IDX),
         );
     }
 
     pub fn handle_keys(&mut self, key: KeyEvent, er: &ErInfo) {
-        self.tab.list_sizes[BOSSES_IDX] = bosses_array(er.dlc).len();
-        self.tab.list_sizes[GRACES_IDX] = graces_array(er.dlc).len();
+        self.tab.set_length(BOSSES_IDX, bosses_array(er.dlc).len());
+        self.tab.set_length(GRACES_IDX, graces_array(er.dlc).len());
 
         self.tab.handle_keys(key);
         match key.code {
@@ -110,8 +110,10 @@ impl TravelTab {
                         .collect();
 
                     let function = |app: &mut App| {
-                        *app.elden_ring.travel.tab.lists[BOSSES_IDX].selected_mut() =
-                        Some(app.fuzzy_finder.selected_idx().unwrap());
+                        app.elden_ring.travel.tab.set_list_selected(
+                            BOSSES_IDX,
+                            app.fuzzy_finder.selected_idx().unwrap(),
+                        )
                     };
                     send_event(Event::Search((list, function)))
                 } else {
@@ -120,8 +122,10 @@ impl TravelTab {
                         .collect();
 
                     let function = |app: &mut App| {
-                        *app.elden_ring.travel.tab.lists[GRACES_IDX].selected_mut() =
-                        Some(app.fuzzy_finder.selected_idx().unwrap());
+                        app.elden_ring.travel.tab.set_list_selected(
+                            GRACES_IDX,
+                            app.fuzzy_finder.selected_idx().unwrap(),
+                        )
                     };
                     send_event(Event::Search((list, function)))
                 }
@@ -131,7 +135,7 @@ impl TravelTab {
     }
 
     fn handle_select(&self, dlc: bool) {
-        let Some(selected_idx) = self.tab.lists[self.tab.current_list].selected() else { return; };
+        let Some(selected_idx) = self.tab.get_list_selected(self.tab.current_list) else { return; };
         if self.tab.current_list == BOSSES_IDX {
             thread::spawn(move || {
                 bosses_array(dlc)[selected_idx].warp().send_error()

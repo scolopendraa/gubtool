@@ -1,5 +1,5 @@
 use crate::tui::{
-    common::{block, centered_rect},
+    common::{block, centered_rect, stateful_list::StatefulList},
     input::Input,
     theme::{self, theme},
 };
@@ -13,17 +13,17 @@ use ratatui::{
     layout::{Constraint, Direction, Layout, Margin},
     style::Style,
     text::{Line, Span},
-    widgets::{Block, Borders, Clear, List, ListItem, ListState, Paragraph},
+    widgets::{Block, Borders, Clear, List, ListItem, Paragraph},
 };
 
 pub struct FuzzyFinder {
-    pub matcher: Matcher,
-    pub input: Input,
+    matcher: Matcher,
+    input: Input,
     pattern: Pattern,
-    pub list: Option<Vec<Utf32String>>,
-    pub matched: StatefulList<Matched>,
-    pub total_count: usize,
-    pub match_count: usize,
+    pub entries: Option<Vec<Utf32String>>,
+    matched: Vec<Matched>,
+    list_state: StatefulList,
+    match_count: usize,
 }
 
 impl Default for FuzzyFinder {
@@ -32,36 +32,31 @@ impl Default for FuzzyFinder {
             matcher: Matcher::new(Config::DEFAULT.match_paths()),
             input: Input::new(theme::HIGHLIGHT_SYMBOL),
             pattern: Pattern::default(),
-            list: None,
-            matched: StatefulList::with_items(Vec::new()),
-            total_count: 0,
+            entries: None,
+            matched: Vec::new(),
+            list_state: StatefulList::new(0),
             match_count: 0,
         }
     }
 }
 
 impl FuzzyFinder {
-    pub fn set_items(&mut self, list: Vec<Utf32String>) {
-        self.total_count = list.len();
-        self.list = Some(list);
-    }
-
     pub fn selected_idx(&self) -> Option<usize> {
-        self.matched.get_selected().map(|item| item.idx)
+        self.list_state.selected().map(|selected| self.matched[selected].idx)
     }
 
     pub fn reset(&mut self) {
         self.input.set_text("");
-        self.list.take();
+        self.entries.take();
     }
 
     pub fn update_matches(&mut self) {
         self.pattern
             .reparse(&self.input.text, CaseMatching::Smart, Normalization::Smart);
 
-        self.matched.items.clear();
+        self.matched.clear();
 
-        for (idx, path) in self.list.as_deref().into_iter().flatten().enumerate() {
+        for (idx, path) in self.entries.as_deref().into_iter().flatten().enumerate() {
             let mut indices = Vec::new();
             let score = self
                 .pattern
@@ -71,13 +66,13 @@ impl FuzzyFinder {
                 indices.sort_unstable();
                 indices.dedup();
 
-                self.matched.items
+                self.matched
                     .push(Matched::new(path.to_string(), idx, score, &indices));
             }
         }
-        self.match_count = self.matched.items.len();
-        self.matched.items.sort_by(|a, b| b.score.cmp(&a.score));
-        self.matched.select_first();
+        self.match_count = self.matched.len();
+        self.matched.sort_by(|a, b| b.score.cmp(&a.score));
+        self.list_state.select(0);
     }
 
     pub fn draw(&mut self, frame: &mut Frame) {
@@ -115,18 +110,18 @@ impl FuzzyFinder {
 
         counter_area = counter_area.inner(Margin::new(1, 0));
         let counter = format!("{} / {}",
-            self.match_count, self.total_count
+            self.match_count, self.entries.as_ref().unwrap_or(&vec![]).len()
         );
         if counter.len() <= counter_area.width.into() {
             let counter = Paragraph::new(counter).right_aligned().style(theme().fg);
             frame.render_widget(counter, counter_area);
         }
-        let selected_idx = self.matched.state.selected().unwrap_or(0);
+        let selected_idx = self.list_state.selected().unwrap_or(0);
         let mut names = Vec::new();
         let mut labels = Vec::new();
         let mut labels_len = 0;
 
-        self.matched.items.iter().enumerate()
+        self.matched.iter().enumerate()
             .for_each(|(idx, item)| {
                 let mut name_span = item.highlight_line().0;
                 name_span.insert(0, (if selected_idx == idx { theme::HIGHLIGHT_SYMBOL } else { "  " }, false));
@@ -152,12 +147,12 @@ impl FuzzyFinder {
         frame.render_stateful_widget(
             List::new(names),
             name_area,
-            &mut self.matched.state
+            &mut self.list_state.state
         );
         frame.render_stateful_widget(
             List::new(labels).block(Block::default().borders(Borders::LEFT)),
             label_area,
-            &mut self.matched.state
+            &mut self.list_state.state
         );
     }
 
@@ -180,16 +175,16 @@ impl FuzzyFinder {
     pub fn handle_keys(&mut self, key: KeyEvent) {
         match (key.code, key.modifiers) {
             (KeyCode::Char('d'), KeyModifiers::CONTROL) => {
-                self.matched.increment(28);
+                self.list_state.increment(28);
             }
             (KeyCode::Char('u'), KeyModifiers::CONTROL) => {
-                self.matched.decrement(28);
+                self.list_state.decrement(28);
             }
             (KeyCode::Down, _) | (KeyCode::Tab, _) | (KeyCode::Char('j'), KeyModifiers::CONTROL) => {
-                self.matched.increment(1);
+                self.list_state.increment(1);
             }
             (KeyCode::Up, _) | (KeyCode::BackTab, _) | (KeyCode::Char('k'), KeyModifiers::CONTROL) => {
-                self.matched.decrement(1);
+                self.list_state.decrement(1);
             }
             _ => {
                 let _ = self.input.handle_keys(key);
@@ -199,61 +194,14 @@ impl FuzzyFinder {
     }
 }
 
-
-pub struct StatefulList<T> {
-    pub state: ListState,
-    pub items: Vec<T>,
-}
-
-impl<T> StatefulList<T> {
-    pub fn with_items(items: Vec<T>) -> Self {
-        let mut stateful_list = StatefulList {
-            state: ListState::default(),
-            items,
-        };
-        stateful_list.select_first();
-        stateful_list
-    }
-    fn select_with_index(&mut self, index: usize) {
-        self.state.select(if self.items.is_empty() {
-            None
-        } else {
-            Some(index)
-        });
-    }
-    pub fn increment(&mut self, val: usize) {
-        if let Some(idx) = self.state.selected() {
-            let new_idx = {
-                if idx + val > self.items.len().saturating_sub(1) {
-                    self.items.len().saturating_sub(1)
-                } else {
-                    idx + val
-                }
-            };
-            self.select_with_index(new_idx);
-        }
-    }
-    pub fn decrement(&mut self, val: usize) {
-        if let Some(idx) = self.state.selected() {
-            self.select_with_index(idx.saturating_sub(val));
-        }
-    }
-    pub fn select_first(&mut self) {
-        self.select_with_index(0);
-    }
-    pub fn get_selected(&self) -> Option<&T> {
-        self.state.selected().and_then(|idx| self.items.get(idx))
-    }
-}
-
 #[derive(Debug, PartialEq, Eq)]
 pub struct Matched {
-    pub idx: usize,
-    pub score: Option<u32>,
-    pub name: String,
-    pub label: Option<String>,
-    pub name_indices: Vec<u32>,
-    pub label_indices: Option<Vec<u32>>,
+    idx: usize,
+    score: Option<u32>,
+    name: String,
+    label: Option<String>,
+    name_indices: Vec<u32>,
+    label_indices: Option<Vec<u32>>,
 }
 
 impl Matched {
@@ -283,7 +231,7 @@ impl Matched {
         Self { idx, score, name, label, name_indices, label_indices }
     }
 
-    pub fn highlight_line(&self) -> (Vec<(&str, bool)>, Option<Vec<(&str, bool)>>) {
+    fn highlight_line(&self) -> (Vec<(&str, bool)>, Option<Vec<(&str, bool)>>) {
         let name_highlights = Self::highlight_slice(&self.name, &self.name_indices);
         let label_highlights =
         if let (Some(label), Some(label_indices)) = (&self.label, &self.label_indices) {

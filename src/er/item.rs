@@ -22,7 +22,7 @@ use crate::{
 };
 use anyhow::Result;
 
-pub fn itemspawn(item_id: i64, quantity: i64, aow_id: i64,
+fn itemspawn(item_id: i64, quantity: i64, aow_id: i64,
     is_quantity_adjustable: bool, max_quantity: i64) -> Result<()> {
     let location = code_cave::base() + code_cave::ITEM_SPAWN_ASM;
     let should_adjust_quantity = code_cave::base() + code_cave::SHOULD_CHECK_QUANTITY;
@@ -55,24 +55,24 @@ pub fn itemspawn(item_id: i64, quantity: i64, aow_id: i64,
 }
 
 pub fn mass_spawn(category: Categories) -> Result<()> {
-    let items: Vec<Item> = match category {
-            Categories::Armor => ARMOR.to_vec(),
-            Categories::Arrows => ARROWS.to_vec(),
-            Categories::AshesOfWar => ASHES_OF_WAR.to_vec(),
-            Categories::BellBearings => BELL_BEARINGS.to_vec(),
-            Categories::Consumables => CONSUMABLES.to_vec(),
-            Categories::Cookbooks => COOKBOOKS.to_vec(),
-            Categories::CraftingMaterials => CRAFTING_MATERIALS.to_vec(),
-            Categories::CrystalTears => CRYSTAL_TEARS.to_vec(),
-            Categories::Incantations => INCANTATIONS.to_vec(),
-            Categories::KeyItems => KEY_ITEMS.to_vec(),
-            Categories::PotsAndPerfumes => POTS_AND_PERFUMES.to_vec(),
-            Categories::PrattlingPate => PRATTLING_PATE.to_vec(),
-            Categories::Sorceries => SORCERIES.to_vec(),
-            Categories::SpiritAshes => SPIRIT_ASHES.to_vec(),
-            Categories::Talismans => TALISMANS.to_vec(),
-            Categories::UpgradeMaterials => UPGRADE_MATERIALS.to_vec(),
-            Categories::Weapons => WEAPONS.to_vec(),
+    let items: &'static [Item] = match category {
+            Categories::Armor => &ARMOR,
+            Categories::Arrows => &ARROWS,
+            Categories::AshesOfWar => &ASHES_OF_WAR,
+            Categories::BellBearings => &BELL_BEARINGS,
+            Categories::Consumables => &CONSUMABLES,
+            Categories::Cookbooks => &COOKBOOKS,
+            Categories::CraftingMaterials => &CRAFTING_MATERIALS,
+            Categories::CrystalTears => &CRYSTAL_TEARS,
+            Categories::Incantations => &INCANTATIONS,
+            Categories::KeyItems => &KEY_ITEMS,
+            Categories::PotsAndPerfumes => &POTS_AND_PERFUMES,
+            Categories::PrattlingPate => &PRATTLING_PATE,
+            Categories::Sorceries => &SORCERIES,
+            Categories::SpiritAshes => &SPIRIT_ASHES,
+            Categories::Talismans => &TALISMANS,
+            Categories::UpgradeMaterials => &UPGRADE_MATERIALS,
+            Categories::Weapons => &WEAPONS,
     };
     for item in items {
         if let Err(err) = item.spawn(1, 0, aow_array()[0], AFFINITIES[0]) &&

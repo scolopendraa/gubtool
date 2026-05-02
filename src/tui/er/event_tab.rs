@@ -1,11 +1,16 @@
 use crate::{
     config::ui_state::UiState,
-    er::event::{self, get_dlc_clear, mass_revive},
-    er::resources::bosses::bosses_array,
+    er::{
+        event::{self, get_dlc_clear, mass_revive},
+        resources::bosses::bosses_array,
+    },
     send_input_event,
     tui::{
         app::App,
-        common::{StrExt, block, blockless_list, label_list, list, tab_state::TabState},
+        common::{
+            StrExt, block, blockless_list, label_list, stateful_list::StatefulList,
+            tab_state::TabState, tabs_list,
+        },
         er::ErInfo,
         event::{Event, ResultExt, send_event},
         theme::{self, theme},
@@ -18,7 +23,7 @@ use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Style, Stylize},
     text::Line,
-    widgets::{Block, Borders, List, ListItem, ListState},
+    widgets::{Block, Borders, List, ListItem},
 };
 use std::thread;
 
@@ -49,16 +54,12 @@ pub struct EventTab {
 
 impl EventTab {
     pub fn new() -> Self {
-        let mut sizes = vec![0; 3];
-        sizes[COMMANDS_IDX] = CommandsItems::ARRAY.len();
-        sizes[BOSSES_IDX] = 0;
-        sizes[REVIVE_OPTIONS_IDX] = ReviveOptions::ARRAY.len();
+        let mut list_states = vec![StatefulList::new(0); 3];
+        list_states[COMMANDS_IDX] = StatefulList::new(CommandsItems::ARRAY.len());
+        list_states[BOSSES_IDX] = StatefulList::new(0);
+        list_states[REVIVE_OPTIONS_IDX] = StatefulList::new(ReviveOptions::ARRAY.len());
         EventTab {
-            tab: TabState {
-                lists: vec![ListState::default().with_selected(Some(0)); 3],
-                list_sizes: sizes,
-                ..TabState::default()
-            },
+            tab: TabState::new(list_states),
             event: None,
             first_encounter: false,
             warp: true,
@@ -89,7 +90,7 @@ impl EventTab {
         frame.render_stateful_widget(
             CommandsItems::list(self, er.dlc),
             layout[COMMANDS_IDX],
-            &mut self.tab.lists[COMMANDS_IDX],
+            &mut self.tab.get_list_state(COMMANDS_IDX),
         );
 
         let [boss_name, boss_area] = Layout::default()
@@ -104,17 +105,17 @@ impl EventTab {
         frame.render_stateful_widget(
             boss_names,
             boss_name,
-            &mut self.tab.lists[BOSSES_IDX],
+            &mut self.tab.get_list_state(BOSSES_IDX),
         );
         frame.render_stateful_widget(
             boss_areas,
             boss_area,
-            &mut self.tab.lists[BOSSES_IDX],
+            &mut self.tab.get_list_state(BOSSES_IDX),
         );
         frame.render_stateful_widget(
             ReviveOptions::list(self),
             revive_options,
-            &mut self.tab.lists[REVIVE_OPTIONS_IDX],
+            &mut self.tab.get_list_state(REVIVE_OPTIONS_IDX),
         );
     }
 
@@ -129,7 +130,9 @@ impl EventTab {
     }
 
     pub fn handle_keys(&mut self, key: KeyEvent, er: &ErInfo) {
-        self.tab.list_sizes[BOSSES_IDX] = bosses_array(er.dlc).len();
+        if self.tab.current_list == BOSSES_IDX {
+            self.tab.set_length(BOSSES_IDX, bosses_array(er.dlc).len())
+        }
         self.tab.handle_keys(key);
         match key.code {
             KeyCode::Char('s') => self.handle_input(),
@@ -138,10 +141,11 @@ impl EventTab {
                 let list = bosses_array(er.dlc).iter()
                     .map(|boss| Utf32String::from(format!("{}|{}", boss.name, boss.main_area)))
                     .collect();
-
                 let function = |app: &mut App| {
-                    *app.elden_ring.event.tab.lists[BOSSES_IDX].selected_mut() =
-                    Some(app.fuzzy_finder.selected_idx().unwrap());
+                    app.elden_ring.event.tab.set_list_selected(
+                        BOSSES_IDX,
+                        app.fuzzy_finder.selected_idx().unwrap(),
+                    )
                 };
                 send_event(Event::Search((list, function)))
             }
@@ -150,28 +154,28 @@ impl EventTab {
     }
 
     fn handle_input(&self) {
-        if let Some(selected_idx) = self.tab.lists[self.tab.current_list].selected() {
+        if let Some(selected) = self.tab.get_list_selected(self.tab.current_list) {
             match self.tab.current_list {
-                COMMANDS_IDX => CommandsItems::ARRAY[selected_idx].set_input(),
+                COMMANDS_IDX => CommandsItems::ARRAY[selected].set_input(),
                 _ => (),
             }
         }
     }
 
     fn handle_select(&mut self, dlc: bool) {
-        let Some(selected_idx) = self.tab.lists[self.tab.current_list].selected() else { return };
+        let Some(selected) = self.tab.get_list_selected(self.tab.current_list) else { return };
 
         if self.tab.current_list == COMMANDS_IDX {
-            CommandsItems::array(dlc)[selected_idx].execute(self)
+            CommandsItems::array(dlc)[selected].execute(self)
         }
         if self.tab.current_list == REVIVE_OPTIONS_IDX {
-            ReviveOptions::ARRAY[selected_idx].execute(self, dlc)
+            ReviveOptions::ARRAY[selected].execute(self, dlc)
         }
         if self.tab.current_list == BOSSES_IDX {
             let first_encounter = self.first_encounter;
             let warp = self.warp;
             thread::spawn(move || {
-                bosses_array(dlc)[selected_idx].revive(first_encounter, warp).send_error()
+                bosses_array(dlc)[selected].revive(first_encounter, warp).send_error()
             });
         }
     }
@@ -190,7 +194,7 @@ impl EventTab {
     }
 
     fn revive_status_line(&self, loaded: bool, dlc: bool) -> Line<'static> {
-        let selected_idx = self.tab.lists[BOSSES_IDX].selected().unwrap_or_default();
+        let selected_idx = self.tab.lists_states[BOSSES_IDX].selected().unwrap_or_default();
         let boss = bosses_array(dlc)[selected_idx];
         let mut style = Style::from(theme().success);
         let text = if !loaded {
@@ -290,7 +294,7 @@ impl CommandsItems {
     fn list(event_tab: &EventTab, dlc: bool) -> List<'static> {
         let array = Self::array(dlc);
         let items: Vec<ListItem> = array.iter().map(|i| i.to_list_item(event_tab)).collect();
-        list(items, None, &event_tab.tab, COMMANDS_IDX)
+        tabs_list(items, None, &event_tab.tab, COMMANDS_IDX)
     }
 }
 

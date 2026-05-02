@@ -47,7 +47,7 @@ pub struct Item {
 }
 
 impl Item {
-    pub const fn default() -> Self {
+    const fn default() -> Self {
         Self {
             id: 0,
             name: "",
@@ -99,12 +99,12 @@ static ITEMS_DLC_NOT_ACTIVE: Lazy<Vec<Item>> = Lazy::new(|| {
 
 pub fn items_array(dlc_active: bool) -> &'static [Item] {
     if dlc_active {
-        return &ITEMS;
+        &ITEMS
+    } else if is_version_dlc_compat() {
+        &ITEMS_DLC_NOT_ACTIVE
+    } else {
+        &ITEMS_NO_DLC_VERSION
     }
-    if is_version_dlc_compat() {
-        return &ITEMS_DLC_NOT_ACTIVE;
-    }
-    &ITEMS_NO_DLC_VERSION
 }
 
 #[derive(Clone, Copy, PartialEq, ValueEnum)]

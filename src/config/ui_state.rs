@@ -1,5 +1,6 @@
 use crate::{
     config::Config,
+    core::attach::Game,
     tui::{self, app::App},
 };
 use anyhow::{Result, anyhow};
@@ -7,7 +8,7 @@ use ratatui_themes::ThemeName;
 use serde::{Deserialize, Serialize};
 use std::{env, fs, path::PathBuf};
 
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default)]
 pub struct UiState {
     #[serde(rename = "global")]
     pub global: GlobalState,
@@ -75,26 +76,29 @@ impl UiState {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct GlobalState {
     pub theme: ThemeName,
+    pub game_screen: Game,
 }
 
 impl Default for GlobalState {
     fn default() -> Self {
         Self {
-            theme: ThemeName::RosePine
+            theme: ThemeName::RosePine,
+            game_screen: Game::EldenRing,
         }
     }
 }
 
 impl GlobalState {
     fn apply(self, app: &mut tui::app::App) {
-        app.theme = self.theme
+        app.theme = self.theme;
+        app.game_screen = self.game_screen;
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct ErState {
     pub player_set_health: i32,
     pub give_runes: i64,
@@ -137,7 +141,7 @@ impl ErState {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Ds2State {
 }
 

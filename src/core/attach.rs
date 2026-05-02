@@ -6,6 +6,7 @@ use pelite::{
     pe32::{self, Pe as Pe32},
     pe64::{self, Pe as Pe64},
 };
+use serde::{Deserialize, Serialize};
 use std::{
     fmt,
     fs::{self, DirEntry},
@@ -279,6 +280,7 @@ pub fn version() -> Version {
 
 #[derive(PartialEq)]
 #[derive(Clone, Copy)]
+#[derive(Serialize, Deserialize)]
 pub enum Game {
     EldenRing,
     DarkSoulsII,

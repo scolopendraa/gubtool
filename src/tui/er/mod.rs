@@ -29,7 +29,7 @@ pub struct EldenRing {
     pub game_state: GameStateHandler,
     pub player: PlayerTab,
     pub target: TargetTab,
-    pub item: ItemTab,
+    pub items: ItemTab,
     pub utility: UtilityTab,
     pub travel: TravelTab,
     pub event: EventTab,
@@ -61,7 +61,7 @@ impl EldenRing {
             player: PlayerTab::new(),
             target: TargetTab::new(),
             utility: UtilityTab::new(),
-            item: ItemTab::new(),
+            items: ItemTab::new(),
             travel: TravelTab::new(),
             event: EventTab::new(),
             elden_beast_map: EldenBeastMap::default(),
@@ -75,7 +75,7 @@ impl EldenRing {
             "Player" => self.player.draw(frame, layout, &self.er_info),
             "Target" => self.target.draw(frame, layout, &self.er_info),
             "Utility" => self.utility.draw(frame, layout, &self.er_info),
-            "Items" => self.item.draw(frame, layout, &self.er_info),
+            "Items" => self.items.draw(frame, layout, &self.er_info),
             "Travel" => self.travel.draw(frame, layout, &self.er_info),
             "Events" => self.event.draw(frame, layout, &self.er_info),
             _ => (),
@@ -89,7 +89,7 @@ impl EldenRing {
             "Player" => self.player.handle_keys(key, &self.er_info),
             "Target" => self.target.handle_keys(key, &self.er_info),
             "Utility" => self.utility.handle_keys(key, &self.er_info),
-            "Items" => self.item.handle_keys(key, &self.er_info),
+            "Items" => self.items.handle_keys(key, &self.er_info),
             "Travel" => self.travel.handle_keys(key, &self.er_info),
             "Events" => self.event.handle_keys(key, &self.er_info),
             _ => (),
@@ -109,6 +109,7 @@ impl EldenRing {
 
     pub fn on_unattach(&mut self) {
         self.game_state = GameStateHandler::new();
+        self.background_tick();
     }
 
     pub fn on_attach(&mut self) -> anyhow::Result<()> {

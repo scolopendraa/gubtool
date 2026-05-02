@@ -295,7 +295,7 @@ impl ChrInsExt for ChrIns {
 
     fn ai_think_pointer(&self) -> Result<u64> {
         read::<u64>(self.chr_ins_pointer()?.saturating_add(chr_ins::manipulator()))
-            .and_then(|addr| read::<u64>(addr + 0xC0))
+            .and_then(|addr| read::<u64>(addr.saturating_add(0xC0)))
     }
 
     fn special_effect_pointer(&self) -> Result<u64> {
@@ -304,7 +304,7 @@ impl ChrInsExt for ChrIns {
 
     fn ctrl_flags_pointer(&self) -> Result<u64> {
         read::<u64>(self.chr_ins_pointer()?.saturating_add(chr_ins::CHR_CTRL))
-            .and_then(|addr| read::<u64>(addr + 0xC8))
+            .and_then(|addr| read::<u64>(addr.saturating_add(0xC8)))
             .map(|addr| addr + 0x24)
     }
 

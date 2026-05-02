@@ -6,7 +6,7 @@ use crate::{
     },
     send_input_event,
     tui::{
-        common::{StrExt, list, parse_act_sequence, tab_state::TabState},
+        common::{StrExt, parse_act_sequence, stateful_list::StatefulList, tab_state::TabState, tabs_list},
         er::ErInfo,
         event::ResultExt,
         theme::theme,
@@ -50,14 +50,11 @@ pub struct TargetTab {
 
 impl TargetTab {
     pub fn new() -> Self {
-        let mut sizes = vec![0; 2];
-        sizes[ACTIONS_IDX] = ActionsItems::ARRAY.len();
-        sizes[TOGGLES_IDX] = TogglesItems::ARRAY.len();
+        let mut list_states = vec![StatefulList::new(0); 2];
+        list_states[ACTIONS_IDX] = StatefulList::new(ActionsItems::ARRAY.len());
+        list_states[TOGGLES_IDX] = StatefulList::new(TogglesItems::ARRAY.len());
         TargetTab {
-            tab: TabState {
-                list_sizes: sizes,
-                ..TabState::default()
-            },
+            tab: TabState::new(list_states),
             hp_val: 1,
             hp_percentage: 50,
             act: 1,
@@ -93,12 +90,12 @@ impl TargetTab {
         frame.render_stateful_widget(
             ActionsItems::list(&self),
             lists_layout[ACTIONS_IDX],
-            &mut self.tab.lists[ACTIONS_IDX],
+            &mut self.tab.get_list_state(ACTIONS_IDX),
         );
         frame.render_stateful_widget(
             TogglesItems::list(self, &er.target_ins),
             lists_layout[TOGGLES_IDX],
-            &mut self.tab.lists[TOGGLES_IDX],
+            &mut self.tab.get_list_state(TOGGLES_IDX),
         );
     }
 
@@ -113,7 +110,7 @@ impl TargetTab {
 
     fn handle_input(&self) {
         let current_list = self.tab.current_list;
-        if let Some(selected_index) = self.tab.lists[current_list].selected() {
+        if let Some(selected_index) = self.tab.lists_states[current_list].selected() {
             match current_list {
                 ACTIONS_IDX => ActionsItems::ARRAY[selected_index].set_input(),
                 _ => (),
@@ -123,7 +120,7 @@ impl TargetTab {
 
     fn handle_select(&self, target_ins: &ChrIns) {
         let current_list = self.tab.current_list;
-        if let Some(selected_index) = self.tab.lists[current_list].selected() {
+        if let Some(selected_index) = self.tab.lists_states[current_list].selected() {
             match current_list {
                 ACTIONS_IDX => ActionsItems::ARRAY[selected_index].execute(self, target_ins),
                 TOGGLES_IDX => TogglesItems::ARRAY[selected_index].execute(target_ins),
@@ -257,7 +254,7 @@ impl ActionsItems {
     ];
     fn list(target_tab: &TargetTab) -> List<'static> {
         let items: Vec<ListItem> = Self::ARRAY.iter().map(|i| i.to_list_item(target_tab)).collect();
-        list(items, None, &target_tab.tab, ACTIONS_IDX)
+        tabs_list(items, None, &target_tab.tab, ACTIONS_IDX)
     }
 }
 
@@ -311,6 +308,6 @@ impl TogglesItems {
 
     fn list(target_tab: &TargetTab, target_ins: &ChrIns) -> List<'static> {
         let items: Vec<ListItem> = Self::ARRAY.iter().map(|i| i.to_list_item(target_ins)).collect();
-        list(items, None, &target_tab.tab, TOGGLES_IDX)
+        tabs_list(items, None, &target_tab.tab, TOGGLES_IDX)
     }
 }
