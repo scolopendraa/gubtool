@@ -240,3 +240,161 @@ pub const ITEM_SPAWN_VANILLA: [u8; 206] = [
     0x0F, 0x85, 0x33, 0xFF, 0xFF, 0xFF,             // jne 0 <_main>
     0xC3,                                           // ret
 ];
+pub const IVORY_SKIP_SCHOLAR: [u8; 219] = [
+    0x81, 0xFA, 0x78, 0x46, 0x02, 0x20,             // cmp edx,0x20024678
+    0x75, 0x12,                                     // jne 1a <check_next>
+    0x41, 0x83, 0xF8, 0x01,                         // cmp r8d,0x1
+    0x0F, 0x85, 0xBF, 0x00, 0x00, 0x00,             // jne d1 <exit>
+    0x45, 0x31, 0xC0,                               // xor r8d,r8d
+    0xE9, 0xB7, 0x00, 0x00, 0x00,                   // jmp d1 <exit>
+                                                    // <check_next>:
+    0x81, 0xFA, 0x80, 0x46, 0x02, 0x20,             // cmp edx,0x20024680
+    0x0F, 0x85, 0xAB, 0x00, 0x00, 0x00,             // jne d1 <exit>
+    0x41, 0x83, 0xF8, 0x01,                         // cmp r8d,0x1
+    0x0F, 0x85, 0xA1, 0x00, 0x00, 0x00,             // jne d1 <exit>
+    0x51,                                           // push rcx
+    0x52,                                           // push rdx
+    0x41, 0x50,                                     // push r8
+    0x41, 0x54,                                     // push r12
+    0x41, 0x55,                                     // push r13
+    0x41, 0x56,                                     // push r14
+    0x41, 0x57,                                     // push r15
+    0x53,                                           // push rbx
+    0x55,                                           // push rbp
+    0x57,                                           // push rdi
+    0x56,                                           // push rsi
+    0x49, 0xC7, 0xC4, 0x00, 0x00, 0x25, 0x32,       // mov r12,0x32250000
+    0x49, 0xC7, 0xC5, 0x03, 0x00, 0x00, 0x00,       // mov r13,0x3
+    0x49, 0xC7, 0xC6, 0xDE, 0x9B, 0x00, 0x03,       // mov r14,0x3009bde
+    0x48, 0xC7, 0xC7, 0x83, 0x46, 0x02, 0x20,       // mov rdi,0x20024683
+    0x49, 0xBF,                                     // movabs r15,0x0
+    0x00, 0x00, 0x00, 0x00, 0x00,                   // (imm64 part 1)
+    0x00, 0x00, 0x00,                               // (imm64 part 2)
+    0x48, 0xBB,                                     // movabs rbx,0x0
+    0x00, 0x00, 0x00, 0x00, 0x00,                   // (imm64 part 1)
+    0x00, 0x00, 0x00,                               // (imm64 part 2)
+    0x48, 0xBD,                                     // movabs rbp,0x0
+    0x00, 0x00, 0x00, 0x00, 0x00,                   // (imm64 part 1)
+    0x00, 0x00, 0x00,                               // (imm64 part 2)
+    0x48, 0x89, 0xCE,                               // mov rsi,rcx
+    0x48, 0x83, 0xEC, 0x28,                         // sub rsp,0x28
+                                                    // <loop_start>:
+    0x44, 0x89, 0xE1,                               // mov ecx,r12d
+    0x44, 0x89, 0xF2,                               // mov edx,r14d
+    0x41, 0xFF, 0xD7,                               // call r15
+    0x48, 0x8D, 0x88, 0xB8, 0x00, 0x00, 0x00,       // lea rcx,[rax+0xb8]
+    0x48, 0x89, 0xC2,                               // mov rdx,rax
+    0xFF, 0xD3,                                     // call rbx
+    0x48, 0x8B, 0x48, 0x48,                         // mov rcx,[rax+0x48]
+    0x48, 0x8B, 0x01,                               // mov rax,[rcx]
+    0xBA, 0x46, 0x00, 0x00, 0x00,                   // mov edx,0x46
+    0xFF, 0x50, 0x30,                               // call [rax+0x30]
+    0x48, 0x89, 0xF1,                               // mov rcx,rsi
+    0x89, 0xFA,                                     // mov edx,edi
+    0x41, 0xB8, 0x01, 0x00, 0x00, 0x00,             // mov r8d,0x1
+    0xFF, 0xD5,                                     // call rbp
+    0x49, 0xFF, 0xC6,                               // inc r14
+    0x48, 0xFF, 0xC7,                               // inc rdi
+    0x49, 0xFF, 0xCD,                               // dec r13
+    0x75, 0xC4,                                     // jne 81 <loop_start>
+    0x48, 0x83, 0xC4, 0x28,                         // add rsp,0x28
+    0x5E,                                           // pop rsi
+    0x5F,                                           // pop rdi
+    0x5D,                                           // pop rbp
+    0x5B,                                           // pop rbx
+    0x41, 0x5F,                                     // pop r15
+    0x41, 0x5E,                                     // pop r14
+    0x41, 0x5D,                                     // pop r13
+    0x41, 0x5C,                                     // pop r12
+    0x41, 0x58,                                     // pop r8
+    0x5A,                                           // pop rdx
+    0x59,                                           // pop rcx
+                                                    // <exit>:
+    0x48, 0x89, 0x74, 0x24, 0x10,                   // mov [rsp+0x10],rsi
+    0xE9, 0x00, 0x00, 0x00, 0x00,                   // jmp db <exit+0xa>
+];
+
+pub const IVORY_SKIP_VANILLA: [u8; 166] = [
+    0x81, 0x7C, 0x24, 0x04, 0x80, 0x46, 0x02,       // cmp DWORD PTR [esp+0x4],0x20024680
+    0x20,
+    0x0F, 0x85, 0x8D, 0x00, 0x00, 0x00,             // jne <original_set_event>
+    0x83, 0x7C, 0x24, 0x08, 0x01,                   // cmp DWORD PTR [esp+0x8],0x1
+    0x0F, 0x85, 0x82, 0x00, 0x00, 0x00,             // jne <original_set_event>
+    0x55,                                           // push ebp
+    0x89, 0xE5,                                     // mov ebp,esp
+    0x83, 0xEC, 0x18,                               // sub esp,0x18
+    0x57,                                           // push edi
+    0x51,                                           // push ecx
+    0x52,                                           // push edx
+    0x53,                                           // push ebx
+    0x89, 0xCF,                                     // mov edi,ecx
+    0xBB, 0x00, 0x00, 0x00, 0x00,                   // mov ebx,0x0
+    0xC7, 0x45, 0xFC, 0x00, 0x00, 0x25, 0x32,       // mov DWORD PTR [ebp-0x4],0x32250000
+    0xC7, 0x45, 0xF8, 0x03, 0x00, 0x00, 0x00,       // mov DWORD PTR [ebp-0x8],0x3
+    0xC7, 0x45, 0xF4, 0xDE, 0x9B, 0x00, 0x03,       // mov DWORD PTR [ebp-0xC],0x3009BDE
+    0xC7, 0x45, 0xF0, 0x83, 0x46, 0x02, 0x20,       // mov DWORD PTR [ebp-0x10],0x20024683
+    0xC7, 0x45, 0xEC, 0x00, 0x00, 0x00, 0x00,       // mov DWORD PTR [ebp-0x14],0x0
+    0xC7, 0x45, 0xE8, 0x00, 0x00, 0x00, 0x00,       // mov DWORD PTR [ebp-0x18],0x0
+    0xFF, 0x75, 0xF4,                               // push DWORD PTR [ebp-0xC]
+    0xFF, 0x75, 0xFC,                               // push DWORD PTR [ebp-0x4]
+    0xFF, 0x55, 0xEC,                               // call DWORD PTR [ebp-0x14]
+    0x83, 0xC4, 0x08,                               // add esp,0x8
+    0x89, 0xC1,                                     // mov ecx,eax
+    0x51,                                           // push ecx
+    0x81, 0xC1, 0x84, 0x00, 0x00, 0x00,             // add ecx,0x84
+    0xFF, 0x55, 0xE8,                               // call DWORD PTR [ebp-0x18]
+    0x89, 0xC1,                                     // mov ecx,eax
+    0x83, 0xC1, 0x24,                               // add ecx,0x24
+    0x8B, 0x09,                                     // mov ecx,DWORD PTR [ecx]
+    0x8B, 0x11,                                     // mov edx,DWORD PTR [ecx]
+    0x89, 0xD0,                                     // mov eax,edx
+    0x83, 0xC0, 0x18,                               // add eax,0x18
+    0x8B, 0x00,                                     // mov eax,DWORD PTR [eax]
+    0x6A, 0x46,                                     // push 0x46
+    0xFF, 0xD0,                                     // call eax
+    0x6A, 0x01,                                     // push 0x1
+    0xFF, 0x75, 0xF0,                               // push DWORD PTR [ebp-0x10]
+    0x89, 0xF9,                                     // mov ecx,edi
+    0xFF, 0xD3,                                     // call ebx
+    0xFF, 0x45, 0xF4,                               // inc DWORD PTR [ebp-0xC]
+    0xFF, 0x45, 0xF0,                               // inc DWORD PTR [ebp-0x10]
+    0xFF, 0x4D, 0xF8,                               // dec DWORD PTR [ebp-0x8]
+    0x75, 0xC0,                                     // jnz -0x40 (loop back)
+    0x5B,                                           // pop ebx
+    0x5A,                                           // pop edx
+    0x59,                                           // pop ecx
+    0x5F,                                           // pop edi
+    0x89, 0xEC,                                     // mov esp,ebp
+    0x5D,                                           // pop ebp
+                                                    // <original_set_event>
+    0x55,                                           // pop ebp
+    0x89, 0xE5,                                     // mov ebp,esp
+    0x83, 0xEC, 0x08,                               // sub esp,0x8
+    0xE9, 0x00, 0x00, 0x00, 0x00,                   // jmp
+];
+
+pub const IVORY_KNIGHTS_SCHOLAR: [u8; 36] = [
+    0x81, 0x79, 0x4C, 0x80, 0x7F, 0x0A, 0x00,       // cmp DWORD PTR [rcx+0x4c],0xa7f80
+    0x75, 0x0E,                                     // jne 17 <normal>
+    0x48, 0x85, 0xC0,                               // test rax,rax
+    0x75, 0x09,                                     // jne 17 <normal>
+    0x41, 0x83, 0xF8, 0x0F,                         // cmp r8d,0xf
+    0x75, 0x03,                                     // jne 17 <normal>
+    0x45, 0x31, 0xC0,                               // xor r8d,r8d
+                                                    // <normal>:
+    0x44, 0x88, 0x84, 0x08, 0xA1, 0x03, 0x00,       // mov BYTE PTR [rax+rcx*1+0x3a1],r8b
+    0x00,
+    0xE9, 0x00, 0x00, 0x00, 0x00,                   // jmp 24 <normal+0xd>
+];
+
+pub const IVORY_KNIGHTS_VANILLA: [u8; 32] = [
+    0x81, 0x79, 0x28, 0x80, 0x7F, 0x0A, 0x00,       // cmp DWORD PTR [ecx+0x28],0xA7F80
+    0x75, 0x0B,                                     // jne 14 <original>
+    0x85, 0xC0,                                     // test eax,eax
+    0x75, 0x07,                                     // jne 14 <original>
+    0x80, 0xFA, 0x0F,                               // cmp dl,0xf
+    0x75, 0x02,                                     // jne 14 <original>
+    0x31, 0xD2,                                     // xor edx,edx
+    0x88, 0x94, 0x08, 0xA1, 0x02, 0x00, 0x00,       // mov BYTE PTR [eax+ecx*1+0x2a1],dl
+    0xE9, 0xFC, 0xFF, 0xFF, 0xFF,                   // jmp 1c <original+0x8>
+];

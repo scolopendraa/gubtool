@@ -24,6 +24,7 @@ const ENTRIES: &[(&str, &str)] = &[
     ("f1", "Help"),
     ("f2", "Show valid processes"),
     ("f3", "Pick game screen"),
+    //("f4", "Set attach preferences"),
     ("f12", "Change TUI theme"),
 ];
 

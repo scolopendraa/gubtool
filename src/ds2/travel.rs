@@ -1,5 +1,5 @@
 use std::{thread, time::Duration};
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use crate::{
     core::common::{rel_i32, write_to_slice},
     ds2::{
@@ -17,6 +17,9 @@ use crate::{
 
 impl Warp {
     pub fn warp(&self) -> Result<()> {
+        let _handle = TRAVEL_MUTEX.try_lock()
+            .map_err(|_| anyhow!("Is already travelling"))?;
+
         character_loaded_check()?;
         let event_warp_entity = follow_pointers(&[
             game_manager_imp::base(),
@@ -29,9 +32,11 @@ impl Warp {
             bonfire_warp(self.bonfire_id, event_warp_entity)?
         }
         if let Some(coords) = self.coordinates {
-            write_coords_hook(coords)?
+            write_coords_hook(coords)?;
+            wait_for_loaded(true)
+        } else {
+            wait_for_loaded(false)
         }
-        Ok(())
     }
 }
 
@@ -134,11 +139,10 @@ fn write_coords_hook(coords: &[f32; 16]) -> Result<()> {
     }
 
     if is_scholar() {
-        write_coords_hook_scholar(coords_location)?
+        write_coords_hook_scholar(coords_location)
     } else {
-        write_coords_hook_vanilla(coords_location)?
+        write_coords_hook_vanilla(coords_location)
     }
-    install_and_uninstall_hook()
 }
 
 fn write_coords_hook_scholar(coords_location: u64) -> Result<()> {
@@ -169,25 +173,30 @@ fn write_coords_hook_vanilla(coords_location: u64) -> Result<()> {
     write_bytes(location, &asm)
 }
 
-fn install_and_uninstall_hook() -> Result<()> {
+fn wait_for_loaded(do_coords_hook: bool) -> Result<()> {
     while !is_loading_screen()? {
         thread::sleep(Duration::from_millis(100));
     }
     thread::sleep(Duration::from_millis(200));
 
-    let location = code_cave::base() + code_cave::WARP_COORDS_HOOK;
-    let mut hookbytes: [u8; 7] = [0xE9, 0x00, 0x00, 0x00, 0x00, 0x90, 0x90];
-    write_to_slice::<i32>(&mut hookbytes, 1, rel_i32(location, hooks::warp_coord_write() + 5)?)?;
-    write_bytes(hooks::warp_coord_write(), &hookbytes)?;
+    if do_coords_hook {
+        let location = code_cave::base() + code_cave::WARP_COORDS_HOOK;
+        let mut hookbytes: [u8; 7] = [0xE9, 0x00, 0x00, 0x00, 0x00, 0x90, 0x90];
+        write_to_slice::<i32>(&mut hookbytes, 1, rel_i32(location, hooks::warp_coord_write() + 5)?)?;
+        write_bytes(hooks::warp_coord_write(), &hookbytes)?;
+    }
 
     while is_loading_screen()? {
         thread::sleep(Duration::from_millis(100));
     }
     thread::sleep(Duration::from_millis(200));
 
-    if is_scholar() {
-        write_bytes(hooks::warp_coord_write(), &[0x0F, 0x5C, 0xC2, 0x0F, 0x29, 0x47, 0x50])
-    } else {
-        write_bytes(hooks::warp_coord_write(), &[0x0F, 0x5C, 0xC1, 0x0F, 0x29, 0x46, 0x40])
+    if do_coords_hook {
+        if is_scholar() {
+            write_bytes(hooks::warp_coord_write(), &[0x0F, 0x5C, 0xC2, 0x0F, 0x29, 0x47, 0x50])?
+        } else {
+            write_bytes(hooks::warp_coord_write(), &[0x0F, 0x5C, 0xC1, 0x0F, 0x29, 0x46, 0x40])?
+        }
     }
+    Ok(())
 }

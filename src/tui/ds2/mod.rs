@@ -1,10 +1,11 @@
 mod items_tab;
 mod player_tab;
 mod travel_tab;
+mod utility_tab;
 
 use crate::{ds2::game_state::GameStateHandler, tui::{
     common::tabs_widget::TabsWidget,
-    ds2::{items_tab::ItemTab, player_tab::PlayerTab, travel_tab::TravelTab}, event::ResultExt,
+    ds2::{items_tab::ItemTab, player_tab::PlayerTab, travel_tab::TravelTab, utility_tab::UtilityTab}, event::ResultExt,
 }};
 use crossterm::event::KeyEvent;
 use ratatui::{Frame, layout::Rect};
@@ -12,6 +13,7 @@ pub struct DarkSouls2 {
     tabs_widget: TabsWidget,
     game_state: GameStateHandler,
     player: PlayerTab,
+    utility: UtilityTab,
     items: ItemTab,
     travel: TravelTab,
 }
@@ -26,6 +28,7 @@ impl DarkSouls2 {
             },
             game_state: GameStateHandler::new(),
             player: PlayerTab::new(),
+            utility: UtilityTab::new(),
             items: ItemTab::new(),
             travel: TravelTab::new(),
         }
@@ -37,7 +40,7 @@ impl DarkSouls2 {
         match self.tabs_widget.tabs[self.tabs_widget.current_tab as usize] {
             "Player" => self.player.draw(frame, layout),
             "Target" => (),
-            "Utility" => (),
+            "Utility" => self.utility.draw(frame, layout),
             "Items" => self.items.draw(frame, layout),
             "Travel" => self.travel.draw(frame, layout),
             _ => (),
@@ -50,7 +53,7 @@ impl DarkSouls2 {
         match self.tabs_widget.tabs[self.tabs_widget.current_tab as usize] {
             "Player" => self.player.handle_keys(key),
             "Target" => (),
-            "Utility" => (),
+            "Utility" => self.utility.handle_keys(key),
             "Items" => self.items.handle_keys(key),
             "Travel" => self.travel.handle_keys(key),
             _ => (),

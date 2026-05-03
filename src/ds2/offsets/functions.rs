@@ -77,3 +77,33 @@ pub fn sleep() -> u64 {
         _ => 0x0,
     }
 }
+
+pub fn set_event() -> u64 {
+    module_handle() + match version() {
+        Version::Vanilla1_0_11 => 0x478840,
+        Version::Vanilla1_0_12 => 0x47FAE0,
+        Version::Scholar1_0_2 => 0x46DEC0,
+        Version::Scholar1_0_3 => 0x4750B0,
+        _ => 0x0,
+    }
+}
+
+pub fn get_map_entity_with_area_id_and_obj_id() -> u64 {
+    module_handle() + match version() {
+        Version::Vanilla1_0_11 => 0x3E0670,
+        Version::Vanilla1_0_12 => 0x3E7610,
+        Version::Scholar1_0_2 => 0x3BAD70,
+        Version::Scholar1_0_3 => 0x3C1B90,
+        _ => 0x0,
+    }
+}
+
+pub fn get_map_obj_state_act_component() -> u64 {
+    module_handle() + match version() {
+        Version::Vanilla1_0_11 => 0x2433F0,
+        Version::Vanilla1_0_12 => 0x246220,
+        Version::Scholar1_0_2 => 0x1C7010,
+        Version::Scholar1_0_3 => 0x1CA790,
+        _ => 0x0,
+    }
+}

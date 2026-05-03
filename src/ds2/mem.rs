@@ -15,6 +15,7 @@ use pelite::Pod;
 
 pub static ITEM_SPAWN_MUTEX: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
 pub static MASS_SPAWN_MUTEX: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
+pub static TRAVEL_MUTEX: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
 
 #[track_caller]
 pub fn read<T: Pod>(address: u64) -> Result<T> {

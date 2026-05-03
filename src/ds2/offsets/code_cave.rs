@@ -47,7 +47,9 @@ pub const ITEM_SPAWN_STACK: u64 = 0x19B;                // [u8; 0x300]
 pub const STATE_HANDLER_FLAGS: u64 = 0xF00;             // [u8; 256]
 
 // Hooks
-pub const WARP_COORDS_HOOK: u64 = 0x1000;              // [u8; 124]
+pub const WARP_COORDS_HOOK: u64 = 0x1000;               // [u8; 124]
+pub const IVORY_SKIP_HOOK: u64 = 0x1080;                // [u8; 219]
+pub const IVORY_KNIGHTS_HOOK: u64 = 0x1160;              // [u8; 36]
 
 // Shellcode
 pub const RUN_THREAD_ASM: u64 = 0x2000;                 // [u8; 39]

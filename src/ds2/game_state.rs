@@ -44,9 +44,6 @@ impl GameStateHandler {
         if get_state_flag(GameStateFlags::PlayerNoDeath) {
             player::player_ctrl().set_no_death(true)?
         }
-        if get_state_flag(GameStateFlags::PlayerNoDamage) {
-            //player::player_ctrl().set_no_damage(true)?
-        }
         Ok(())
     }
     fn on_load_delayed(&self) -> Result<()> {
@@ -60,7 +57,6 @@ impl GameStateHandler {
 #[repr(u64)]
 pub enum GameStateFlags {
     PlayerNoDeath = 0x0,
-    PlayerNoDamage = 0x1,
 }
 
 pub fn get_state_flag(flag_offset: GameStateFlags) -> bool {
