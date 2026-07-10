@@ -22,6 +22,7 @@ pub enum Event {
     BlockInputs(bool),
     Input((&'static str, tokio::sync::oneshot::Sender<String>, std::any::TypeId)),
     Search((Vec<Utf32String>, tokio::sync::oneshot::Sender<Option<usize>>)),
+    MultiSearch((Vec<Utf32String>, tokio::sync::oneshot::Sender<Vec<usize>>)),
     AppState(Box<dyn FnOnce(&mut App) + Send>),
     Attach,
     ApplyAttach,
@@ -32,6 +33,7 @@ pub enum InfoType {
     SysError,
     GameError,
     Success,
+    Warning,
 }
 
 pub static SENDER: OnceLock<mpsc::Sender<Event>> = OnceLock::new();

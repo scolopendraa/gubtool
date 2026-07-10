@@ -51,8 +51,8 @@ impl TravelTab {
         let layout = Layout::default()
             .direction(Direction::Horizontal)
             .constraints(vec![
-                Constraint::Percentage(50),
-                Constraint::Percentage(50),
+                Constraint::Percentage(40),
+                Constraint::Percentage(60),
             ])
             .split(layout);
 
@@ -64,8 +64,8 @@ impl TravelTab {
         let [boss_name, boss_area] = Layout::default()
             .direction(Direction::Horizontal)
             .constraints(vec![
-                Constraint::Min(44),
-                Constraint::Max(33),
+                Constraint::Min(40),
+                Constraint::Max(30),
             ])
             .areas(bosses_inner);
 
@@ -89,8 +89,8 @@ impl TravelTab {
         let [grace_name, grace_area] = Layout::default()
             .direction(Direction::Horizontal)
             .constraints(vec![
-                Constraint::Min(42),
-                Constraint::Max(33),
+                Constraint::Min(40),
+                Constraint::Max(30),
             ])
             .areas(graces_inner);
 

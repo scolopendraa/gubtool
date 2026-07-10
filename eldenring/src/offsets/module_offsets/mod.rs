@@ -19,6 +19,7 @@ pub enum BasePointer {
     DlUserInputManagerImpl,
     CsFlipperImp,
     CsDlcImp,
+    CSTrophy,
 }
 
 #[derive(Clone, Copy)]
@@ -62,6 +63,7 @@ pub enum Patch {
     OpenMap,
     CloseMap,
     CanFastTravel,
+    NoRuneLossOnDeath,
 }
 
 #[derive(Clone, Copy)]
@@ -92,6 +94,7 @@ impl Address for BasePointer {
             Self::DlUserInputManagerImpl => f.dl_user_input_manager_impl,
             Self::CsFlipperImp => f.cs_flipper_imp,
             Self::CsDlcImp => f.cs_dlc_imp,
+            Self::CSTrophy => f.cs_trophy,
         };
         module_base() + offset
     }
@@ -150,6 +153,7 @@ impl Address for Patch {
             Self::OpenMap => f.open_map,
             Self::CloseMap => f.close_map,
             Self::CanFastTravel => f.can_fast_travel,
+            Self::NoRuneLossOnDeath => f.no_rune_loss_on_death,
         };
         module_base() + offset
     }

@@ -5,7 +5,7 @@ use crate::{
     event::{AnyhowExt, Event, InfoType, ResultExt, send_event, start_event_loop_thread},
     game_screen_selector::GameScreenSelector,
     help,
-    input::{fuzzy_finder::FuzzyFinder, input_prompt::InputPrompt},
+    input::{fuzzy_finder::FuzzyFinder, input_prompt::InputPrompt, multi_fuzzy_finder::MultiFuzzyFinder},
     memory_viewer_screen::MemoryViewerScreen,
     process_selector::ProcessSelector,
     spawn_task,
@@ -39,6 +39,7 @@ pub struct App {
     block_inputs: bool,
     input: InputPrompt,
     fuzzy_finder: FuzzyFinder,
+    multi_fuzzy_finder: MultiFuzzyFinder,
 
     pub theme: ThemeName,
     theme_selector: ThemeSelector,
@@ -63,6 +64,7 @@ impl App {
             block_inputs: false,
             input: InputPrompt::default(),
             fuzzy_finder: FuzzyFinder::default(),
+            multi_fuzzy_finder: MultiFuzzyFinder::default(),
 
             theme: ThemeName::TokyoNight,
             theme_selector: ThemeSelector::new(),
@@ -161,6 +163,9 @@ impl App {
                 Event::Search((entries, sender)) => {
                     self.fuzzy_finder.show(entries, sender)
                 }
+                Event::MultiSearch((entries, sender)) => {
+                    self.multi_fuzzy_finder.show(entries, sender)
+                }
                 Event::AppState(closure) => {
                     closure(&mut self)
                 }
@@ -207,6 +212,7 @@ impl App {
                 InfoType::SysError => theme().error,
                 InfoType::GameError => theme().warning,
                 InfoType::Success => theme().success,
+                InfoType::Warning => theme().warning,
             };
             let info_paragraph = Paragraph::new(self.info_message.to_string()).style(style);
             frame.render_widget(info_paragraph, layout[2]);
@@ -244,6 +250,7 @@ impl App {
         }
         self.input.draw_popup_checked(frame);
         self.fuzzy_finder.draw_checked(frame);
+        self.multi_fuzzy_finder.draw_checked(frame);
     }
 
     fn handle_keys(&mut self, key: KeyEvent) {
@@ -260,6 +267,10 @@ impl App {
         }
         if self.fuzzy_finder.show {
             self.fuzzy_finder.handle_keys(key);
+            return;
+        }
+        if self.multi_fuzzy_finder.show {
+            self.multi_fuzzy_finder.handle_keys(key);
             return;
         }
 

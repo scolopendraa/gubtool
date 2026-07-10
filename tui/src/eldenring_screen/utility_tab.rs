@@ -9,6 +9,7 @@ use crate::{
 use config::{Config, attach::AttachConfig};
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use eldenring::{
+    emevd,
     game_state::{StateFlagOffset, StateFlags},
     resources::talk_commands::{MENUS, shops_array},
     utility::{self, ControlFlag},
@@ -39,6 +40,7 @@ enum TogglesItems {
 enum ActionsItems {
     FpsCap,
     GameSpeed,
+    SetTimeOfDay,
     Quitout,
     ClearCount,
     TriggerNewGameCycle,
@@ -341,6 +343,13 @@ impl ActionsItems {
                     }
                 }
             }
+            Self::SetTimeOfDay => {
+                spawn_task! {
+                    if let Some(val) = request_input::<f32>(Some("Enter time (0-23.999): ")).await {
+                        emevd::set_time_of_day(val).send_error()
+                    }
+                }
+            }
             Self::ClearCount => {
                 spawn_task! {
                     if let Some(val) = request_input::<i32>(None).await {
@@ -361,6 +370,12 @@ impl ActionsItems {
             Self::GameSpeed => {
                 format!("Game Speed: {}", utility::get_game_speed())
             }
+            Self::SetTimeOfDay => {
+                let time = emevd::get_time_of_day();
+                let hour = (time as i32) % 24;
+                let minute = ((time - hour as f32) * 60.0) as i32;
+                format!("Set Time of Day: {:02}:{:02}", hour, minute)
+            }
             Self::Quitout => {
                 "Quitout".to_string()
             }
@@ -377,6 +392,7 @@ impl ActionsItems {
     const ARRAY: &[ActionsItems] = &[
         Self::FpsCap,
         Self::GameSpeed,
+        Self::SetTimeOfDay,
         Self::ClearCount,
         Self::TriggerNewGameCycle,
         Self::Quitout,

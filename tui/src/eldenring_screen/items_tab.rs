@@ -1,12 +1,11 @@
 use crate::{
     app::App,
     common::{
-        block, blockless_list, label_list, stateful_list::StatefulList, tab_state::TabState,
-        tabs_list,
+        block, blockless_list, label_list, stateful_list::StatefulList, tab_state::TabState, ItemOption,
     },
     eldenring_screen::GameState,
     event::AnyhowExt,
-    input::{request_input, request_search},
+    input::request_search,
     mutate_app, spawn_task,
     theme::theme,
 };
@@ -22,18 +21,15 @@ use nucleo_matcher::Utf32String;
 use ratatui::{
     Frame,
     layout::{Constraint, Direction, Layout, Rect},
-    style::{Modifier, Style, Stylize},
+    style::Style,
     text::Line,
     widgets::{List, ListItem},
 };
 use std::thread;
 
-enum OptionsItems {
-    Quantity,
-    Upgrade,
-    AshOfWar,
-    Affinity,
-}
+const ITEMS_IDX: usize = 0;
+const OPTIONS_IDX: usize = 1;
+const MASS_SPAWN_IDX: usize = 2;
 
 pub struct ItemTab {
     tab: TabState,
@@ -44,15 +40,11 @@ pub struct ItemTab {
     affinity: Affinity,
 }
 
-const ITEMS_IDX: usize = 0;
-const OPTIONS_IDX: usize = 1;
-const MASS_SPAWN_IDX: usize = 2;
-
 impl ItemTab {
     pub fn new() -> Self {
         let mut list_states = vec![StatefulList::new(0); 3];
         list_states[ITEMS_IDX] = StatefulList::new(0);
-        list_states[OPTIONS_IDX] = StatefulList::new(OptionsItems::ARRAY.len());
+        list_states[OPTIONS_IDX] = StatefulList::new(ItemOption::ARRAY.len());
         list_states[MASS_SPAWN_IDX] = StatefulList::new(Categories::ARRAY.len());
         ItemTab {
             tab: TabState::new(list_states),
@@ -87,7 +79,7 @@ impl ItemTab {
         let [options, mass_spawn] = Layout::default()
             .direction(Direction::Vertical)
             .constraints(vec![
-                Constraint::Length(6),
+                Constraint::Length(5),
                 Constraint::Fill(1)
             ])
             .areas(right_area);
@@ -104,7 +96,11 @@ impl ItemTab {
             &mut self.tab.get_list_state(ITEMS_IDX),
         );
         frame.render_stateful_widget(
-            OptionsItems::list(&self),
+            ItemOption::options_list(
+                &self.item, self.quantity, self.upgrade,
+                &self.aow, &self.affinity,
+                None,
+            ),
             options,
             &mut self.tab.get_list_state(OPTIONS_IDX),
         );
@@ -160,7 +156,7 @@ impl ItemTab {
                 ).send_error();
             }
             OPTIONS_IDX => {
-                OptionsItems::ARRAY[selected].execute(self);
+                self.handle_option(ItemOption::ARRAY[selected]);
             }
             MASS_SPAWN_IDX => {
                 thread::spawn(move || {
@@ -175,7 +171,7 @@ impl ItemTab {
         let items: (Vec<ListItem>, Vec<ListItem>) = items_array(GameState::dlc()).iter()
             .map(|item| (
                     ListItem::from(item.name),
-                    ListItem::from(Line::raw(format!("{}", item.category)).fg(theme().muted))
+                    ListItem::from(Line::raw(format!("{}", item.category)).style(Style::from(theme().muted)))
             ))
             .collect();
         (
@@ -186,7 +182,34 @@ impl ItemTab {
 
     fn mass_spawn_list(&self) -> List<'static> {
         let items: Vec<ListItem> = Categories::ARRAY.iter().map(|item| ListItem::from(Line::raw(item.to_string()))).collect();
-        tabs_list(items, Some("Mass Spawn"), &self.tab, MASS_SPAWN_IDX)
+        crate::common::tabs_list(items, Some("Mass Spawn"), &self.tab, MASS_SPAWN_IDX)
+    }
+
+    fn handle_option(&mut self, option: ItemOption) {
+        let item = self.item;
+        let qty = self.quantity;
+        let upgrade = self.upgrade;
+        let aow = self.aow;
+        let affinity = self.affinity;
+        spawn_task! {
+            crate::common::execute_spawn_option(
+                option,
+                item,
+                qty,
+                upgrade,
+                aow,
+                affinity,
+                |nq, nu, na, nf| {
+                    mutate_app!(|app: &mut App| {
+                        let tab = &mut app.elden_ring.items;
+                        tab.quantity = nq;
+                        tab.upgrade = nu;
+                        tab.aow = na;
+                        tab.affinity = nf;
+                    });
+                },
+            ).await;
+        }
     }
 
     pub fn handle_item_switch(&mut self) {
@@ -209,126 +232,5 @@ impl ItemTab {
             self.affinity = AFFINITIES[0];
         }
     }
-
-    fn can_aow(&self) -> bool {
-        self.item.weapon_type.is_some() && (self.item.gem_mount_type != Some(0))
-    }
-
-    fn can_upgrade(&self) -> bool {
-        matches!(self.item.category, Categories::Weapons | Categories::SpiritAshes)
-    }
-
-    fn can_quantity(&self) -> bool {
-        self.item.stack_size > 1
-    }
 }
 
-impl OptionsItems {
-    fn execute(&self, item_tab: &mut ItemTab) {
-        match self {
-            Self::Quantity => {
-                if item_tab.can_quantity() {
-                    spawn_task! {
-                        if let Some(val) = request_input::<u64>(None).await {
-                            mutate_app!(|app: &mut App| {
-                                let items_tab = &mut app.elden_ring.items;
-                                items_tab.quantity = val;
-                                items_tab.handle_item_switch()
-                            });
-                        }
-                    }
-                }
-            },
-            Self::Upgrade => {
-                if item_tab.can_upgrade() {
-                    spawn_task! {
-                        if let Some(val) = request_input::<u64>(None).await {
-                            mutate_app!(|app: &mut App| {
-                                let items_tab = &mut app.elden_ring.items;
-                                items_tab.upgrade = val;
-                                items_tab.handle_item_switch()
-                            });
-                        }
-                    }
-                }
-            },
-            Self::AshOfWar => {
-                if item_tab.can_aow() {
-                    let entries = aow_array().iter()
-                        .filter(|aow| aow.supports_item(item_tab.item))
-                        .map(|aow| Utf32String::from(aow.name))
-                        .collect();
-                    spawn_task! {
-                        if let Some(selected) = request_search(entries).await {
-                            mutate_app!(|app: &mut App| {
-                                let items_tab = &mut app.elden_ring.items;
-                                let entries: Vec<Aow> = aow_array().iter()
-                                    .filter(|aow| aow.supports_item(items_tab.item))
-                                    .cloned().collect();
-                                items_tab.aow = entries[selected];
-                            });
-                        }
-                    }
-                }
-            },
-            Self::Affinity => {
-                if item_tab.can_aow() {
-                    let entries = AFFINITIES.iter()
-                        .filter(|affinity| item_tab.aow.supports_affinity(affinity.flag))
-                        .map(|affinity| Utf32String::from(affinity.name))
-                        .collect();
-                    spawn_task! {
-                        if let Some(selected) = request_search(entries).await {
-                            mutate_app!(|app: &mut App| {
-                                let items_tab = &mut app.elden_ring.items;
-                                let entries: Vec<Affinity> = AFFINITIES.iter()
-                                    .filter(|affinity| items_tab.aow.supports_affinity(affinity.flag))
-                                    .cloned().collect();
-                                items_tab.affinity = entries[selected];
-                            });
-                        }
-                    }
-                }
-            },
-        }
-    }
-    fn to_list_item(&self, item_tab: &ItemTab) -> ListItem<'static> {
-        match self {
-            Self::Quantity => {
-                ListItem::new(format!("Quantity: {}", item_tab.quantity))
-                    .style(options_style(item_tab.can_quantity()))
-            }
-            Self::Upgrade => {
-                ListItem::new(format!("Upgrade: {}", item_tab.upgrade))
-                    .style(options_style(item_tab.can_upgrade()))
-            }
-            Self::AshOfWar => {
-                ListItem::new(format!("Ash of War: {}", item_tab.aow.name))
-                    .style(options_style(item_tab.can_aow()))
-            }
-            Self::Affinity => {
-                ListItem::new(format!("Affinity: {}", item_tab.affinity.name))
-                    .style(options_style(item_tab.can_aow()))
-            }
-        }
-    }
-    const ARRAY: &[OptionsItems] = &[
-        Self::Quantity,
-        Self::Upgrade,
-        Self::AshOfWar,
-        Self::Affinity,
-    ];
-    fn list(item_tab: &ItemTab) -> List<'static> {
-        let items: Vec<ListItem> = Self::ARRAY.iter().map(|i| i.to_list_item(item_tab)).collect();
-        tabs_list(items, None, &item_tab.tab, OPTIONS_IDX)
-    }
-}
-
-fn options_style(show: bool) -> Style {
-    if show {
-        Style::default()
-    } else {
-        Style::new()
-            .add_modifier(Modifier::CROSSED_OUT)
-    }
-}

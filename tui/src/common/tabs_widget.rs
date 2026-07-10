@@ -44,8 +44,8 @@ impl TabsWidget {
                 let tabs_len = self.tabs.len() as i64;
                 self.current_tab = (self.current_tab.clone() + tabs_len + 1) % tabs_len;
             }
-            (KeyCode::Char(c), _) if let Some(digit) = c.to_digit(10) => {
-                if digit <= self.tabs.len() as u32 && digit != 0 {
+            (KeyCode::Char(c), _) if matches!(c.to_digit(10), Some(d) if d <= self.tabs.len() as u32 && d != 0) => {
+                if let Some(digit) = c.to_digit(10) {
                     self.current_tab = digit as i64 - 1
                 }
             }

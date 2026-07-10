@@ -39,6 +39,13 @@ macro_rules! impl_for_other {
 impl_for_int!(u8, u16, u32, u64, usize, i8, i16, i32, i64, isize);
 impl_for_other!(f32, f64, ActArray);
 
+/// Free-form string input - always valid.
+impl ParseInput for String {
+    fn parse_input(s: &str) -> Option<Self> {
+        Some(s.to_string())
+    }
+}
+
 static REGISTRY: LazyLock<ParseRegistry> = LazyLock::new(|| ParseRegistry::init());
 
 pub struct ParseRegistry {
@@ -76,6 +83,7 @@ impl ParseRegistry {
         self.register::<f32>();
         self.register::<f64>();
         self.register::<ActArray>();
+        self.register::<String>();
     }
 
     fn register<T>(&mut self)

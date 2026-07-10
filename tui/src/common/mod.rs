@@ -1,8 +1,11 @@
 pub mod controls;
 pub mod event_log_table;
+pub mod item_options;
 pub mod stateful_list;
 pub mod tab_state;
 pub mod tabs_widget;
+
+pub use item_options::*;
 
 use crate::{
     common::tab_state::TabState,

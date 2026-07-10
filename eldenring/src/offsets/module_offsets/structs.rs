@@ -26,6 +26,7 @@ pub struct BasePointers {
     pub dl_user_input_manager_impl: u64,
     pub cs_flipper_imp: u64,
     pub cs_dlc_imp: u64,
+    pub cs_trophy: u64,
 }
 
 #[derive(Debug)]
@@ -69,6 +70,7 @@ pub struct Patches {
     pub open_map: u64,
     pub close_map: u64,
     pub can_fast_travel: u64,
+    pub no_rune_loss_on_death: u64,
 }
 
 #[derive(Debug)]
@@ -130,6 +132,7 @@ pub fn scan() -> Result<ModuleOffsets> {
             dl_user_input_manager_impl: aob_scanner::scan(scan_patterns::DL_USER_INPUT_MANAGER_IMPL)?,
             cs_flipper_imp: aob_scanner::scan(scan_patterns::CS_FLIPPER_IMP)?,
             cs_dlc_imp: aob_scanner::scan(scan_patterns::CS_DLC_IMP)?,
+            cs_trophy: 0, // Resolved via version-specific offsets in module_offsets()
         },
         functions: Functions {
             grace_warp: aob_scanner::scan(scan_patterns::GRACE_WARP)?,
@@ -167,6 +170,7 @@ pub fn scan() -> Result<ModuleOffsets> {
             open_map: aob_scanner::scan(scan_patterns::OPEN_MAP)?,
             close_map: aob_scanner::scan(scan_patterns::CLOSE_MAP)?,
             can_fast_travel: aob_scanner::scan(scan_patterns::CAN_FAST_TRAVEL)?,
+            no_rune_loss_on_death: 0,
         },
         data: Data {
             chr_dbg_flags: aob_scanner::scan(scan_patterns::CHR_DBG_FLAGS)?,

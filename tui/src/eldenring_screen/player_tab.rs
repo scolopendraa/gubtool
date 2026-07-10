@@ -1,7 +1,7 @@
 use crate::{
     common::{StrExt, stateful_list::StatefulList, tab_state::TabState, tabs_list},
     eldenring_screen::GameState,
-    event::{AnyhowExt, ResultExt},
+    event::{AnyhowExt, InfoType, ResultExt, send_event, Event},
     input::request_input,
     spawn_task,
 };
@@ -12,7 +12,8 @@ use eldenring::{
     emevd,
     game_state::{StateFlagOffset, StateFlags},
     player::{
-        self, ChrDbgOffset, PlayerGameData, PlayerGameDataOffset, is_chr_dbg_flag, torrent_ins
+        self, ChrDbgOffset, PlayerGameData, PlayerGameDataOffset, Position, format_position,
+        is_chr_dbg_flag, save_position, torrent_ins,
     },
 };
 use ratatui::{
@@ -27,6 +28,10 @@ enum ActionsItems {
     GiveRunes,
     AnimationSpeed,
     Rest,
+    SavePos1,
+    SavePos2,
+    RestorePos1,
+    RestorePos2,
 }
 
 enum TogglesItems {
@@ -44,6 +49,10 @@ enum TogglesItems {
     InfiniteArrows,
     TorrentAnywhere,
     TorrentNoDeath,
+    Set1hp,
+    NoTimeChangeDeath,
+    NoRuneLoss,
+    DisableAchievements,
 }
 
 pub enum Stats {
@@ -166,6 +175,13 @@ impl PlayerTab {
             }
         }
     }
+
+    fn get_saved_pos_display(&self, index: usize) -> String {
+        match Position::read_from_cave(index) {
+            Ok(pos) if pos.is_valid() => format_position(&pos),
+            _ => "Not set".to_string(),
+        }
+    }
 }
 
 impl ActionsItems {
@@ -194,6 +210,52 @@ impl ActionsItems {
             }
             Self::Die => GameState::player_ins().set_hp(0).send_error(),
             Self::Rest => emevd::rest().send_error(),
+            Self::SavePos1 => {
+                spawn_task! {
+                    save_position(0).send_error()
+                }
+            }
+            Self::SavePos2 => {
+                spawn_task! {
+                    save_position(1).send_error()
+                }
+            }
+            Self::RestorePos1 => {
+                spawn_task! {
+                    match player::restore_position(0).await {
+                        Ok(()) => {},
+                        Err(e) => {
+                            // Only show error if the position is actually saved but restore failed
+                            // (not just "not set")
+                            match Position::read_from_cave(0) {
+                                Ok(pos) if pos.is_valid() => {
+                                    eprintln!("Failed to restore position 1: {}", e);
+                                }
+                                _ => {
+                                    // Position not set - this is expected, no error needed
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Self::RestorePos2 => {
+                spawn_task! {
+                    match player::restore_position(1).await {
+                        Ok(()) => {},
+                        Err(e) => {
+                            match Position::read_from_cave(1) {
+                                Ok(pos) if pos.is_valid() => {
+                                    eprintln!("Failed to restore position 2: {}", e);
+                                }
+                                _ => {
+                                    // Position not set - this is expected, no error needed
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
     fn to_list_item(&self, player_tab: &PlayerTab) -> ListItem<'static> {
@@ -214,6 +276,18 @@ impl ActionsItems {
                 format!("Animation Speed: {}",
                     GameState::player_ins().get_animation_speed().unwrap_or_default())
             }
+            Self::SavePos1 => {
+                format!("Save Pos 1: {}", player_tab.get_saved_pos_display(0))
+            }
+            Self::SavePos2 => {
+                format!("Save Pos 2: {}", player_tab.get_saved_pos_display(1))
+            }
+            Self::RestorePos1 => {
+                "Restore Pos 1".to_string()
+            }
+            Self::RestorePos2 => {
+                "Restore Pos 2".to_string()
+            }
         };
         ListItem::new(text)
     }
@@ -223,6 +297,10 @@ impl ActionsItems {
         Self::AnimationSpeed,
         Self::Die,
         Self::Rest,
+        Self::SavePos1,
+        Self::SavePos2,
+        Self::RestorePos1,
+        Self::RestorePos2,
     ];
     fn list(player_tab: &PlayerTab) -> List<'static> {
         let items: Vec<ListItem> = Self::ARRAY.iter().map(|i| i.to_list_item(player_tab)).collect();
@@ -293,6 +371,50 @@ impl TogglesItems {
                 let new_state = !player::is_torrent_anywhere().unwrap_or_default();
                 player::set_torrent_anywhere(new_state).send_error();
             }
+            Self::Set1hp => {
+                let new_state = !GameState::state_flags().set_1hp;
+                StateFlags::set(StateFlagOffset::Set1hp, new_state).send_error();
+                // Apply immediately if toggling on
+                if new_state {
+                    spawn_task! {
+                        player::set_1hp().send_error();
+                    }
+                } else {
+                    // Warn user that HP is not restored
+                    send_event(Event::Info((
+                        "Set 1 HP disabled. Player remains at 1 HP. Use 'Set HP' to restore.".to_string(),
+                        InfoType::GameError,
+                    )));
+                }
+            }
+            Self::NoTimeChangeDeath => {
+                let new_state = !GameState::state_flags().no_time_change_death;
+                StateFlags::set(StateFlagOffset::NoTimeChangeDeath, new_state).send_error();
+                // Apply immediately if toggling on
+                if new_state {
+                    emevd::init_time_of_day().send_error();
+                }
+            }
+            Self::DisableAchievements => {
+                let new_state = !GameState::state_flags().disable_achievements;
+                StateFlags::set(StateFlagOffset::DisableAchievements, new_state).send_error();
+                // Apply immediately if toggling on
+                if new_state {
+                    eldenring::achievement::install_patch().send_error();
+                } else {
+                    eldenring::achievement::uninstall_patch().send_error();
+                }
+            }
+            Self::NoRuneLoss => {
+                let new_state = !GameState::state_flags().no_rune_loss;
+                StateFlags::set(StateFlagOffset::NoRuneLoss, new_state).send_error();
+                // Apply immediately if toggling on
+                if new_state {
+                    eldenring::no_rune_loss::install_patch().send_error();
+                } else {
+                    eldenring::no_rune_loss::uninstall_patch().send_error();
+                }
+            }
         }
     }
     fn to_list_item(&self, player_tab: &PlayerTab) -> ListItem<'_> {
@@ -353,6 +475,22 @@ impl TogglesItems {
                 let state = player::is_torrent_anywhere().unwrap_or_default();
                 "Torrent Anywhere".create_toggle_str(state)
             }
+            Self::Set1hp => {
+                let state = GameState::state_flags().set_1hp;
+                "Set 1 HP".create_toggle_str(state)
+            }
+            Self::NoTimeChangeDeath => {
+                let state = GameState::state_flags().no_time_change_death;
+                "No Time Change on Death".create_toggle_str(state)
+            }
+            Self::DisableAchievements => {
+                let state = GameState::state_flags().disable_achievements;
+                "Disable Achievements".create_toggle_str(state)
+            }
+            Self::NoRuneLoss => {
+                let state = GameState::state_flags().no_rune_loss;
+                "No Rune Loss on Death".create_toggle_str(state)
+            }
         };
         ListItem::from(text)
     }
@@ -371,6 +509,10 @@ impl TogglesItems {
         Self::InfiniteArrows,
         Self::TorrentAnywhere,
         Self::TorrentNoDeath,
+        Self::Set1hp,
+        Self::NoTimeChangeDeath,
+        Self::NoRuneLoss,
+        Self::DisableAchievements,
     ];
     fn list(player_tab: &PlayerTab) -> List<'static> {
         let items: Vec<ListItem> = Self::ARRAY.iter().map(|i| i.to_list_item(player_tab)).collect();

@@ -12,6 +12,7 @@ pub const OFFSETS_2_2_0: ModuleOffsets = ModuleOffsets {
         dl_user_input_manager_impl: 0x485DB68,
         cs_flipper_imp: 0x4589AD8,
         cs_dlc_imp: 0x3D86BD8,
+        cs_trophy: 0x4589478,
     },
     functions: Functions {
         grace_warp: 0x599B20,
@@ -49,6 +50,7 @@ pub const OFFSETS_2_2_0: ModuleOffsets = ModuleOffsets {
         open_map: 0x7EE97A,
         close_map: 0x9C35AE,
         can_fast_travel: 0x7C4A90,
+        no_rune_loss_on_death: 0x5FBEB5,
     },
     data: Data {
         chr_dbg_flags: 0x3D661A0,

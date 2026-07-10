@@ -635,6 +635,8 @@ dependencies = [
  "once_cell",
  "pelite",
  "phf 0.13.1",
+ "serde",
+ "serde_json",
  "shared",
  "thiserror 2.0.18",
  "tokio",

@@ -12,8 +12,11 @@ use crate::{
         world_chr_man,
     },
     resources::ASM,
+    travel,
     utils::player_loaded_check,
 };
+use crate::offsets::chr_ins as chr_ins_offsets;
+
 use gubtool_core::{
     address::Address,
     attached::version,
@@ -32,8 +35,11 @@ pub fn player_ins() -> ChrIns {
 }
 
 pub fn torrent_ins() -> ChrIns {
-    let handle = player_game_data()
+    let handle = read::<u64>(BasePointer::GameDataMan)
         .read_offset(game_data_man::torrent_handle())?;
+    if handle == 0 {
+        return Ok(0);
+    }
     chr_ins::chr_ins_from_handle(handle)
 }
 
@@ -55,6 +61,12 @@ pub fn set_rfbs() -> ProcResult {
     let player_ins = player_ins();
     let max_hp = player_ins.get_max_hp()?;
     player_ins.set_hp((max_hp * 20) / 100 - 1)
+}
+
+/// Set player HP to exactly 1.
+/// Used for challenge runs and one-HP mode.
+pub fn set_1hp() -> ProcResult {
+    player_ins().set_hp(1)
 }
 
 pub fn set_runes(amount: u32) -> ProcResult {
@@ -323,4 +335,264 @@ fn level_up_cost(next_level: i32) -> i32 {
         base_level * base_level * (level_up_cost_increase * adjusted_level + initial_level_up_cost)
             + initial_level_up_offset;
     cost as i32
+}
+
+// Position save/load support
+
+/// Threshold for determining if a same-area teleport is "long distance".
+/// If the delta between current and saved position exceeds this value,
+/// no-gravity is enabled temporarily to prevent fall damage during teleport.
+/// 500.0 ≈ 2 × GRID_SIZE, meaning teleports across more than 2 grid cells
+/// are considered long distance.
+pub const LONG_DISTANCE_THRESHOLD: f32 = 500.0;
+
+/// Size of each overworld grid cell in game units.
+pub const GRID_SIZE: f32 = 256.0;
+pub const OVERWORLD_AREA_ID: u8 = 0x3C;
+pub const DLC_OVERWORLD_AREA_ID: u8 = 0x3D;
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct Position {
+    pub block_id: u32,
+    pub coords: [f32; 3],
+    pub angle: f32,
+}
+
+impl Position {
+    pub fn read_from_cave(index: usize) -> ProcResult<Self> {
+        let offset = if index == 0 { CaveOffset::SavedPos1 } else { CaveOffset::SavedPos2 };
+        let bytes = read::<[u8; 24]>(offset)?;
+        let block_id = read_from_slice::<u32>(&bytes, 0)?;
+        let coords = read_from_slice::<[f32; 3]>(&bytes, 4)?;
+        let angle = read_from_slice::<f32>(&bytes, 16)?;
+        Ok(Self { block_id, coords, angle })
+    }
+
+    pub fn write_to_cave(&self, index: usize) -> ProcResult {
+        let offset = if index == 0 { CaveOffset::SavedPos1 } else { CaveOffset::SavedPos2 };
+        let mut bytes = [0u8; 24];
+        write_to_slice::<u32>(&mut bytes, 0, self.block_id)?;
+        write_to_slice::<[f32; 3]>(&mut bytes, 4, self.coords)?;
+        write_to_slice::<f32>(&mut bytes, 16, self.angle)?;
+        write_bytes(offset, &bytes)
+    }
+
+    /// Check if this position slot has valid (saved) data.
+    /// An unsaved slot will have block_id == 0.
+    /// We also check that at least one coordinate is non-zero to guard against
+    /// partial writes (e.g., if a crash occurs during write_to_cave).
+    pub fn is_valid(&self) -> bool {
+        self.block_id != 0 && (self.coords[0] != 0.0 || self.coords[1] != 0.0 || self.coords[2] != 0.0)
+    }
+}
+
+pub fn get_player_position() -> anyhow::Result<Position> {
+    let player = player_ins()?;
+    let block_id = read::<u32>(player + chr_ins_offsets::BLOCK_ID)?;
+    let coords = map_coords()?;
+    let angle = map_angle()?;
+    Ok(Position { block_id, coords, angle })
+}
+
+/// Get the player's chr_ins address
+fn player_addr() -> ProcResult<u64> {
+    player_ins().map(|p| p.clone())
+}
+
+/// Get the player's physics pointer (same as ChrInsExt::physics_pointer)
+fn player_physics_ptr() -> ProcResult<u64> {
+    let player = player_addr()?;
+    let modules = read::<u64>(player + chr_ins_offsets::MODULES)?;
+    read::<u64>(modules + chr_ins_offsets::CHR_PHYSICS_MODULE)
+}
+
+/// Get the player's local coords (same as ChrInsExt::local_coords)
+fn player_local_coords() -> ProcResult<[f32; 3]> {
+    let physics_ptr = player_physics_ptr()?;
+    read::<[f32; 3]>(physics_ptr + chr_ins_offsets::physics_offsets::COORDS)
+}
+
+/// Check if the player is in a restricted state where position restore should be blocked.
+/// Returns an error with a descriptive message if the player is in a restricted state.
+pub fn check_player_state_for_restore() -> anyhow::Result<()> {
+    // Check if player is dead
+    if let Ok(dead) = crate::emevd::is_player_dead() {
+        if dead {
+            anyhow::bail!("Cannot restore position: player is dead");
+        }
+    }
+    
+    // Check if player is on torrent
+    if let Ok(torrent_handle) = torrent_ins() {
+        if torrent_handle != 0 {
+            anyhow::bail!("Cannot restore position: player is on torrent");
+        }
+    }
+    
+    Ok(())
+}
+
+/// Save the player's current position to the given slot (0 or 1).
+pub fn save_position(index: usize) -> anyhow::Result<()> {
+    if index >= 2 {
+        anyhow::bail!("Position slot index must be 0 or 1, got {}", index);
+    }
+    player_loaded_check()?;
+    let pos = get_player_position()?;
+    pos.write_to_cave(index)?;
+    Ok(())
+}
+
+/// Restore the player's position from the given slot (0 or 1).
+pub async fn restore_position(index: usize) -> anyhow::Result<()> {
+    if index >= 2 {
+        anyhow::bail!("Position slot index must be 0 or 1, got {}", index);
+    }
+    player_loaded_check()?;
+    
+    // Check player state before attempting restore
+    check_player_state_for_restore()?;
+    
+    let saved = Position::read_from_cave(index)?;
+    
+    // Check if the position slot has been saved (not all zeros)
+    if !saved.is_valid() {
+        anyhow::bail!("Position slot {} has not been saved yet", index + 1);
+    }
+    
+    let current = get_player_position()?;
+
+    let current_area = (current.block_id >> 24) & 0xFF;
+    let saved_area = (saved.block_id >> 24) & 0xFF;
+
+    if current_area == saved_area {
+        // Re-check player state immediately before writing coords
+        // to prevent TOCTOU race where player could die between
+        // the initial check and the actual position write.
+        check_player_state_for_restore()?;
+        restore_same_area(&current, &saved)?;
+    } else {
+        restore_different_area(&saved).await?;
+    }
+    Ok(())
+}
+
+fn restore_same_area(current: &Position, saved: &Position) -> anyhow::Result<()> {
+    let current_abs = to_absolute(current.coords, current.block_id);
+    let saved_abs = to_absolute(saved.coords, saved.block_id);
+    let delta = [
+        saved_abs[0] - current_abs[0],
+        saved_abs[1] - current_abs[1],
+        saved_abs[2] - current_abs[2],
+    ];
+
+    let player = player_addr()?;
+    let player_coords = player_local_coords()?;
+    let new_coords = [
+        player_coords[0] + delta[0],
+        player_coords[1] + delta[1],
+        player_coords[2] + delta[2],
+    ];
+
+    // Read physics pointer once and reuse for all writes.
+    // The pointer chain (player -> modules -> chr_physics_module) is stable
+    // once the player is loaded and doesn't change during synchronous execution.
+    let physics_ptr = player_physics_ptr()?;
+
+    let is_long_distance = delta[0].hypot(delta[1].hypot(delta[2])) > LONG_DISTANCE_THRESHOLD;
+
+    if is_long_distance {
+        // Enable no gravity for long distance teleports to prevent death
+        write::<u8>(physics_ptr + chr_ins_offsets::physics_offsets::NO_GRAVITY, 1)?;
+    }
+
+    // Write new local coords
+    write::<[f32; 3]>(physics_ptr + chr_ins_offsets::physics_offsets::COORDS, new_coords)?;
+
+    // Also update map angle
+    write::<f32>(
+        player + world_chr_man::player_ins_offsets::current_map_angle(),
+        saved.angle,
+    )?;
+
+    if is_long_distance {
+        // Disable no gravity after a delay.
+        // We verify the player is still loaded before writing to avoid writing to freed memory.
+        // Use tokio::spawn to stay consistent with the rest of the codebase (see restore_different_area).
+        tokio::spawn(async move {
+            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+            // Verify player is still loaded before writing
+            if let Ok(verified_ptr) = {
+                let player_check = match read::<u64>(BasePointer::WorldChrMan)
+                    .read_offset(world_chr_man::player_ins())
+                {
+                    Ok(ptr) if ptr != 0 => Ok(ptr),
+                    _ => Err(gubtool_core::sys::error::ProcessError::InvalidPointer {
+                        pointer_type: gubtool_core::sys::error::PointerType::PlayerIns,
+                    }),
+                };
+                player_check.and_then(|p| {
+                    let modules = read::<u64>(p + chr_ins_offsets::MODULES)?;
+                    read::<u64>(modules + chr_ins_offsets::CHR_PHYSICS_MODULE)
+                })
+            } {
+                let _ = write::<u8>(
+                    verified_ptr + chr_ins_offsets::physics_offsets::NO_GRAVITY,
+                    0,
+                );
+            }
+        });
+    }
+
+    Ok(())
+}
+
+async fn restore_different_area(saved: &Position) -> anyhow::Result<()> {
+    // For different map areas, spawn a tokio task to warp to the saved position.
+    // We use tokio::spawn since we're already on a tokio runtime (from spawn_task! in the TUI).
+    // This avoids creating a new Runtime per warp, which would accumulate thread pools.
+    let block_id = saved.block_id as i32;
+    let coords = saved.coords;
+    let angle = saved.angle;
+    let handle = tokio::spawn(async move {
+        let _ = travel::warp_to_block_id(block_id, coords, angle, false).await;
+    });
+    handle.await.map_err(|e| anyhow::anyhow!("Warp task failed: {}", e))?;
+    Ok(())
+}
+
+/// Convert map coordinates to absolute world coordinates.
+/// For overworld areas, the block_id encodes grid position (grid_x, grid_z)
+/// which is used to offset the local map coordinates into world space.
+/// Y coordinate is left unchanged because in Elden Ring, Y (height) is global
+/// and not affected by grid position - this matches TarnishedTool's implementation.
+/// For non-overworld areas (dungeons, interiors), coordinates are already absolute.
+fn to_absolute(map_coords: [f32; 3], block_id: u32) -> [f32; 3] {
+    let area = ((block_id >> 24) & 0xFF) as u8;
+    if is_overworld_area(area) {
+        let grid_x = ((block_id >> 16) & 0xFF) as f32;
+        let grid_z = ((block_id >> 8) & 0xFF) as f32;
+        [
+            map_coords[0] + GRID_SIZE * grid_x,
+            map_coords[1],
+            map_coords[2] + GRID_SIZE * grid_z,
+        ]
+    } else {
+        map_coords
+    }
+}
+
+fn is_overworld_area(area: u8) -> bool {
+    area == OVERWORLD_AREA_ID || area == DLC_OVERWORLD_AREA_ID
+}
+
+pub fn format_position(pos: &Position) -> String {
+    let area = (pos.block_id >> 24) & 0xFF;
+    let grid_x = (pos.block_id >> 16) & 0xFF;
+    let map = (pos.block_id >> 8) & 0xFF;
+    format!("[A{:02}][G{:03},M{:03}] ({:.1}, {:.1}, {:.1}) a:{:.2}",
+        area, grid_x, map,
+        pos.coords[0], pos.coords[1], pos.coords[2],
+        pos.angle,
+    )
 }

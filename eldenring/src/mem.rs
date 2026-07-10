@@ -32,6 +32,16 @@ pub fn write_bytes(address: impl Address, data: &[u8]) -> ProcResult {
     write_bytes_unsafe(address, data)
 }
 
+#[track_caller]
+pub fn read_bytes(address: impl Address, len: usize) -> ProcResult<Vec<u8>> {
+    ensure_eldenring()?;
+    let mut buf = vec![0u8; len];
+    for i in 0..len {
+        buf[i] = read_unsafe::<u8>(address.add_offset(i as u64))?;
+    }
+    Ok(buf)
+}
+
 pub fn spawn_thread_join(thread_start_address: impl Address, thread_code: Vec<u8>) -> ProcResult {
     ensure_eldenring()?;
     #[cfg(unix)]

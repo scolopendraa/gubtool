@@ -38,8 +38,13 @@ impl InputPrompt {
 
         match key.code {
             KeyCode::Esc => {
+                // Send empty string to the caller to prevent hanging on rx.await
+                // when the user cancels the input prompt. The caller's parse_input
+                // will reject empty strings for numeric types, returning None.
+                if let Some(tx) = self.sender.take() {
+                    let _ = tx.send(String::new());
+                }
                 self.prompt_type = None;
-                self.sender = None;
                 self.show = false;
             },
             KeyCode::Enter => {

@@ -2,6 +2,7 @@ mod elden_beast_map;
 mod event_tab;
 mod items_tab;
 mod player_tab;
+mod presets_tab;
 mod target_tab;
 mod travel_tab;
 mod utility_tab;
@@ -10,10 +11,11 @@ use crate::{
     common::tabs_widget::TabsWidget,
     eldenring_screen::{
         elden_beast_map::EldenBeastMap, event_tab::EventTab, items_tab::ItemTab,
-        player_tab::PlayerTab, target_tab::TargetTab, travel_tab::TravelTab,
-        utility_tab::UtilityTab,
+        player_tab::PlayerTab, presets_tab::PresetsTab, target_tab::TargetTab,
+        travel_tab::TravelTab, utility_tab::UtilityTab,
     },
 };
+use eldenring::travel;
 use crossterm::event::KeyEvent;
 use eldenring::{
     chr_ins::{ChrIns, ChrInsExt},
@@ -30,6 +32,7 @@ pub struct EldenRing {
     items: ItemTab,
     utility: UtilityTab,
     travel: TravelTab,
+    presets: PresetsTab,
     event: EventTab,
     elden_beast_map: EldenBeastMap,
 }
@@ -82,7 +85,7 @@ impl EldenRing {
             tabs_widget: TabsWidget {
                 current_tab: 0,
                 title: Some("Elden Ring"),
-                tabs: &["Player", "Target", "Utility", "Items", "Travel", "Events"],
+                tabs: &["Player", "Target", "Utility", "Items", "Travel", "Presets", "Events"],
             },
             game_state: GameStateHandler::new(),
             player: PlayerTab::new(),
@@ -90,6 +93,7 @@ impl EldenRing {
             utility: UtilityTab::new(),
             items: ItemTab::new(),
             travel: TravelTab::new(),
+            presets: PresetsTab::new(),
             event: EventTab::new(),
             elden_beast_map: EldenBeastMap::default(),
         }
@@ -104,6 +108,7 @@ impl EldenRing {
             "Utility" => self.utility.draw(frame, layout),
             "Items" => self.items.draw(frame, layout),
             "Travel" => self.travel.draw(frame, layout),
+            "Presets" => self.presets.draw(frame, layout),
             "Events" => self.event.draw(frame, layout),
             _ => (),
         }
@@ -116,6 +121,7 @@ impl EldenRing {
             "Utility" => self.utility.handle_keys(key),
             "Items" => self.items.handle_keys(key),
             "Travel" => self.travel.handle_keys(key),
+            "Presets" => self.presets.handle_keys(key),
             "Events" => self.event.handle_keys(key),
             _ => (),
         }
@@ -144,6 +150,8 @@ impl EldenRing {
     }
 
     pub fn on_unattach(&mut self) {
+        // Clean up any hooks that might still be installed
+        let _ = travel::cleanup_warp_hooks();
         unsafe {
             GAME_STATE.dlc = true;
             GAME_STATE.loaded = false;

@@ -30,6 +30,17 @@ pub enum CaveOffset {
     DisableBackstepFlag = 0x152,                        // u8
 
     StateHandlerFlags = 0xF00,                          // 0x100
+    // Position save slots (2 slots, each: u32 block_id + [f32;3] coords + f32 angle = 24 bytes)
+    SavedPos1 = 0x1200,                                 // 0x18
+    SavedPos2 = 0x1218,                                 // 0x18
+    // Achievement patch original bytes (7 bytes)
+    AchievementPatchOriginal = 0x1230,                  // 0x7
+    // Time of day save (4 bytes - f32 value)
+    SavedTimeOfDay = 0x1238,                            // 0x4
+    // Death detection flag (1 byte)
+    DeathFlag = 0x123C,                                 // 0x1
+    // No rune loss on death - original patched bytes (6 bytes)
+    NoRuneLossPatchOriginal = 0x1240,                   // 0x6
     // Hooks
     SaveTargetHook = 0x1000,                            // 0x1D
     TargetNoStaggerHook = 0x1020,                       // 0x22

@@ -21,6 +21,16 @@ use crate::{
 };
 use gubtool_core::{slice_ops::*, sys::error::ProcResult};
 
+/// Spawn an item with raw parameters.
+/// This is useful for presets and bulk operations.
+pub fn spawn_item_raw(
+    item_id: i64,
+    quantity: i64,
+    aow_id: i64,
+) -> ProcResult {
+    itemspawn(item_id, quantity, aow_id, false, quantity)
+}
+
 fn itemspawn(
     item_id: i64,
     quantity: i64,
