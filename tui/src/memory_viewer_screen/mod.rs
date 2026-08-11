@@ -18,7 +18,7 @@ use ratatui::{
         Direction::{self, Horizontal},
         Layout, Rect,
     },
-    style::Stylize,
+    style::{Modifier, Style, Stylize},
     text::{Line, Span},
     widgets::{Block, Borders, Paragraph, Wrap},
 };
@@ -233,34 +233,35 @@ impl MemoryViewerScreen {
     }
 
     fn memory_paragraph(&self) -> Paragraph<'static> {
+        let theme = theme();
+
         let m = memory_viewer();
         let mut spans = Vec::new();
         m.bytes.iter().enumerate().for_each(|(idx, byte)| {
             let address = m.base_address.saturating_add(idx as u64);
             let is_highlighted = m.highlighted_offset == idx as u64;
+
             let text_color = if m.changed_highlights.contains_key(&(&address)) {
-                theme().error
+                theme.error
             } else if m.copied_highlights.contains_key(&(&address)) {
-                theme().success
-            } else if is_highlighted {
-                theme().bg
+                theme.success
             } else {
-                theme().fg
+                theme.fg
             };
-            let backlight = if is_highlighted {
-                theme().fg
+
+            let mut style = Style::new().fg(text_color);
+
+            if is_highlighted {
+                style.add_modifier = Modifier::REVERSED;
+            }
+
+            let content = if m.read_successful {
+                format!("{:02x}", byte)
             } else {
-                theme().bg
+                String::from("??")
             };
-            if m.read_successful {
-                spans.push(
-                    Span::raw(format!("{:02x}", byte))
-                        .bg(backlight)
-                        .fg(text_color),
-                )
-            } else {
-                spans.push(Span::raw(format!("??")).bg(backlight).fg(text_color))
-            };
+
+            spans.push(Span::styled(content, style));
             spans.push(Span::raw(" "))
         });
         Paragraph::new(Line::from(spans)).wrap(Wrap { trim: false })

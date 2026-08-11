@@ -1,7 +1,7 @@
 use crate::{
     app::App,
     event::{Event, send_event},
-    theme::set_theme,
+    theme::{ThemeChoice, set_theme},
 };
 use anyhow::Result;
 use config::Config;
@@ -9,7 +9,6 @@ use gubtool_core::{
     appdata::{AppDataError, app_data_dir},
     game_version::Game,
 };
-use ratatui_themes::ThemeName;
 use serde::{Deserialize, Serialize};
 use std::{fs, path::PathBuf};
 
@@ -55,7 +54,7 @@ impl UiState {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct GlobalState {
-    pub theme: ThemeName,
+    pub theme: ThemeChoice,
     pub game_screen: Game,
     pub has_pressed_f1: bool,
 }
@@ -63,7 +62,7 @@ pub struct GlobalState {
 impl Default for GlobalState {
     fn default() -> Self {
         Self {
-            theme: ThemeName::TokyoNight,
+            theme: ThemeChoice::default(),
             game_screen: Game::EldenRing,
             has_pressed_f1: false,
         }

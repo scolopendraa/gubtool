@@ -310,19 +310,23 @@ impl TablePane {
 
     fn highlight_row(&self, buf: &mut Buffer, area: Rect, active: bool) {
         if let Some(selected) = self.selected() {
+            let theme = theme();
             let top_left = if self.has_header { area.y + 1 } else { area.y };
             let y = top_left + selected as u16 - self.current_offset() as u16;
 
             for x in area.left()..area.right() {
                 if let Some(cell) = buf.cell_mut((x, y)) {
                     if active {
-                        if cell.fg != theme().error {
-                            cell.set_fg(theme().bg);
+                        if cell.fg == theme.error {
+                            cell.set_bg(theme.accent);
+                        } else {
+                            cell.set_fg(theme.accent);
+                            cell.modifier.insert(Modifier::REVERSED);
                         }
-                        cell.set_bg(theme().accent);
                     } else {
-                        cell.set_fg(theme().accent);
+                        cell.set_fg(theme.accent);
                     }
+
                     cell.modifier.insert(Modifier::BOLD);
                 }
             }
