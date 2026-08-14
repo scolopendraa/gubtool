@@ -1,7 +1,0 @@
-CompileFlags:
-  Compiler: clang-cl
-  Add:
-    - --target=x86_64-pc-windows-msvc
-    - /winsysroot
-    - /home/a/.xwin
-    - /I/home/a/.libffi/x86/include
