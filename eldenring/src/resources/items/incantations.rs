@@ -12,91 +12,91 @@ impl Item {
 
 pub static INCANTATIONS: [Item; 129] = [
     Item {
-        id: 0x40001B59,
+        id: 0x40001b59,
         name: "Agheel's Flame",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001B1C,
+        id: 0x40001b1c,
         name: "Ancient Dragons' Lightning Spear",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001AFE,
+        id: 0x40001afe,
         name: "Ancient Dragons' Lightning Strike",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401E9E84,
+        id: 0x401e9e84,
         name: "Aspects of the Crucible: Bloom",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001D60,
+        id: 0x40001d60,
         name: "Aspects of the Crucible: Breath",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001D56,
+        id: 0x40001d56,
         name: "Aspects of the Crucible: Horns",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001D4C,
+        id: 0x40001d4c,
         name: "Aspects of the Crucible: Tail",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401E9E7A,
+        id: 0x401e9e7a,
         name: "Aspects of the Crucible: Thorns",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x4000196E,
+        id: 0x4000196e,
         name: "Assassin's Approach",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x400018BA,
+        id: 0x400018ba,
         name: "Barrier of Gold",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401E9FE2,
+        id: 0x401e9fe2,
         name: "Bayle's Flame Lightning",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401E9FD8,
+        id: 0x401e9fd8,
         name: "Bayle's Tyranny",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001AA4,
+        id: 0x40001aa4,
         name: "Beast Claw",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001AC2,
+        id: 0x40001ac2,
         name: "Bestial Constitution",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001A90,
+        id: 0x40001a90,
         name: "Bestial Sling",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001AB8,
+        id: 0x40001ab8,
         name: "Bestial Vitality",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001D6A,
+        id: 0x40001d6a,
         name: "Black Blade",
         ..Item::default_incantations()
     },
@@ -106,7 +106,7 @@ pub static INCANTATIONS: [Item; 129] = [
         ..Item::default_incantations()
     },
     Item {
-        id: 0x4000186A,
+        id: 0x4000186a,
         name: "Black Flame Blade",
         ..Item::default_incantations()
     },
@@ -121,37 +121,37 @@ pub static INCANTATIONS: [Item; 129] = [
         ..Item::default_incantations()
     },
     Item {
-        id: 0x4000191F,
+        id: 0x4000191f,
         name: "Blessing of the Erdtree",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x4000191E,
+        id: 0x4000191e,
         name: "Blessing's Boon",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x400018A6,
+        id: 0x400018a6,
         name: "Bloodboon",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x400018B0,
+        id: 0x400018b0,
         name: "Bloodflame Blade",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x4000189C,
+        id: 0x4000189c,
         name: "Bloodflame Talons",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001B6D,
+        id: 0x40001b6d,
         name: "Borealis's Mist",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x400017E8,
+        id: 0x400017e8,
         name: "Burn, O Flame!",
         ..Item::default_incantations()
     },
@@ -171,23 +171,23 @@ pub static INCANTATIONS: [Item; 129] = [
         ..Item::default_incantations()
     },
     Item {
-        id: 0x400013B0,
+        id: 0x400013b0,
         name: "Death Lightning",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001A2C,
+        id: 0x40001a2c,
         name: "Discus of Light",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401EA2B2,
+        id: 0x401ea2b2,
         name: "Divine Beast Tornado",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401EA2BC,
+        id: 0x401ea2bc,
         name: "Divine Bird Feathers",
         dlc: true,
         ..Item::default_incantations()
@@ -198,53 +198,53 @@ pub static INCANTATIONS: [Item; 129] = [
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001B3B,
+        id: 0x40001b3b,
         name: "Dragonbolt Blessing",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401E9F7E,
+        id: 0x401e9f7e,
         name: "Dragonbolt of Florissax",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001B94,
+        id: 0x40001b94,
         name: "Dragonclaw",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001B58,
+        id: 0x40001b58,
         name: "Dragonfire",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001B6C,
+        id: 0x40001b6c,
         name: "Dragonice",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001BA8,
+        id: 0x40001ba8,
         name: "Dragonmaw",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001B77,
+        id: 0x40001b77,
         name: "Ekzykes's Decay",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001A40,
+        id: 0x40001a40,
         name: "Elden Stars",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001B30,
+        id: 0x40001b30,
         name: "Electrify Armament",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401E9F88,
+        id: 0x401e9f88,
         name: "Electrocharge",
         dlc: true,
         ..Item::default_incantations()
@@ -255,13 +255,13 @@ pub static INCANTATIONS: [Item; 129] = [
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401EA2F8,
+        id: 0x401ea2f8,
         name: "Fire Serpent",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001EDC,
+        id: 0x40001edc,
         name: "Fire's Deadly Sin",
         ..Item::default_incantations()
     },
@@ -271,12 +271,12 @@ pub static INCANTATIONS: [Item; 129] = [
         ..Item::default_incantations()
     },
     Item {
-        id: 0x4000177A,
+        id: 0x4000177a,
         name: "Flame Sling",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x400017DE,
+        id: 0x400017de,
         name: "Flame of the Fell God",
         ..Item::default_incantations()
     },
@@ -291,71 +291,71 @@ pub static INCANTATIONS: [Item; 129] = [
         ..Item::default_incantations()
     },
     Item {
-        id: 0x400017A2,
+        id: 0x400017a2,
         name: "Flame, Grant Me Strength",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x400017AC,
+        id: 0x400017ac,
         name: "Flame, Protect Me",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001B1D,
+        id: 0x40001b1d,
         name: "Fortissax's Lightning Spear",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001C98,
+        id: 0x40001c98,
         name: "Frenzied Burst",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001B09,
+        id: 0x40001b09,
         name: "Frozen Lightning Spear",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401E9D1C,
+        id: 0x401e9d1c,
         name: "Furious Blade of Ansbach",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401E9FEC,
+        id: 0x401e9fec,
         name: "Ghostflame Breath",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401EA29E,
+        id: 0x401ea29e,
         name: "Giant Golden Arc",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x400017D4,
+        id: 0x400017d4,
         name: "Giantsflame Take Thee",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001B80,
+        id: 0x40001b80,
         name: "Glintstone Breath",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401EA294,
+        id: 0x401ea294,
         name: "Golden Arcs",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001EDF,
+        id: 0x40001edf,
         name: "Golden Lightning Fortification",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x400019C8,
+        id: 0x400019c8,
         name: "Golden Vow",
         ..Item::default_incantations()
     },
@@ -365,12 +365,12 @@ pub static INCANTATIONS: [Item; 129] = [
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001BB2,
+        id: 0x40001bb2,
         name: "Greyoll's Roar",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001AAE,
+        id: 0x40001aae,
         name: "Gurranq's Beast Claw",
         ..Item::default_incantations()
     },
@@ -380,60 +380,60 @@ pub static INCANTATIONS: [Item; 129] = [
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401E9D80,
+        id: 0x401e9d80,
         name: "Heal from Afar",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001B12,
+        id: 0x40001b12,
         name: "Honed Bolt",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001CA2,
+        id: 0x40001ca2,
         name: "Howl of Shabriri",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001A54,
+        id: 0x40001a54,
         name: "Immutable Shield",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001C84,
+        id: 0x40001c84,
         name: "Inescapable Frenzy",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401E9F74,
+        id: 0x401e9f74,
         name: "Knight's Lightning Spear",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401E9E98,
+        id: 0x401e9e98,
         name: "Land of Shadow",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001B26,
+        id: 0x40001b26,
         name: "Lansseax's Glaive",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001A68,
+        id: 0x40001a68,
         name: "Law of Causality",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001A4A,
+        id: 0x40001a4a,
         name: "Law of Regression",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401E9EAC,
+        id: 0x401e9eac,
         name: "Light of Miquella",
         dlc: true,
         ..Item::default_incantations()
@@ -444,17 +444,17 @@ pub static INCANTATIONS: [Item; 129] = [
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001AF4,
+        id: 0x40001af4,
         name: "Lightning Spear",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001B08,
+        id: 0x40001b08,
         name: "Lightning Strike",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001A5E,
+        id: 0x40001a5e,
         name: "Litany of Proper Death",
         ..Item::default_incantations()
     },
@@ -464,7 +464,7 @@ pub static INCANTATIONS: [Item; 129] = [
         ..Item::default_incantations()
     },
     Item {
-        id: 0x4000195A,
+        id: 0x4000195a,
         name: "Lord's Divine Fortification",
         ..Item::default_incantations()
     },
@@ -474,41 +474,41 @@ pub static INCANTATIONS: [Item; 129] = [
         ..Item::default_incantations()
     },
     Item {
-        id: 0x4000193C,
+        id: 0x4000193c,
         name: "Magic Fortification",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001B62,
+        id: 0x40001b62,
         name: "Magma Breath",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401EA30C,
+        id: 0x401ea30c,
         name: "Messmer's Orb",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401EA104,
+        id: 0x401ea104,
         name: "Midra's Flame of Frenzy",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401E9E8E,
+        id: 0x401e9e8e,
         name: "Minor Erdtree",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401E9EB6,
+        id: 0x401e9eb6,
         name: "Multilayered Ring of Light",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x4000187E,
+        id: 0x4000187e,
         name: "Noble Presence",
         ..Item::default_incantations()
     },
@@ -518,53 +518,53 @@ pub static INCANTATIONS: [Item; 129] = [
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001A7C,
+        id: 0x40001a7c,
         name: "Order Healing",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001A72,
+        id: 0x40001a72,
         name: "Order's Blade",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001C20,
+        id: 0x40001c20,
         name: "Pest Threads",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401EA0AA,
+        id: 0x401ea0aa,
         name: "Pest-Thread Spears",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001B8A,
+        id: 0x40001b8a,
         name: "Placidusax's Ruin",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001C3E,
+        id: 0x40001c3e,
         name: "Poison Armament",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001C34,
+        id: 0x40001c34,
         name: "Poison Mist",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x400018C4,
+        id: 0x400018c4,
         name: "Protection of the Erdtree",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001A36,
+        id: 0x40001a36,
         name: "Radagon's Rings of Light",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401EA302,
+        id: 0x401ea302,
         name: "Rain of Fire",
         dlc: true,
         ..Item::default_incantations()
@@ -575,24 +575,24 @@ pub static INCANTATIONS: [Item; 129] = [
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401E9F10,
+        id: 0x401e9f10,
         name: "Roar of Rugalea",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001B76,
+        id: 0x40001b76,
         name: "Rotten Breath",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401EA0A0,
+        id: 0x401ea0a0,
         name: "Rotten Butterflies",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001C48,
+        id: 0x40001c48,
         name: "Scarlet Aeonia",
         ..Item::default_incantations()
     },
@@ -607,48 +607,48 @@ pub static INCANTATIONS: [Item; 129] = [
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001B81,
+        id: 0x40001b81,
         name: "Smarag's Glintstone Breath",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401EA2A8,
+        id: 0x401ea2a8,
         name: "Spira",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001A9A,
+        id: 0x40001a9a,
         name: "Stone of Gurranq",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x4000184C,
+        id: 0x4000184c,
         name: "Surge, O Flame!",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001C2A,
+        id: 0x40001c2a,
         name: "Swarm of Flies",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001C8E,
+        id: 0x40001c8e,
         name: "The Flame of Frenzy",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001B63,
+        id: 0x40001b63,
         name: "Theodorix's Magma",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001A2D,
+        id: 0x40001a2d,
         name: "Triple Rings of Light",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001C8F,
+        id: 0x40001c8f,
         name: "Unendurable Frenzy",
         ..Item::default_incantations()
     },
@@ -658,29 +658,29 @@ pub static INCANTATIONS: [Item; 129] = [
         ..Item::default_incantations()
     },
     Item {
-        id: 0x40001B3A,
+        id: 0x40001b3a,
         name: "Vyke's Dragonbolt",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401EA230,
+        id: 0x401ea230,
         name: "Watchful Spirit",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x4000178E,
+        id: 0x4000178e,
         name: "Whirl, O Flame!",
         ..Item::default_incantations()
     },
     Item {
-        id: 0x401E9EA2,
+        id: 0x401e9ea2,
         name: "Wrath from Afar",
         dlc: true,
         ..Item::default_incantations()
     },
     Item {
-        id: 0x4000190A,
+        id: 0x4000190a,
         name: "Wrath of Gold",
         ..Item::default_incantations()
     },

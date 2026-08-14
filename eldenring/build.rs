@@ -1,7 +1,5 @@
-const FOLDERS: &[(&'static str, &'static str, bool); 1] = &[
-    ("src/resources/asm/", "eldenring", false),
-];
+const FOLDERS: [(&str, &str, bool); 1] = [("src/resources/asm/", "eldenring", false)];
 
 fn main() {
-    assemble::object::build(FOLDERS)
+    assemble::object::build(&FOLDERS)
 }

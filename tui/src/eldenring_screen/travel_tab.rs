@@ -1,29 +1,31 @@
-use crate::{
-    common::controls::Control,
-    event::{AnyhowExt, KeyContext, request_search},
-    input::fuzzy_finder::SearchRequest,
-    panes::{PaneManager, TableController, TablePane, TableView},
-    screen::Screen,
-    spawn_task,
-    theme::theme,
-};
-use crossterm::event::{KeyCode, KeyModifiers};
-use eldenring::{
-    event,
-    resources::{
-        bosses::{self, BOSSES},
-        graces::{self, GRACES},
+use {
+    crate::{
+        common::controls::Control,
+        event::{AnyhowExt, KeyContext, request_search},
+        input::fuzzy_finder::SearchRequest,
+        panes::{PaneManager, TableController, TablePane, TableView},
+        screen::Screen,
+        spawn_task,
+        theme::theme,
     },
+    crossterm::event::{KeyCode, KeyModifiers},
+    eldenring::{
+        event,
+        resources::{
+            bosses::{self, BOSSES},
+            graces::{self, GRACES},
+        },
+    },
+    nucleo_matcher::Utf32String,
+    ratatui::{
+        Frame,
+        layout::{Constraint, Direction, Layout, Offset, Rect},
+        style::Stylize,
+        text::Span,
+        widgets::{Cell, Row},
+    },
+    ratatui_themes::Style,
 };
-use nucleo_matcher::Utf32String;
-use ratatui::{
-    Frame,
-    layout::{Constraint, Direction, Layout, Offset, Rect},
-    style::Stylize,
-    text::Span,
-    widgets::{Cell, Row},
-};
-use ratatui_themes::Style;
 
 pub(super) struct TravelTab {
     pub pane_manager: PaneManager,
@@ -42,7 +44,7 @@ impl TravelTab {
                     .with_title("Graces")
                     .freeze()
                     .boxed(),
-            ])
+            ]),
         }
     }
 }
@@ -51,10 +53,7 @@ impl Screen for TravelTab {
     fn draw(&mut self, frame: &mut Frame, rect: Rect) {
         let layout = Layout::default()
             .direction(Direction::Horizontal)
-            .constraints(vec![
-                Constraint::Percentage(50),
-                Constraint::Percentage(50),
-            ])
+            .constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
             .split(rect);
 
         self.pane_manager.draw(frame, &layout);
@@ -73,18 +72,17 @@ impl Screen for TravelTab {
 struct BossTable;
 impl TableController for BossTable {
     fn make_table_view(&self) -> TableView {
-        let rows: Vec<Row> = BOSSES.iter().map(|boss| {
-            Row::new([
-                Cell::from(boss.name),
-                Cell::from(boss.main_area).fg(theme().muted),
-            ])
-        })
-        .collect();
+        let rows: Vec<Row> = BOSSES
+            .iter()
+            .map(|boss| {
+                Row::new([
+                    Cell::from(boss.name),
+                    Cell::from(boss.main_area).fg(theme().muted),
+                ])
+            })
+            .collect();
 
-        TableView::new(rows).with_widths(&[
-            Constraint::Min(44),
-            Constraint::Max(33),
-        ])
+        TableView::new(rows).with_widths(&[Constraint::Min(44), Constraint::Max(33)])
     }
     fn handle_keys_selected(&self, selected: usize, ctx: &mut KeyContext) {
         if ctx.key_enter() {
@@ -110,18 +108,17 @@ impl TableController for BossTable {
 struct BonfireTable;
 impl TableController for BonfireTable {
     fn make_table_view(&self) -> TableView {
-        let rows: Vec<Row> = GRACES.iter().map(|bonfire| {
-            Row::new([
-                Cell::from(bonfire.name),
-                Cell::from(bonfire.main_area).fg(theme().muted),
-            ])
-        })
-        .collect();
+        let rows: Vec<Row> = GRACES
+            .iter()
+            .map(|bonfire| {
+                Row::new([
+                    Cell::from(bonfire.name),
+                    Cell::from(bonfire.main_area).fg(theme().muted),
+                ])
+            })
+            .collect();
 
-        TableView::new(rows).with_widths(&[
-            Constraint::Min(42),
-            Constraint::Max(33),
-        ])
+        TableView::new(rows).with_widths(&[Constraint::Min(42), Constraint::Max(33)])
     }
     fn handle_keys_selected(&self, selected: usize, ctx: &mut KeyContext) {
         if ctx.key_enter() {
@@ -137,7 +134,8 @@ impl TableController for BonfireTable {
 struct BossesSearch;
 impl SearchRequest for BossesSearch {
     fn items(&self) -> Vec<Utf32String> {
-        bosses::BOSSES.iter()
+        bosses::BOSSES
+            .iter()
             .map(|boss| Utf32String::from(format!("{}|{}", boss.name, boss.main_area)))
             .collect()
     }
@@ -146,7 +144,8 @@ impl SearchRequest for BossesSearch {
 struct BonfireSearch;
 impl SearchRequest for BonfireSearch {
     fn items(&self) -> Vec<Utf32String> {
-        graces::GRACES.iter()
+        graces::GRACES
+            .iter()
             .map(|grace| Utf32String::from(format!("{}|{}", grace.name, grace.main_area)))
             .collect()
     }
@@ -174,7 +173,6 @@ impl TravelTab {
             revive_status.to_string()
         };
 
-        Span::from(text)
-            .style(style)
+        Span::from(text).style(style)
     }
 }

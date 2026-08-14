@@ -1,30 +1,33 @@
-use crate::{common::helpers::bordered_block, event::KeyContext, screen::Tab, theme::theme};
-use crossterm::event::KeyCode;
-use ratatui::{
-    Frame,
-    layout::{Constraint, Direction, Layout, Offset, Rect},
-    symbols,
-    widgets::Tabs,
+use {
+    crate::{common::helpers::bordered_block, event::KeyContext, screen::Tab, theme::theme},
+    crossterm::event::KeyCode,
+    ratatui::{
+        Frame,
+        layout::{Constraint, Direction, Layout, Offset, Rect},
+        symbols,
+        widgets::Tabs,
+    },
+    ratatui_themes::Style,
 };
-use ratatui_themes::Style;
 
 pub struct TabSelector {
     pub current_tab: i64,
-    pub title: Option<&'static str>,
-    pub tabs: &'static [&'static str],
+    pub title:       Option<&'static str>,
+    pub tabs:        &'static [&'static str],
 }
 
 impl TabSelector {
     pub fn new(names: &'static [&'static str]) -> Self {
-        Self { current_tab: 0, title: None, tabs: names }
+        Self {
+            current_tab: 0,
+            title:       None,
+            tabs:        names,
+        }
     }
     pub fn draw(&self, frame: &mut Frame, layout: Rect) -> Rect {
         let [tabs_area, rest] = Layout::default()
             .direction(Direction::Vertical)
-            .constraints(vec![
-                Constraint::Length(3),
-                Constraint::Fill(1),
-            ])
+            .constraints(vec![Constraint::Length(3), Constraint::Fill(1)])
             .areas(layout);
 
         let tabs = Tabs::new(self.tabs.to_owned())
@@ -45,16 +48,16 @@ impl TabSelector {
 
         if ctx.key(KeyCode::Tab) {
             let tabs_len = self.tabs.len() as i64;
-            self.current_tab = (self.current_tab.clone() + tabs_len + 1) % tabs_len;
+            self.current_tab = (self.current_tab + tabs_len + 1) % tabs_len;
         }
 
-        if let Some(KeyCode::Char(c)) = ctx.peek_code() {
-            if let Some(digit) = c.to_digit(10) {
-                if digit != 0 && digit <= self.tabs.len() as u32 {
-                    ctx.consume();
-                    self.current_tab = digit as i64 - 1;
-                }
-            }
+        if let Some(KeyCode::Char(c)) = ctx.peek_code()
+            && let Some(digit) = c.to_digit(10)
+            && digit != 0
+            && digit <= self.tabs.len() as u32
+        {
+            ctx.consume();
+            self.current_tab = digit as i64 - 1;
         }
     }
 
@@ -65,12 +68,8 @@ impl TabSelector {
         }
         if ctx.key_char('l') || ctx.key(KeyCode::Right) {
             let tabs_len = self.tabs.len() as i64;
-            self.current_tab = (self.current_tab.clone() + tabs_len + 1) % tabs_len;
+            self.current_tab = (self.current_tab + tabs_len + 1) % tabs_len;
         }
-    }
-
-    pub fn current_tab_str(&self) -> &'static str {
-        self.tabs[self.current_tab as usize]
     }
 
     pub fn draw_thin(&self, frame: &mut Frame, layout: Rect) {
@@ -84,7 +83,7 @@ impl TabSelector {
 
 pub struct TabManager {
     tab_selector: TabSelector,
-    tabs: Vec<Box<dyn Tab>>
+    tabs:         Vec<Box<dyn Tab>>,
 }
 
 impl TabManager {
@@ -94,7 +93,11 @@ impl TabManager {
         tabs: Vec<Box<dyn Tab>>,
     ) -> Self {
         Self {
-            tab_selector: TabSelector { current_tab: 0, title: Some(title), tabs: names },
+            tab_selector: TabSelector {
+                current_tab: 0,
+                title:       Some(title),
+                tabs:        names,
+            },
             tabs,
         }
     }

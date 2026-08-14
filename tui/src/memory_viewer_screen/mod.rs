@@ -1,28 +1,31 @@
 mod pointers_popup;
-use crate::{
-    common::controls::{Control, HelpPopup},
-    event::{KeyContext, ResultExt},
-    input::request_input,
-    memory_viewer_screen::pointers_popup::PointersPopup,
-    popup::{Popup, PopupState},
-    screen::Screen,
-    spawn_task,
-    theme::theme,
-};
-use crossterm::event::{KeyCode, KeyModifiers};
-use gubtool_core::memory_viewer::{self, MemoryViewer};
-use ratatui::{
-    Frame,
-    layout::{
-        Constraint,
-        Direction::{self, Horizontal},
-        Layout, Rect,
+use {
+    crate::{
+        common::controls::{Control, HelpPopup},
+        event::{KeyContext, ResultExt},
+        input::request_input,
+        memory_viewer_screen::pointers_popup::PointersPopup,
+        popup::{Popup, PopupState},
+        screen::Screen,
+        spawn_task,
+        theme::theme,
     },
-    style::{Modifier, Style, Stylize},
-    text::{Line, Span},
-    widgets::{Block, Borders, Paragraph, Wrap},
+    crossterm::event::{KeyCode, KeyModifiers},
+    gubtool_core::memory_viewer::{self, MemoryViewer},
+    ratatui::{
+        Frame,
+        layout::{
+            Constraint,
+            Direction::{self, Horizontal},
+            Layout,
+            Rect,
+        },
+        style::{Modifier, Style, Stylize},
+        text::{Line, Span},
+        widgets::{Block, Borders, Paragraph, Wrap},
+    },
+    std::sync::{LazyLock, Mutex, MutexGuard},
 };
-use std::sync::{LazyLock, Mutex, MutexGuard};
 
 const HELP_ENTRIES: [Control; 15] = [
     Control::new("g", "Jump to module relative address"),
@@ -42,20 +45,19 @@ const HELP_ENTRIES: [Control; 15] = [
     Control::new("p", "Show cached pointers"),
 ];
 
-static MEMORY_VIEWER: LazyLock<Mutex<MemoryViewer>> = LazyLock::new(|| {
-    Mutex::new(MemoryViewer::new())
-});
+static MEMORY_VIEWER: LazyLock<Mutex<MemoryViewer>> =
+    LazyLock::new(|| Mutex::new(MemoryViewer::new()));
 
 fn memory_viewer() -> MutexGuard<'static, MemoryViewer> {
     MEMORY_VIEWER.lock().unwrap()
 }
 
 pub struct MemoryViewerScreen {
-    help: HelpPopup,
-    pointers: PointersPopup,
+    help:          HelpPopup,
+    pointers:      PointersPopup,
     bytes_per_row: i64,
-    frame_heigth: i64,
-    popup_state: PopupState,
+    frame_heigth:  i64,
+    popup_state:   PopupState,
 }
 
 impl Screen for MemoryViewerScreen {
@@ -64,14 +66,16 @@ impl Screen for MemoryViewerScreen {
             let mut m = memory_viewer();
             m.poll();
             if let Some(current_row) = self.current_row(&m) {
-                let diff = current_row as i64 - (self.frame_heigth as i64 - 1);
+                let diff = current_row as i64 - (self.frame_heigth - 1);
                 if diff >= 0 {
                     m.increment_base(self.bytes_per_row * diff);
                 }
             }
         }
 
-        let block = Block::new().borders(Borders::TOP | Borders::BOTTOM).bg(theme().bg);
+        let block = Block::new()
+            .borders(Borders::TOP | Borders::BOTTOM)
+            .bg(theme().bg);
         let [address, bytes] = Layout::default()
             .direction(Horizontal)
             .constraints(vec![Constraint::Max(15), Constraint::Fill(1)])
@@ -136,7 +140,7 @@ impl Screen for MemoryViewerScreen {
         }
 
         if ctx.key_with_modifiers(KeyCode::Char('q'), KeyModifiers::CONTROL) {
-                m.copy_qword_at_highlighted();
+            m.copy_qword_at_highlighted();
         }
 
         if ctx.key_with_modifiers(KeyCode::Char('d'), KeyModifiers::CONTROL) {
@@ -209,10 +213,7 @@ impl Popup for MemoryViewerScreen {
     fn popup_rect(&self, frame: &mut Frame) -> Rect {
         let layout = Layout::default()
             .direction(Direction::Vertical)
-            .constraints([
-                Constraint::Length(1),
-                Constraint::Fill(1),
-            ])
+            .constraints([Constraint::Length(1), Constraint::Fill(1)])
             .split(frame.area());
         layout[1]
     }
@@ -224,11 +225,11 @@ impl Popup for MemoryViewerScreen {
 impl MemoryViewerScreen {
     pub fn new() -> Self {
         Self {
-            pointers: PointersPopup::new(),
-            help: HelpPopup::new(&HELP_ENTRIES),
+            pointers:      PointersPopup::new(),
+            help:          HelpPopup::new(&HELP_ENTRIES),
             bytes_per_row: 0,
-            frame_heigth: 0,
-            popup_state: PopupState::default(),
+            frame_heigth:  0,
+            popup_state:   PopupState::default(),
         }
     }
 
@@ -241,9 +242,9 @@ impl MemoryViewerScreen {
             let address = m.base_address.saturating_add(idx as u64);
             let is_highlighted = m.highlighted_offset == idx as u64;
 
-            let text_color = if m.changed_highlights.contains_key(&(&address)) {
+            let text_color = if m.changed_highlights.contains_key(&address) {
                 theme.error
-            } else if m.copied_highlights.contains_key(&(&address)) {
+            } else if m.copied_highlights.contains_key(&address) {
                 theme.success
             } else {
                 theme.fg
@@ -264,7 +265,9 @@ impl MemoryViewerScreen {
             spans.push(Span::styled(content, style));
             spans.push(Span::raw(" "))
         });
-        Paragraph::new(Line::from(spans)).wrap(Wrap { trim: false })
+        Paragraph::new(Line::from(spans)).wrap(Wrap {
+            trim: false,
+        })
     }
 
     fn addresses_paragraph(&self) -> Paragraph<'static> {
@@ -273,7 +276,9 @@ impl MemoryViewerScreen {
             for i in 0..rows {
                 lines.push(Line::from(format!(
                     "{:#X}",
-                    memory_viewer().base_address.saturating_add(self.bytes_per_row as u64 * i as u64)
+                    memory_viewer()
+                        .base_address
+                        .saturating_add(self.bytes_per_row as u64 * i as u64)
                 )));
             }
         }
@@ -286,6 +291,7 @@ impl MemoryViewerScreen {
     }
 
     fn current_row(&self, m: &MemoryViewer) -> Option<u64> {
-        m.highlighted_offset.checked_div_euclid(self.bytes_per_row as u64)
+        m.highlighted_offset
+            .checked_div_euclid(self.bytes_per_row as u64)
     }
 }

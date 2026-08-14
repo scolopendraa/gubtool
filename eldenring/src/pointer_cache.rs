@@ -1,16 +1,16 @@
-use crate::{
-    mem::read,
-    offsets::{ChainReadExt, game_data_man, module_offsets::BasePointer},
-};
-use gubtool_core::sys::error::ProcResult;
-use std::{
-    collections::HashMap,
-    sync::{LazyLock, Mutex},
+use {
+    crate::{
+        mem::read,
+        offsets::{ChainReadExt, game_data_man, module_offsets::BasePointer},
+    },
+    gubtool_core::sys::sys_error::ProcResult,
+    std::{
+        collections::HashMap,
+        sync::{LazyLock, Mutex},
+    },
 };
 
-pub(crate) static POINTER_CACHE: LazyLock<PointerCache> = LazyLock::new(|| {
-    PointerCache::default()
-});
+pub(crate) static POINTER_CACHE: LazyLock<PointerCache> = LazyLock::new(PointerCache::default);
 
 #[derive(Default)]
 pub struct PointerCache {
@@ -83,5 +83,7 @@ impl ResolvedPtr {
 
 pub fn get_pointers() -> Vec<(String, u64)> {
     let map = POINTER_CACHE.map.lock().unwrap();
-    map.iter().map(|(name, addr)| (format!("{:?}", name), *addr)).collect()
+    map.iter()
+        .map(|(name, addr)| (format!("{:?}", name), *addr))
+        .collect()
 }

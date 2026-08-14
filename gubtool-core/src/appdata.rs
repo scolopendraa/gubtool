@@ -1,14 +1,9 @@
-use std::{
-    fmt::Display,
-    fs::OpenOptions,
-    io::{Read, Seek, SeekFrom, Write},
-    path::PathBuf,
-};
+use std::{fmt::Display, fs, path::PathBuf};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum AppDataError {
     Env(std::env::VarError),
-    Io(std::io::Error),
+    Io(std::io::ErrorKind),
     Serialize(toml::ser::Error),
     Deserialize(toml::de::Error),
 }
@@ -29,41 +24,31 @@ pub fn app_data_dir() -> Result<PathBuf, AppDataError> {
 
 const MAX_LINES: usize = 500;
 
-pub fn log_error(err: &impl Display) -> Result<(), AppDataError>{
-    let msg = format!("{err}");
-    let appdata_dir = app_data_dir()?;
-    let log_path = appdata_dir.join("errors.log");
+pub fn log_error(err: &impl Display) -> Result<(), AppDataError> {
+    let msg = err.to_string();
+    let log_path = app_data_dir()?.join("errors.log");
 
-    let mut file = OpenOptions::new()
-        .read(true)
-        .write(true)
-        .create(true)
-        .open(&log_path)?;
+    let contents = if log_path.exists() {
+        fs::read_to_string(&log_path)?
+    } else {
+        String::new()
+    };
 
-    file.seek(SeekFrom::Start(0))?;
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)?;
     let mut lines: Vec<&str> = contents.lines().collect();
 
-    if let Some(line) = lines.last() && line == &msg {
-        return Ok(())
+    if lines.last() == Some(&msg.as_str()) {
+        return Ok(());
     }
 
     lines.push(&msg);
 
-    if lines.len() > MAX_LINES {
-        let excess = lines.len() - MAX_LINES;
-        lines.drain(0..excess);
-    }
+    let lines = if lines.len() > MAX_LINES {
+        &lines[lines.len() - MAX_LINES..]
+    } else {
+        &lines[..]
+    };
 
-    let mut file = OpenOptions::new()
-        .read(true)
-        .truncate(true)
-        .write(true)
-        .create(true)
-        .open(&log_path)?;
-
-    writeln!(file, "{}", lines.join("\n"))?;
+    fs::write(&log_path, lines.join("\n") + "\n")?;
     Ok(())
 }
 
@@ -75,7 +60,7 @@ impl From<std::env::VarError> for AppDataError {
 
 impl From<std::io::Error> for AppDataError {
     fn from(err: std::io::Error) -> Self {
-        Self::Io(err)
+        Self::Io(err.kind())
     }
 }
 

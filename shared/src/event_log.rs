@@ -1,16 +1,18 @@
-use chrono::{DateTime, Local};
-use gubtool_core::{
-    appdata::{AppDataError, app_data_dir},
-    slice_ops::read_from_slice,
-    sys::error::ProcResult,
+use {
+    chrono::{DateTime, Local},
+    gubtool_core::{
+        appdata::{AppDataError, app_data_dir},
+        slice_ops::read_from_slice,
+        sys::sys_error::ProcResult,
+    },
+    std::{collections::HashMap, fs::OpenOptions, io::Write},
+    thiserror::Error,
 };
-use std::{collections::HashMap, fs::OpenOptions, io::Write};
-use thiserror::Error;
 
 #[derive(Clone, Copy)]
 pub struct EventRecord {
-    pub event_id: u32,
-    pub state: bool,
+    pub event_id:   u32,
+    pub state:      bool,
     pub time_stamp: DateTime<Local>,
 }
 
@@ -26,11 +28,11 @@ impl EventRecord {
 
 #[derive(Default)]
 pub struct EventLog {
-    pub records: Vec<EventRecord>,
-    excluded: Vec<u32>,
+    pub records:     Vec<EventRecord>,
+    excluded:        Vec<u32>,
     push_duplicates: bool,
-    dupe_map: HashMap<u32, bool>,
-    read_idx: i32,
+    dupe_map:        HashMap<u32, bool>,
+    read_idx:        i32,
 }
 
 impl EventLog {
@@ -41,7 +43,7 @@ impl EventLog {
             let idx = (self.read_idx + i) & 511;
             let read_offset = idx * 5;
 
-            let record = EventRecord::read_at(&buffer, read_offset as u64, now)?;
+            let record = EventRecord::read_at(buffer, read_offset as u64, now)?;
 
             if (self.push_duplicates || self.dupe_map.get(&record.event_id) != Some(&record.state))
                 && !self.excluded.contains(&record.event_id)
@@ -64,18 +66,16 @@ impl EventLog {
 
     pub fn export(&self, file_prefix: &'static str) -> Result<String, ExportError> {
         if self.records.is_empty() {
-            return Err(ExportError::Empty)
+            return Err(ExportError::Empty);
         }
 
         let appdata_dir = app_data_dir()?;
         let time = Local::now().format("%H:%M:%S");
-        let dir = appdata_dir
-            .join("event_logs");
+        let dir = appdata_dir.join("event_logs");
 
         std::fs::create_dir_all(&dir)?;
 
-        let log_path = dir
-            .join(format!("{file_prefix}_event_{time}.log"));
+        let log_path = dir.join(format!("{file_prefix}_event_{time}.log"));
 
         let mut file = OpenOptions::new()
             .create(true)
@@ -92,7 +92,7 @@ impl EventLog {
                 record.state.to_string().to_uppercase(),
             )?;
         }
-        Ok(format!("{}", log_path.display().to_string()))
+        Ok(log_path.display().to_string())
     }
 }
 
@@ -150,20 +150,22 @@ pub enum ExportError {
     Empty,
     #[error("{err}")]
     AppData {
-        err: AppDataError
-    }
+        err: AppDataError,
+    },
 }
 
 impl From<AppDataError> for ExportError {
     fn from(err: AppDataError) -> Self {
-        Self::AppData { err }
+        Self::AppData {
+            err,
+        }
     }
 }
 
 impl From<std::io::Error> for ExportError {
     fn from(err: std::io::Error) -> Self {
         Self::AppData {
-            err: AppDataError::Io(err)
+            err: AppDataError::Io(err.kind()),
         }
     }
 }

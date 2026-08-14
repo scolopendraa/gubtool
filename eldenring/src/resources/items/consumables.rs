@@ -11,7 +11,7 @@ impl Item {
 
 pub static CONSUMABLES: [Item; 161] = [
     Item {
-        id: 0x401E8CB4,
+        id: 0x401e8cb4,
         name: "Ancient Dragon's Blessing",
         stack_size: 1,
         max_storage: 0,
@@ -19,28 +19,28 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000D20,
+        id: 0x40000d20,
         name: "Baldachin's Blessing",
         stack_size: 1,
         max_storage: 0,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000D16,
+        id: 0x40000d16,
         name: "Bewitching Branch",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8804,
+        id: 0x401e8804,
         name: "Blessing of Marika",
         stack_size: 1,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400005A0,
+        id: 0x400005a0,
         name: "Blood Grease",
         stack_size: 10,
         max_storage: 600,
@@ -54,28 +54,28 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x4000033E,
+        id: 0x4000033e,
         name: "Boiled Prawn",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E9038,
+        id: 0x401e9038,
         name: "Bondstone",
         stack_size: 1,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400006AE,
+        id: 0x400006ae,
         name: "Bone Dart",
         stack_size: 40,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E9007,
+        id: 0x401e9007,
         name: "Broken Rune",
         stack_size: 99,
         max_storage: 600,
@@ -83,28 +83,28 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E90CE,
+        id: 0x401e90ce,
         name: "Call of Tibia",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E9196,
+        id: 0x401e9196,
         name: "Charming Branch",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400003C0,
+        id: 0x400003c0,
         name: "Clarifying Boluses",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x4000046A,
+        id: 0x4000046a,
         name: "Clarifying Cured Meat",
         stack_size: 10,
         max_storage: 999,
@@ -118,14 +118,14 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400006CC,
+        id: 0x400006cc,
         name: "Crystal Dart",
         stack_size: 40,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000BD6,
+        id: 0x40000bd6,
         name: "Cuckoo Glintstone",
         stack_size: 10,
         max_storage: 600,
@@ -139,49 +139,49 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x4000053C,
+        id: 0x4000053c,
         name: "Dappled White Cured Meat",
         stack_size: 10,
         max_storage: 999,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E88CC,
+        id: 0x401e88cc,
         name: "Dragon Communion Flesh",
         stack_size: 10,
         max_storage: 999,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8A48,
+        id: 0x401e8a48,
         name: "Dragon Communion Grease",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8B2E,
+        id: 0x401e8b2e,
         name: "Dragon Communion Harpoon",
         stack_size: 5,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8A02,
+        id: 0x401e8a02,
         name: "Dragonbolt Grease",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E88D1,
+        id: 0x401e88d1,
         name: "Dragonscale Flesh",
         stack_size: 10,
         max_storage: 999,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400005C8,
+        id: 0x400005c8,
         name: "Dragonwound Grease",
         stack_size: 10,
         max_storage: 600,
@@ -195,56 +195,56 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8A66,
+        id: 0x401e8a66,
         name: "Drawstring Dragonbolt Grease",
         stack_size: 30,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8A8E,
+        id: 0x401e8a8e,
         name: "Drawstring Eternal Sleep Grease",
         stack_size: 30,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400005DC,
+        id: 0x400005dc,
         name: "Drawstring Fire Grease",
         stack_size: 30,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8A7A,
+        id: 0x401e8a7a,
         name: "Drawstring Golden Grease",
         stack_size: 30,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400005FA,
+        id: 0x400005fa,
         name: "Drawstring Holy Grease",
         stack_size: 30,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400005E6,
+        id: 0x400005e6,
         name: "Drawstring Lightning Grease",
         stack_size: 30,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400005F0,
+        id: 0x400005f0,
         name: "Drawstring Magic Grease",
         stack_size: 30,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8A5C,
+        id: 0x401e8a5c,
         name: "Drawstring Messmerfire Grease",
         stack_size: 30,
         max_storage: 600,
@@ -265,28 +265,28 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8A70,
+        id: 0x401e8a70,
         name: "Drawstring Royal Magic Grease",
         stack_size: 30,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x4000060E,
+        id: 0x4000060e,
         name: "Drawstring Soporific Grease",
         stack_size: 30,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8A2A,
+        id: 0x401e8a2a,
         name: "Eternal Sleep Grease",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400004BA,
+        id: 0x400004ba,
         name: "Exalted Flesh",
         stack_size: 10,
         max_storage: 999,
@@ -307,28 +307,28 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400006D6,
+        id: 0x400006d6,
         name: "Fan Daggers",
         stack_size: 40,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8AC0,
+        id: 0x401e8ac0,
         name: "Festive Grease",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E88D6,
+        id: 0x401e88d6,
         name: "Fingerprint Nostrum",
         stack_size: 10,
         max_storage: 999,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E90EC,
+        id: 0x401e90ec,
         name: "Fire Coil",
         stack_size: 10,
         max_storage: 600,
@@ -342,7 +342,7 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E90F6,
+        id: 0x401e90f6,
         name: "Fire Spritestone",
         stack_size: 10,
         max_storage: 600,
@@ -356,28 +356,28 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E88EA,
+        id: 0x401e88ea,
         name: "Fireproof Pickled Liver",
         stack_size: 5,
         max_storage: 999,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400005BE,
+        id: 0x400005be,
         name: "Freezing Grease",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000CEF,
+        id: 0x40000cef,
         name: "Frenzyflame Stone",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x4000032C,
+        id: 0x4000032c,
         name: "Frozen Raisin",
         stack_size: 30,
         max_storage: 600,
@@ -398,154 +398,154 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E9100,
+        id: 0x401e9100,
         name: "Glinting Nail",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000BEA,
+        id: 0x40000bea,
         name: "Glintstone Scrap",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400007EE,
+        id: 0x400007ee,
         name: "Glowstone",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8A16,
+        id: 0x401e8a16,
         name: "Golden Grease",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E894E,
+        id: 0x401e894e,
         name: "Golden Horn Tender",
         stack_size: 10,
         max_storage: 999,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000B5D,
+        id: 0x40000b5d,
         name: "Golden Rune [10]",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000B5E,
+        id: 0x40000b5e,
         name: "Golden Rune [11]",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000B5F,
+        id: 0x40000b5f,
         name: "Golden Rune [12]",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000B60,
+        id: 0x40000b60,
         name: "Golden Rune [13]",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000B54,
+        id: 0x40000b54,
         name: "Golden Rune [1]",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000B55,
+        id: 0x40000b55,
         name: "Golden Rune [2]",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000B56,
+        id: 0x40000b56,
         name: "Golden Rune [3]",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000B57,
+        id: 0x40000b57,
         name: "Golden Rune [4]",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000B58,
+        id: 0x40000b58,
         name: "Golden Rune [5]",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000B59,
+        id: 0x40000b59,
         name: "Golden Rune [6]",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000B5A,
+        id: 0x40000b5a,
         name: "Golden Rune [7]",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000B5B,
+        id: 0x40000b5b,
         name: "Golden Rune [8]",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000B5C,
+        id: 0x40000b5c,
         name: "Golden Rune [9]",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E90E2,
+        id: 0x401e90e2,
         name: "Golden Vow",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400004B0,
+        id: 0x400004b0,
         name: "Gold-Pickled Fowl Foot",
         stack_size: 10,
         max_storage: 999,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8931,
+        id: 0x401e8931,
         name: "Gourmet Scorpion Stew",
         stack_size: 1,
         max_storage: 1,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8931,
+        id: 0x401e8931,
         name: "Gourmet Scorpion Stew",
         stack_size: 1,
         max_storage: 1,
@@ -559,49 +559,49 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000BFE,
+        id: 0x40000bfe,
         name: "Gravity Stone Chunk",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000BF4,
+        id: 0x40000bf4,
         name: "Gravity Stone Fan",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000B62,
+        id: 0x40000b62,
         name: "Hero's Rune [1]",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000B63,
+        id: 0x40000b63,
         name: "Hero's Rune [2]",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000B64,
+        id: 0x40000b64,
         name: "Hero's Rune [3]",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000B65,
+        id: 0x40000b65,
         name: "Hero's Rune [4]",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000B66,
+        id: 0x40000b66,
         name: "Hero's Rune [5]",
         stack_size: 99,
         max_storage: 600,
@@ -615,21 +615,21 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x4000049C,
+        id: 0x4000049c,
         name: "Holyproof Dried Liver",
         stack_size: 5,
         max_storage: 999,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E88FE,
+        id: 0x401e88fe,
         name: "Holyproof Pickled Liver",
         stack_size: 5,
         max_storage: 999,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E90BA,
+        id: 0x401e90ba,
         name: "Horned Bairn",
         stack_size: 1,
         max_storage: 600,
@@ -643,14 +643,14 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x4000051E,
+        id: 0x4000051e,
         name: "Immunizing White Cured Meat",
         stack_size: 10,
         max_storage: 999,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8B24,
+        id: 0x401e8b24,
         name: "Innard Meat",
         stack_size: 40,
         max_storage: 600,
@@ -671,42 +671,42 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8CC8,
+        id: 0x401e8cc8,
         name: "Iris of Grace",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8CD2,
+        id: 0x401e8cd2,
         name: "Iris of Occultation",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400006C2,
+        id: 0x400006c2,
         name: "Kukri",
         stack_size: 30,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000BAE,
+        id: 0x40000bae,
         name: "Lands Between Rune",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000BEB,
+        id: 0x40000beb,
         name: "Large Glintstone Scrap",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E9006,
+        id: 0x401e9006,
         name: "Leda's Rune",
         stack_size: 99,
         max_storage: 600,
@@ -728,35 +728,35 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E88F4,
+        id: 0x401e88f4,
         name: "Lightningproof Pickled Liver",
         stack_size: 5,
         max_storage: 999,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000B67,
+        id: 0x40000b67,
         name: "Lord's Rune",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E880E,
+        id: 0x401e880e,
         name: "Lulling Branch",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x4000058C,
+        id: 0x4000058c,
         name: "Magic Grease",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E9010,
+        id: 0x401e9010,
         name: "Marika's Rune",
         stack_size: 99,
         max_storage: 600,
@@ -764,7 +764,7 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E89F8,
+        id: 0x401e89f8,
         name: "Messmerfire Grease",
         stack_size: 10,
         max_storage: 600,
@@ -778,42 +778,42 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000B61,
+        id: 0x40000b61,
         name: "Numen's Rune",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8908,
+        id: 0x401e8908,
         name: "Opaline Pickled Liver",
         stack_size: 5,
         max_storage: 999,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E90C4,
+        id: 0x401e90c4,
         name: "Perfumed Oil of Ranah",
         stack_size: 1,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x4000044C,
+        id: 0x4000044c,
         name: "Pickled Turtle Neck",
         stack_size: 10,
         max_storage: 999,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400005B4,
+        id: 0x400005b4,
         name: "Poison Grease",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400006B8,
+        id: 0x400006b8,
         name: "Poisonbone Dart",
         stack_size: 40,
         max_storage: 600,
@@ -834,77 +834,77 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8C50,
+        id: 0x401e8c50,
         name: "Polter Stone",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400003AC,
+        id: 0x400003ac,
         name: "Preserving Boluses",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000D21,
+        id: 0x40000d21,
         name: "Radiant Baldachin's Blessing",
         stack_size: 1,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400007E4,
+        id: 0x400007e4,
         name: "Rainbow Stone",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400004D3,
+        id: 0x400004d3,
         name: "Raw Meat Dumpling",
         stack_size: 3,
         max_storage: 999,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400003B6,
+        id: 0x400003b6,
         name: "Rejuvenating Boluses",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400005D2,
+        id: 0x400005d2,
         name: "Rot Grease",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x4000032A,
+        id: 0x4000032a,
         name: "Rowa Raisin",
         stack_size: 30,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8A0C,
+        id: 0x401e8a0c,
         name: "Royal Magic Grease",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400000BE,
+        id: 0x400000be,
         name: "Rune Arc",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E900F,
+        id: 0x401e900f,
         name: "Rune of an Unsung Hero",
         stack_size: 99,
         max_storage: 600,
@@ -912,35 +912,35 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E893A,
+        id: 0x401e893a,
         name: "Sacred Bloody Flesh",
         stack_size: 10,
         max_storage: 999,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8930,
+        id: 0x401e8930,
         name: "Scorpion Stew",
         stack_size: 1,
         max_storage: 1,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8930,
+        id: 0x401e8930,
         name: "Scorpion Stew",
         stack_size: 1,
         max_storage: 1,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000CF8,
+        id: 0x40000cf8,
         name: "Scriptstone",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E9008,
+        id: 0x401e9008,
         name: "Shadow Realm Rune [1]",
         stack_size: 99,
         max_storage: 600,
@@ -948,7 +948,7 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E9009,
+        id: 0x401e9009,
         name: "Shadow Realm Rune [2]",
         stack_size: 99,
         max_storage: 600,
@@ -956,7 +956,7 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E900A,
+        id: 0x401e900a,
         name: "Shadow Realm Rune [3]",
         stack_size: 99,
         max_storage: 600,
@@ -964,7 +964,7 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E900B,
+        id: 0x401e900b,
         name: "Shadow Realm Rune [4]",
         stack_size: 99,
         max_storage: 600,
@@ -972,7 +972,7 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E900C,
+        id: 0x401e900c,
         name: "Shadow Realm Rune [5]",
         stack_size: 99,
         max_storage: 600,
@@ -980,7 +980,7 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E900D,
+        id: 0x401e900d,
         name: "Shadow Realm Rune [6]",
         stack_size: 99,
         max_storage: 600,
@@ -988,7 +988,7 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E900E,
+        id: 0x401e900e,
         name: "Shadow Realm Rune [7]",
         stack_size: 99,
         max_storage: 600,
@@ -996,21 +996,21 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x4000069A,
+        id: 0x4000069a,
         name: "Shield Grease",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8944,
+        id: 0x401e8944,
         name: "Silver Horn Tender",
         stack_size: 10,
         max_storage: 999,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400004A6,
+        id: 0x400004a6,
         name: "Silver-Pickled Fowl Foot",
         stack_size: 10,
         max_storage: 999,
@@ -1031,84 +1031,84 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400005AA,
+        id: 0x400005aa,
         name: "Soporific Grease",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x4000047E,
+        id: 0x4000047e,
         name: "Spellproof Dried Liver",
         stack_size: 5,
         max_storage: 999,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E88E0,
+        id: 0x401e88e0,
         name: "Spellproof Pickled Liver",
         stack_size: 5,
         max_storage: 999,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E87A0,
+        id: 0x401e87a0,
         name: "Spirit Raisin",
         stack_size: 30,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E9039,
+        id: 0x401e9039,
         name: "Spritestone",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x4000038E,
+        id: 0x4000038e,
         name: "Stanching Boluses",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x4000050A,
+        id: 0x4000050a,
         name: "Starlight Shards",
         stack_size: 10,
         max_storage: 999,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400003A2,
+        id: 0x400003a2,
         name: "Stimulating Boluses",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40001F40,
+        id: 0x40001f40,
         name: "Stonesword Key",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E916E,
+        id: 0x401e916e,
         name: "Sunwarmth Stone",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E90D8,
+        id: 0x401e90d8,
         name: "Surging Frenzied Flame",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x4000032B,
+        id: 0x4000032b,
         name: "Sweet Raisin",
         stack_size: 30,
         max_storage: 600,
@@ -1122,28 +1122,28 @@ pub static CONSUMABLES: [Item; 161] = [
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8CDC,
+        id: 0x401e8cdc,
         name: "Thiollier's Concoction",
         stack_size: 99,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x400006A4,
+        id: 0x400006a4,
         name: "Throwing Dagger",
         stack_size: 40,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x40000CEE,
+        id: 0x40000cee,
         name: "Warming Stone",
         stack_size: 10,
         max_storage: 600,
         ..Item::default_consumables()
     },
     Item {
-        id: 0x401E8912,
+        id: 0x401e8912,
         name: "Well-Pickled Turtle Neck",
         stack_size: 10,
         max_storage: 999,

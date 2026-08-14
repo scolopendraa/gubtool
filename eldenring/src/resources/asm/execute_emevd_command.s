@@ -23,7 +23,8 @@ mov QWORD PTR [r8+0xd0], rcx
 movabs rax, OFFSET args_location
 lea rcx, [rax]
 mov QWORD PTR [r8+0xd8], rcx
-movabs rax, ds: OFFSET cs_emk_system_base
+movabs rax, OFFSET cs_emk_system_base
+mov rax, [rax]
 mov rcx, QWORD PTR [rax+0x28]
 mov eax, 0x3ca3d70a
 movd xmm1, eax

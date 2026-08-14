@@ -1,19 +1,18 @@
-use phf::phf_map;
-use strum::Display;
+use {phf::phf_map, strum::Display};
 
 #[repr(u8)]
 #[derive(Debug, Copy, Clone, PartialEq, Display)]
 pub enum Infusion {
-    Normal = 0,
-    Fire = 1,
-    Magic = 2,
+    Normal    = 0,
+    Fire      = 1,
+    Magic     = 2,
     Lightning = 3,
-    Dark = 4,
-    Poison = 5,
-    Bleed = 6,
-    Raw = 7,
+    Dark      = 4,
+    Poison    = 5,
+    Bleed     = 6,
+    Raw       = 7,
     Enchanted = 8,
-    Mundane = 9,
+    Mundane   = 9,
 }
 
 pub static INFUSIONS: [Infusion; 10] = [

@@ -1,12 +1,13 @@
-use anyhow::{Ok, ensure};
-use clap::{Parser, Subcommand, ValueEnum};
-use gubtool_core::{
-    attached::{self, game},
-    game_version::Game,
+use {
+    anyhow::{Ok, ensure},
+    clap::{Parser, Subcommand, ValueEnum},
+    gubtool_core::{
+        attached::{self, game},
+        game_version::Game,
+    },
+    shared::command::{ToggleCommand, UnitCommand},
+    std::{thread, time::Duration},
 };
-use shared::command::{ToggleCommand, UnitCommand};
-use std::{thread, time::Duration};
-use tui;
 
 #[derive(Parser)]
 #[command(name = "gubtool")]
@@ -46,7 +47,8 @@ pub fn run() -> anyhow::Result<()> {
             darksouls2::utils::print_asm_sizes();
             eldenring::utils::print_asm_sizes();
             return Ok(());
-        },
+        }
+        CliCommand::Test => {}
         _ => (),
     }
 
@@ -61,33 +63,38 @@ pub fn run() -> anyhow::Result<()> {
 
     #[allow(unreachable_patterns)]
     match cli.command.unwrap() {
-        CliCommand::Quitout => match game {
-            Game::EldenRing => eldenring::utility::Quitout.execute()?,
-            Game::DarkSouls2 => darksouls2::utility::Quitout.execute()?,
-        },
-        CliCommand::KillTarget => match game {
-            Game::EldenRing => {
-                if !eldenring::target::SaveTargetHook.is()? {
-                    eldenring::target::SaveTargetHook.set(true)?;
-                    thread::sleep(Duration::from_millis(50));
-                }
-                eldenring::target::target().chr_ins()?.set_hp(0)?
+        CliCommand::Quitout => {
+            match game {
+                Game::EldenRing => eldenring::utility::Quitout.execute()?,
+                Game::DarkSouls2 => darksouls2::utility::Quitout.execute()?,
             }
-            Game::DarkSouls2 => {
-                if !darksouls2::target::SaveTargetHook.is()? {
-                    darksouls2::target::SaveTargetHook.set(true)?;
-                    thread::sleep(Duration::from_millis(50));
+        }
+        CliCommand::KillTarget => {
+            match game {
+                Game::EldenRing => {
+                    if !eldenring::target::SaveTargetHook.is()? {
+                        eldenring::target::SaveTargetHook.set(true)?;
+                        thread::sleep(Duration::from_millis(50));
+                    }
+                    eldenring::target::target().chr_ins()?.set_hp(0)?
                 }
-                darksouls2::target::target().chr_ctrl()?.set_hp(0)?
+                Game::DarkSouls2 => {
+                    if !darksouls2::target::SaveTargetHook.is()? {
+                        darksouls2::target::SaveTargetHook.set(true)?;
+                        thread::sleep(Duration::from_millis(50));
+                    }
+                    darksouls2::target::target().chr_ctrl()?.set_hp(0)?
+                }
             }
-        },
-        CliCommand::NextPhase => match game {
-            Game::EldenRing => eldenring::target::target().chr_ins()?.next_phase()?,
-            Game::DarkSouls2 => (),
-        },
+        }
+        CliCommand::NextPhase => {
+            match game {
+                Game::EldenRing => eldenring::target::next_phase()?,
+                Game::DarkSouls2 => (),
+            }
+        }
         #[cfg(debug_assertions)]
-        CliCommand::AobScan => {
-        },
+        CliCommand::AobScan => {}
         _ => (),
     }
     Ok(())
@@ -95,7 +102,7 @@ pub fn run() -> anyhow::Result<()> {
 
 #[derive(Clone, ValueEnum)]
 pub enum OnOff {
-    On = 1,
+    On  = 1,
     Off = 0,
 }
 

@@ -1,5 +1,7 @@
-use crate::act_array::ActArray;
-use std::{any::TypeId, collections::HashMap, sync::LazyLock};
+use {
+    crate::act_array::ActArray,
+    std::{any::TypeId, collections::HashMap, sync::LazyLock},
+};
 
 pub trait ParseInput: Sized {
     fn parse_input(s: &str) -> Option<Self>;
@@ -39,7 +41,7 @@ macro_rules! impl_for_other {
 impl_for_int!(u8, u16, u32, u64, usize, i8, i16, i32, i64, isize);
 impl_for_other!(f32, f64, ActArray);
 
-static REGISTRY: LazyLock<ParseRegistry> = LazyLock::new(|| ParseRegistry::init());
+static REGISTRY: LazyLock<ParseRegistry> = LazyLock::new(ParseRegistry::init);
 
 pub struct ParseRegistry {
     registry: HashMap<TypeId, CanParseFn>,
@@ -58,7 +60,6 @@ impl ParseRegistry {
 
     pub fn can_parse(&self, type_id: TypeId, s: &str) -> bool {
         self.registry.get(&type_id).map(|f| f(s)).unwrap_or(false)
-
     }
 
     fn register_all(&mut self) {
@@ -79,13 +80,9 @@ impl ParseRegistry {
     }
 
     fn register<T>(&mut self)
-    where
-        T: ParseInput + 'static,
-    {
-        self.registry.insert(
-            TypeId::of::<T>(),
-            |s| T::parse_input(s).is_some(),
-        );
+    where T: ParseInput + 'static {
+        self.registry
+            .insert(TypeId::of::<T>(), |s| T::parse_input(s).is_some());
     }
 }
 

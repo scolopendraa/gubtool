@@ -1,5 +1,7 @@
-use crate::{pe::error::ParsePeError, sys::error::ProcessError};
-use thiserror::Error;
+use {
+    crate::{pe::error::ParsePeError, sys::sys_error::ProcessError},
+    thiserror::Error,
+};
 
 #[derive(Debug, Error)]
 pub enum ScanError {
@@ -21,7 +23,7 @@ pub enum ScanError {
     },
     #[error("{err}")]
     ProcessError {
-        err: ProcessError
+        err: ProcessError,
     },
     #[error("IO error: {error_kind}")]
     Io {
@@ -35,23 +37,29 @@ pub enum ScanError {
     FoundDuplicates {
         scan_name: &'static str,
         locations: Vec<u64>,
-    }
+    },
 }
 
 impl From<ProcessError> for ScanError {
     fn from(err: ProcessError) -> Self {
-        Self::ProcessError { err }
+        Self::ProcessError {
+            err,
+        }
     }
 }
 
 impl From<std::io::Error> for ScanError {
     fn from(value: std::io::Error) -> Self {
-        Self::Io { error_kind: value.kind() }
+        Self::Io {
+            error_kind: value.kind(),
+        }
     }
 }
 
 impl From<ParsePeError> for ScanError {
     fn from(value: ParsePeError) -> Self {
-        Self::Pe { err: value }
+        Self::Pe {
+            err: value,
+        }
     }
 }

@@ -1,5 +1,7 @@
-use crate::offsets::Offset;
-use gubtool_core::{address::Address, attached::module_base};
+use {
+    crate::offsets::Offset,
+    gubtool_core::{address::Address, attached::module_base},
+};
 
 pub const SIZE: usize = 0x5000;
 
@@ -11,52 +13,46 @@ pub const BASE: Offset = Offset {
 #[repr(u64)]
 #[derive(Clone, Copy)]
 pub enum CaveAddress {
-    ItemArgs = 0x0,                                     // 0x23
-    ItemSpawnStack = 0x30,                              // 0x300
-    WarpRequestStruct = 0x350,                          // 0x40
-    CreditsModifyOnceFlag = 0x3A0,                      // u8
-    OpenMenuArgs = 0x3B0,                               // 0x30
-    NpcTalkArgs = 0x3E0,                                // 0x30
-    NpcPos = 0x410,                                     // 0x20
+    WorkerThreadPort      = 0x0, // u16
 
-    LevelUpBuffer = 0x440,                              // 0x100
-    NegativeFlag = 0x550,                               // u8
+    SavedTargetPointer    = 0x10, // u64
+    ForceActChrAi         = 0x18, // u64
+    ForceActId            = 0x20, // i32
+    ForceActFlag          = 0x24, // u8
+    SavedActBuffer        = 0x25, // 0x50
 
-    SavedTargetPointer = 0x600,                         // u64
-    ForceActChrAi = 0x608,                         // u64
-    ForceActId = 0x610,                                 // i32
-    ForceActFlag = 0x614,                               // u8
-    SavedActBuffer = 0x615,                             // 0x50
+    ItemArgs              = 0x100, // 0x23
+    ItemSpawnStack        = 0x130, // 0x300
 
-    StateHandlerFlags = 0xF00,                          // 0x100
+    WarpRequestStruct     = 0x430, // 0x40
+    CreditsModifyOnceFlag = 0x470, // u8
+    OpenMenuArgs          = 0x480, // 0x30
+    NpcTalkArgs           = 0x4b0, // 0x30
+    NpcPos                = 0x4e0, // 0x20
+
+    LevelUpBuffer         = 0x500, // 0x100
+    NegativeFlag          = 0x600, // u8
+
+    StateHandlerFlags     = 0xf00, // 0x100
     // Hooks
-    PlayerNoDamageHook = 0x1000,                        // 0x2C
-    InfinitePoiseHook = 0x1030,                         // 0x2C
-    SaveTargetHook = 0x1060,                            // 0x2D
-    CreditsSkipHook = 0x1090,                           // 0x2A
-    FasterMenuHook = 0x10C0,                            // 0x1A
-    EventLogHook = 0x10E0,                              // 0x41
-    IvorySkipHook = 0x1130,                             // 0xC1
-    IvoryKnightsHook = 0x1210,                          // 0x24
-    TargetActHook = 0x1240,                             // 0x98
-    // Shellcode
-    RunThreadAsm = 0x2001,                              // 0x60
-    // Keep at least 16 bytes of buffer
-    // for completion flag and appended flag setter
-    WarpRequestAsm = 0x2070,                            // 0x29
-    ItemSpawnAsm = 0x20B0,                              // 0x154
-    SetEventAsm = 0x2220,                               // 0x2C
-    GiveSoulsAsm = 0x2270,                              // 0x26
-    BonfireUnlockAsm = 0x22B0,                          // 0x27
-    BonfireUnlockAllAsm = 0x22F0,                       // 0x4B
-    BonfireRestAsm = 0x2350,                            // 0x25
-    OpenMenuAsm = 0x2390,                               // 0x33
-    MenuChrStateAsm = 0x23E0,                           // 0x2A
-    LevelUpAsm = 0x2420,                                // 0xF4
+    PlayerNoDamageHook    = 0x1000, // 0x2C
+    InfinitePoiseHook     = 0x1030, // 0x2C
+    SaveTargetHook        = 0x1060, // 0x2D
+    CreditsSkipHook       = 0x1090, // 0x2A
+    FasterMenuHook        = 0x10c0, // 0x1A
+    EventLogHook          = 0x10e0, // 0x41
+    IvorySkipHook         = 0x1130, // 0xC1
+    IvoryKnightsHook      = 0x1210, // 0x24
+    TargetActHook         = 0x1240, // 0x98
 
+    RunThreadAsm          = 0x2001, // 0x60
 
-    EventLogWriteIdx = 0x3FFC,                          // i32
-    EventLogBuffer = 0x4000,                            // 0x1000
+    DllPath               = 0x3000, // 0x208
+    DllInjectCode         = 0x3210, // 0x50
+    CustomFunction        = 0x3250, // 0x500
+
+    EventLogWriteIdx      = 0x3750, // i32
+    EventLogBuffer        = 0x3754, // 0x1000
 }
 
 impl Address for CaveAddress {
@@ -68,19 +64,17 @@ impl Address for CaveAddress {
 }
 
 pub mod item_args_offsets {
-    pub const SHOULD_EXIT_FLAG: u64 = 0x0;              // u8
-    pub const SHOULD_PROCESS_FLAG: u64 = 0x1;           // u8
-    pub const ADJUST_QUANTITY_FLAG: u64 = 0x2;          // u8
-    pub const MAX_QUANTITY: u64 = 0x3;                  // i32
-    pub const ITEM_COUNT: u64 = 0x7;                    // i32
-    pub const CURRENT_QUANTITY: u64 = 0xB;              // i32
-    pub const STACK_COUNT: u64 = 0xF;                   // i32
-    pub const ITEM_STRUCT: u64 = 0x13;                  // 0x16
+    pub const ADJUST_QUANTITY_FLAG: u64 = 0x2; // u8
+    pub const MAX_QUANTITY: u64 = 0x3; // i32
+    pub const ITEM_COUNT: u64 = 0x7; // i32
+    pub const CURRENT_QUANTITY: u64 = 0xb; // i32
+    pub const STACK_COUNT: u64 = 0xf; // i32
+    pub const ITEM_STRUCT: u64 = 0x13; // 0x16
 }
 pub mod item_struct_offsets {
-    pub const ITEM_ID: u64 = 0x4;                       // i32
-    pub const DURABILITY: u64 = 0x8;                    // f32
-    pub const QUANTITY: u64 = 0xC;                      // i16
-    pub const UPGRADE: u64 = 0xE;                       // u8
-    pub const INFUSION: u64 = 0xF;                      // u8
+    pub const ITEM_ID: u64 = 0x4; // i32
+    pub const DURABILITY: u64 = 0x8; // f32
+    pub const QUANTITY: u64 = 0xc; // i16
+    pub const UPGRADE: u64 = 0xe; // u8
+    pub const INFUSION: u64 = 0xf; // u8
 }

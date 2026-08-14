@@ -1,36 +1,39 @@
-use crate::{
-    app::App,
-    common::helpers::bordered_block,
-    event::{Event, KeyContext, send_event},
-    input::Input,
-    panes::{Pane, TableController, TablePane, TableView},
-    popup::{Popup, PopupState, centered_popup},
-    screen::Screen,
-    theme::{self, theme},
+use {
+    crate::{
+        app::App,
+        common::helpers::bordered_block,
+        event::{Event, KeyContext, send_event},
+        input::Input,
+        panes::{Pane, TableController, TablePane, TableView},
+        popup::{Popup, PopupState, centered_popup},
+        screen::Screen,
+        theme::{self, theme},
+    },
+    crossterm::event::KeyCode,
+    nucleo_matcher::{
+        Matcher,
+        Utf32String,
+        pattern::{CaseMatching, Normalization, Pattern},
+    },
+    ratatui::{
+        Frame,
+        layout::{Constraint, Direction, Layout, Margin, Rect},
+        style::{Style, Stylize},
+        text::{Line, Span},
+        widgets::{Cell, Paragraph, Row},
+    },
+    std::{cell::RefCell, rc::Rc},
 };
-use crossterm::event::KeyCode;
-use nucleo_matcher::{
-    Matcher, Utf32String,
-    pattern::{CaseMatching, Normalization, Pattern},
-};
-use ratatui::{
-    Frame,
-    layout::{Constraint, Direction, Layout, Margin, Rect},
-    style::{Style, Stylize},
-    text::{Line, Span},
-    widgets::{Cell, Paragraph, Row},
-};
-use std::{cell::RefCell, rc::Rc};
 
 pub struct FuzzyFinder {
-    input: Input,
-    table: TablePane,
+    input:       Input,
+    table:       TablePane,
     popup_state: PopupState,
     match_count: usize,
-    entries: Option<Vec<Utf32String>>,
-    matched: Rc<RefCell<Vec<Matched>>>,
-    matcher: Matcher,
-    pattern: Pattern,
+    entries:     Option<Vec<Utf32String>>,
+    matched:     Rc<RefCell<Vec<Matched>>>,
+    matcher:     Matcher,
+    pattern:     Pattern,
     pub request: Option<&'static dyn SearchRequest>,
 }
 
@@ -40,14 +43,20 @@ struct SearchController {
 
 impl SearchController {
     fn new(matched: Rc<RefCell<Vec<Matched>>>) -> Self {
-        Self { matched }
+        Self {
+            matched,
+        }
     }
 }
 
 pub trait SearchRequest: Send + Sync {
     fn items(&self) -> Vec<Utf32String>;
     fn jump(&self, app: &mut App, selected: usize) {
-        app.current_screen().tab_manager().current_tab_mut().pane_manager().set_current_list_idx(selected);
+        app.current_screen()
+            .tab_manager()
+            .current_tab_mut()
+            .pane_manager()
+            .set_current_list_idx(selected);
     }
 }
 
@@ -70,7 +79,7 @@ impl TableController for SearchController {
             }
         });
 
-        let widths = if label_cells.len() > 0 {
+        let widths = if !label_cells.is_empty() {
             vec![
                 Constraint::Min(longest_name_len as u16 + 1),
                 Constraint::Fill(1),
@@ -79,16 +88,17 @@ impl TableController for SearchController {
             vec![Constraint::Fill(1)]
         };
 
-        let rows = if label_cells.len() > 0 {
-            name_cells.into_iter().zip(label_cells).map(|(name, label)| {
-                Row::new([name, label])
-            })
-            .collect()
+        let rows = if !label_cells.is_empty() {
+            name_cells
+                .into_iter()
+                .zip(label_cells)
+                .map(|(name, label)| Row::new([name, label]))
+                .collect()
         } else {
-            name_cells.into_iter().map(|name| {
-                Row::new([name])
-            })
-            .collect()
+            name_cells
+                .into_iter()
+                .map(|name| Row::new([name]))
+                .collect()
         };
 
         TableView::new(rows).with_widths(widths)
@@ -105,10 +115,7 @@ impl Screen for FuzzyFinder {
     fn draw(&mut self, frame: &mut Frame, rect: Rect) {
         let [search_area, results_area] = Layout::default()
             .direction(Direction::Vertical)
-            .constraints(vec![
-                Constraint::Length(3),
-                Constraint::Fill(1),
-            ])
+            .constraints(vec![Constraint::Length(3), Constraint::Fill(1)])
             .areas(rect);
 
         let search_block = bordered_block(Some("Search"));
@@ -133,9 +140,8 @@ impl Screen for FuzzyFinder {
         frame.render_widget(input, input_area);
 
         counter_area = counter_area.inner(Margin::new(1, 0));
-        let counter = format!("{} / {}",
-            self.match_count, self.entries.as_ref().unwrap_or(&vec![]).len()
-        );
+        let counter =
+            format!("{} / {}", self.match_count, self.entries.as_ref().unwrap_or(&vec![]).len());
         if counter.len() <= counter_area.width.into() {
             let counter = Paragraph::new(counter).right_aligned().style(theme().fg);
             frame.render_widget(counter, counter_area);
@@ -234,7 +240,7 @@ impl FuzzyFinder {
                 }
             }
             self.match_count = matched.len();
-            matched.sort_by(|a, b| b.score.cmp(&a.score));
+            matched.sort_by_key(|x| std::cmp::Reverse(x.score));
         }
 
         self.table.update_container();
@@ -243,49 +249,61 @@ impl FuzzyFinder {
 
 #[derive(Debug, PartialEq, Eq)]
 struct Matched {
-    idx: usize,
-    score: Option<u32>,
-    name: String,
-    label: Option<String>,
-    name_indices: Vec<u32>,
+    idx:           usize,
+    score:         Option<u32>,
+    name:          String,
+    label:         Option<String>,
+    name_indices:  Vec<u32>,
     label_indices: Option<Vec<u32>>,
 }
 
 impl Matched {
     fn new(text: String, idx: usize, score: Option<u32>, indices: &[u32]) -> Self {
         let (name, label, name_indices, label_indices) =
-        if let Some(split_byte_idx) = text.find('|') {
-            let split_char_idx = text[..split_byte_idx].chars().count();
+            if let Some(split_byte_idx) = text.find('|') {
+                let split_char_idx = text[..split_byte_idx].chars().count();
 
-            let (name_part, label_part) = text.split_at(split_byte_idx);
-            let label_part = &label_part[1..];
+                let (name_part, label_part) = text.split_at(split_byte_idx);
+                let label_part = &label_part[1..];
 
-            let mut name_indices = Vec::new();
-            let mut label_indices = Vec::new();
+                let mut name_indices = Vec::new();
+                let mut label_indices = Vec::new();
 
-            for &i in indices {
-                if i < split_char_idx as u32 {
-                    name_indices.push(i);
-                } else if i > split_char_idx as u32 {
-                    let new_i = i.saturating_sub(split_char_idx as u32 + 1);
-                    label_indices.push(new_i);
+                for &i in indices {
+                    if i < split_char_idx as u32 {
+                        name_indices.push(i);
+                    } else if i > split_char_idx as u32 {
+                        let new_i = i.saturating_sub(split_char_idx as u32 + 1);
+                        label_indices.push(new_i);
+                    }
                 }
-            }
-            (String::from(name_part), Some(String::from(label_part)), name_indices, Some(label_indices))
-        } else {
-            (text, None, Vec::from(indices), None)
-        };
-        Self { idx, score, name, label, name_indices, label_indices }
+                (
+                    String::from(name_part),
+                    Some(String::from(label_part)),
+                    name_indices,
+                    Some(label_indices),
+                )
+            } else {
+                (text, None, Vec::from(indices), None)
+            };
+        Self {
+            idx,
+            score,
+            name,
+            label,
+            name_indices,
+            label_indices,
+        }
     }
 
     fn highlight_line(&self) -> (Vec<(&str, bool)>, Option<Vec<(&str, bool)>>) {
         let name_highlights = Self::highlight_slice(&self.name, &self.name_indices);
         let label_highlights =
-        if let (Some(label), Some(label_indices)) = (&self.label, &self.label_indices) {
-            Some(Self::highlight_slice(label, label_indices))
-        } else {
-            None
-        };
+            if let (Some(label), Some(label_indices)) = (&self.label, &self.label_indices) {
+                Some(Self::highlight_slice(label, label_indices))
+            } else {
+                None
+            };
         (name_highlights, label_highlights)
     }
 
@@ -305,16 +323,19 @@ impl Matched {
         let mut start_byte = 0;
         let mut current_char_pos = 0;
 
-        while current_char_pos <  chars.len() {
+        while current_char_pos < chars.len() {
             let is_highlighted = highlighted[current_char_pos];
             let run_start_char = current_char_pos;
 
-            while current_char_pos < chars.len() && highlighted[current_char_pos] == is_highlighted {
+            while current_char_pos < chars.len() && highlighted[current_char_pos] == is_highlighted
+            {
                 current_char_pos += 1;
             }
 
             let run_str_len: usize = chars[run_start_char..current_char_pos]
-                .iter().map(|c| c.len_utf8()).sum();
+                .iter()
+                .map(|c| c.len_utf8())
+                .sum();
 
             let end_byte = start_byte + run_str_len;
             slices.push((&text[start_byte..end_byte], is_highlighted));
@@ -325,7 +346,8 @@ impl Matched {
 }
 
 fn highlighted_cell(line: Vec<(&str, bool)>, style: Style) -> Cell<'static> {
-    let spans = line.into_iter()
+    let spans = line
+        .into_iter()
         .map(|(slice, highlighted)| {
             let content = slice.to_string();
             if highlighted {

@@ -1,19 +1,20 @@
-use crate::{event::KeyContext, panes::Pane};
-use crossterm::event::{KeyCode, KeyModifiers};
-use ratatui::{Frame, layout::Rect};
+use {
+    crate::{event::KeyContext, panes::Pane},
+    crossterm::event::{KeyCode, KeyModifiers},
+    ratatui::{Frame, layout::Rect},
+};
 
 pub struct PaneManager {
-    panes: Vec<Box<dyn Pane>>,
+    panes:        Vec<Box<dyn Pane>>,
     current_pane: usize,
 }
 
 impl PaneManager {
     pub fn new(panes: Vec<Box<dyn Pane>>) -> Self {
-        Self { panes, current_pane: 0 }
-    }
-
-    pub fn current_pane(&self) -> usize {
-        self.current_pane
+        Self {
+            panes,
+            current_pane: 0,
+        }
     }
 
     pub fn get_list_selected(&self, list_idx: usize) -> Option<usize> {
@@ -43,39 +44,35 @@ impl PaneManager {
             2 => &TWO_PANES,
             3 => &THREE_PANES,
             4 => &FOUR_PANES,
-            _ => unreachable!("invalid amount of panes")
+            _ => unreachable!("invalid amount of panes"),
         };
 
-        if ctx.key_with_modifiers(KeyCode::Char('h'), KeyModifiers::CONTROL)
-            || ctx.key_with_modifiers(KeyCode::Left, KeyModifiers::CONTROL)
+        if (ctx.key_with_modifiers(KeyCode::Char('h'), KeyModifiers::CONTROL)
+            || ctx.key_with_modifiers(KeyCode::Left, KeyModifiers::CONTROL))
+            && let Some(new_pane) = layout[self.current_pane].left
         {
-            if let Some(new_pane) = layout[self.current_pane].left {
-                self.current_pane = new_pane;
-            }
+            self.current_pane = new_pane;
         }
 
-        if ctx.key_with_modifiers(KeyCode::Char('l'), KeyModifiers::CONTROL)
-            || ctx.key_with_modifiers(KeyCode::Right, KeyModifiers::CONTROL)
+        if (ctx.key_with_modifiers(KeyCode::Char('l'), KeyModifiers::CONTROL)
+            || ctx.key_with_modifiers(KeyCode::Right, KeyModifiers::CONTROL))
+            && let Some(new_pane) = layout[self.current_pane].right
         {
-            if let Some(new_pane) = layout[self.current_pane].right {
-                self.current_pane = new_pane;
-            }
+            self.current_pane = new_pane;
         }
 
-        if ctx.key_with_modifiers(KeyCode::Char('j'), KeyModifiers::CONTROL)
-            || ctx.key_with_modifiers(KeyCode::Down, KeyModifiers::CONTROL)
+        if (ctx.key_with_modifiers(KeyCode::Char('j'), KeyModifiers::CONTROL)
+            || ctx.key_with_modifiers(KeyCode::Down, KeyModifiers::CONTROL))
+            && let Some(new_pane) = layout[self.current_pane].down
         {
-            if let Some(new_pane) = layout[self.current_pane].down {
-                self.current_pane = new_pane;
-            }
+            self.current_pane = new_pane;
         }
 
-        if ctx.key_with_modifiers(KeyCode::Char('k'), KeyModifiers::CONTROL)
-            || ctx.key_with_modifiers(KeyCode::Up, KeyModifiers::CONTROL)
+        if (ctx.key_with_modifiers(KeyCode::Char('k'), KeyModifiers::CONTROL)
+            || ctx.key_with_modifiers(KeyCode::Up, KeyModifiers::CONTROL))
+            && let Some(new_pane) = layout[self.current_pane].up
         {
-            if let Some(new_pane) = layout[self.current_pane].up {
-                self.current_pane = new_pane;
-            }
+            self.current_pane = new_pane;
         }
 
         self.panes[self.current_pane].handle_keys(ctx);
@@ -83,71 +80,71 @@ impl PaneManager {
 }
 
 struct Neighbours {
-    left: Option<usize>,
+    left:  Option<usize>,
     right: Option<usize>,
-    up: Option<usize>,
-    down: Option<usize>,
+    up:    Option<usize>,
+    down:  Option<usize>,
 }
 
 const TWO_PANES: [Neighbours; 2] = [
     Neighbours {
-        left: None,
+        left:  None,
         right: Some(1),
-        up: None,
-        down: None,
+        up:    None,
+        down:  None,
     },
     Neighbours {
-        left: Some(0),
+        left:  Some(0),
         right: None,
-        up: None,
-        down: None,
+        up:    None,
+        down:  None,
     },
 ];
 
 const THREE_PANES: [Neighbours; 3] = [
     Neighbours {
-        left: None,
+        left:  None,
         right: Some(1),
-        up: None,
-        down: None,
+        up:    None,
+        down:  None,
     },
     Neighbours {
-        left: Some(0),
+        left:  Some(0),
         right: None,
-        up: None,
-        down: Some(2),
+        up:    None,
+        down:  Some(2),
     },
     Neighbours {
-        left: Some(0),
+        left:  Some(0),
         right: None,
-        up: Some(1),
-        down: None,
+        up:    Some(1),
+        down:  None,
     },
 ];
 
 const FOUR_PANES: [Neighbours; 4] = [
     Neighbours {
-        left: None,
+        left:  None,
         right: Some(1),
-        up: None,
-        down: Some(4),
+        up:    None,
+        down:  Some(4),
     },
     Neighbours {
-        left: Some(0),
+        left:  Some(0),
         right: None,
-        up: None,
-        down: Some(2),
+        up:    None,
+        down:  Some(2),
     },
     Neighbours {
-        left: Some(4),
+        left:  Some(4),
         right: None,
-        up: Some(1),
-        down: None,
+        up:    Some(1),
+        down:  None,
     },
     Neighbours {
-        left: None,
+        left:  None,
         right: Some(3),
-        up: Some(0),
-        down: None,
+        up:    Some(0),
+        down:  None,
     },
 ];

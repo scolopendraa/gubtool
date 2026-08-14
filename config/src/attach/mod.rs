@@ -2,19 +2,22 @@ pub mod attach_config_error;
 pub mod ds2_attach;
 pub mod er_attach;
 
-use crate::{
-    Config,
-    attach::{
-        attach_config_error::ApplyAttachError, ds2_attach::Ds2AttachConfig,
-        er_attach::ErAttachConfig,
+use {
+    crate::{
+        Config,
+        attach::{
+            attach_config_error::ApplyAttachError,
+            ds2_attach::Ds2AttachConfig,
+            er_attach::ErAttachConfig,
+        },
     },
-};
-use gubtool_core::appdata::{AppDataError, app_data_dir, log_error};
-use serde::{Deserialize, Serialize};
-use std::{
-    fs,
-    path::PathBuf,
-    sync::{LazyLock, RwLock, RwLockReadGuard},
+    gubtool_core::appdata::{AppDataError, app_data_dir, log_error},
+    serde::{Deserialize, Serialize},
+    std::{
+        fs,
+        path::PathBuf,
+        sync::{LazyLock, RwLock, RwLockReadGuard},
+    },
 };
 
 pub(crate) static CONFIG: LazyLock<RwLock<AttachConfig>> = LazyLock::new(|| {
@@ -63,9 +66,7 @@ impl Config for AttachConfig {
     }
 
     fn update<F>(modifier: F) -> Result<(), AppDataError>
-    where
-        F: FnOnce(&mut AttachConfig),
-    {
+    where F: FnOnce(&mut AttachConfig) {
         let mut toml = Self::read().unwrap_or_default();
         modifier(&mut toml);
         toml.write()
@@ -85,7 +86,9 @@ pub fn apply_attach_entries(attach_entries: &[&dyn AttachEntry]) -> Result<(), A
         let _ = log_error(&err);
     }
     if len > 0 {
-        return Err(ApplyAttachError { error_count: len });
+        return Err(ApplyAttachError {
+            error_count: len,
+        });
     }
     Ok(())
 }
@@ -100,11 +103,13 @@ macro_rules! impl_attach_field_bool {
         shared::declare_command!($struct_name);
 
         impl shared::command::ToggleCommand for $struct_name {
-            fn is(&self) -> gubtool_core::sys::error::ProcResult<bool> {
+            fn is(&self) -> gubtool_core::sys::sys_error::ProcResult<bool> {
                 Ok(config::attach::read_config().$game.$field)
             }
             fn set(&self, state: bool) -> anyhow::Result<()> {
-                <config::attach::AttachConfig as config::Config>::update(|c| { c.$game.$field = state; })?;
+                <config::attach::AttachConfig as config::Config>::update(|c| {
+                    c.$game.$field = state;
+                })?;
                 Ok(())
             }
         }
@@ -126,12 +131,14 @@ macro_rules! impl_attach_field_f32 {
     ($struct_name:ident, $game:ident, $field:ident, $command_struct:path) => {
         shared::declare_command!($struct_name);
 
-        impl shared::command::OptionCommand::<f32> for $struct_name {
+        impl shared::command::OptionCommand<f32> for $struct_name {
             fn get(&self) -> Option<f32> {
                 config::attach::read_config().$game.$field
             }
             fn set(&self, val: Option<f32>) -> anyhow::Result<()> {
-                <config::attach::AttachConfig as config::Config>::update(|c| { c.$game.$field = val; })?;
+                <config::attach::AttachConfig as config::Config>::update(|c| {
+                    c.$game.$field = val;
+                })?;
                 Ok(())
             }
         }

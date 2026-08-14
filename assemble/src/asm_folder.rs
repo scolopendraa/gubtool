@@ -1,5 +1,7 @@
-use serde::{Deserialize, Serialize};
-use std::collections::{HashMap, VecDeque};
+use {
+    serde::{Deserialize, Serialize},
+    std::collections::{HashMap, VecDeque},
+};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AsmFolder {
@@ -12,7 +14,9 @@ impl AsmFolder {
             .into_iter()
             .map(|fun| (fun.name.clone(), fun))
             .collect();
-        Self { functions: map }
+        Self {
+            functions: map,
+        }
     }
 
     pub fn get_function(&self, name: &'static str) -> AsmFunction {
@@ -28,8 +32,8 @@ impl AsmFolder {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AsmFunction {
-    name: String,
-    bytes: Vec<u8>,
+    name:        String,
+    bytes:       Vec<u8>,
     relocations: VecDeque<Relocation>,
 }
 
@@ -65,7 +69,8 @@ impl AsmFunction {
 
     #[track_caller]
     pub fn reloc_find(&mut self, name: &'static str) -> u64 {
-        let pos = self.relocations
+        let pos = self
+            .relocations
             .iter()
             .position(|s| s.symbol == name)
             .unwrap();
@@ -82,6 +87,9 @@ pub struct Relocation {
 
 impl Relocation {
     pub fn new(symbol: String, offset: u64) -> Self {
-        Self { symbol, offset }
+        Self {
+            symbol,
+            offset,
+        }
     }
 }

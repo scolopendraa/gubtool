@@ -1,6 +1,8 @@
-use crate::{AsmFolder, AsmFunction, Relocation};
-use object::{Object, ObjectSection, ObjectSymbol, RelocationTarget};
-use std::{collections::VecDeque, env, fs, path::PathBuf, process::Command};
+use {
+    crate::{AsmFolder, AsmFunction, Relocation},
+    object::{Object, ObjectSection, ObjectSymbol, RelocationTarget},
+    std::{collections::VecDeque, env, fs, path::PathBuf, process::Command},
+};
 
 pub fn build(folders: &[(&'static str, &'static str, bool)]) {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
@@ -30,7 +32,7 @@ pub fn build(folders: &[(&'static str, &'static str, bool)]) {
             let status = cmd.status().unwrap();
             assert!(status.success(), "failed to assemble {:?}", file_path);
 
-            println!("cargo:rerun-if-changed={}", &file_path.display());
+            println!("cargo:rerun-if-changed={}", file_path.display());
 
             let mut relocations: VecDeque<Relocation> = VecDeque::new();
 
@@ -41,21 +43,14 @@ pub fn build(folders: &[(&'static str, &'static str, bool)]) {
             let text = section.data().unwrap();
 
             for (offset, reloc) in section.relocations() {
-                match reloc.target() {
-                    RelocationTarget::Symbol(symbol_index) => {
-                        let symbol = obj_file.symbol_by_index(symbol_index).unwrap();
-                        relocations
-                            .push_back(Relocation::new(symbol.name().unwrap().to_string(), offset));
-                    }
-                    _ => (),
+                if let RelocationTarget::Symbol(symbol_index) = reloc.target() {
+                    let symbol = obj_file.symbol_by_index(symbol_index).unwrap();
+                    relocations
+                        .push_back(Relocation::new(symbol.name().unwrap().to_string(), offset));
                 }
             }
 
-            functions.push(AsmFunction::new(
-                file_stem.to_string(),
-                text.to_vec(),
-                relocations,
-            ));
+            functions.push(AsmFunction::new(file_stem.to_string(), text.to_vec(), relocations));
         }
 
         let folder = AsmFolder::new(functions);
@@ -63,6 +58,6 @@ pub fn build(folders: &[(&'static str, &'static str, bool)]) {
         let out_file = out_dir.join(format!("{name}.bin"));
         fs::write(&out_file, encoded).unwrap();
 
-        println!("cargo:rerun-if-changed={}", &path);
+        println!("cargo:rerun-if-changed={}", path);
     }
 }

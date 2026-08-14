@@ -16,45 +16,58 @@ pub mod talismans;
 pub mod upgrade_materials;
 pub mod weapons;
 
-use crate::resources::items::{
-    armor::ARMOR, arrows::ARROWS, ashes_of_war::ASHES_OF_WAR, bell_bearings::BELL_BEARINGS,
-    consumables::CONSUMABLES, cookbooks::COOKBOOKS, crafting_materials::CRAFTING_MATERIALS,
-    crystal_tears::CRYSTAL_TEARS, incantations::INCANTATIONS, key_items::KEY_ITEMS,
-    pots_and_perfumes::POTS_AND_PERFUMES, prattling_pate::PRATTLING_PATE, sorceries::SORCERIES,
-    spirit_ashes::SPIRIT_ASHES, talismans::TALISMANS, upgrade_materials::UPGRADE_MATERIALS,
-    weapons::WEAPONS,
+use {
+    crate::resources::items::{
+        armor::ARMOR,
+        arrows::ARROWS,
+        ashes_of_war::ASHES_OF_WAR,
+        bell_bearings::BELL_BEARINGS,
+        consumables::CONSUMABLES,
+        cookbooks::COOKBOOKS,
+        crafting_materials::CRAFTING_MATERIALS,
+        crystal_tears::CRYSTAL_TEARS,
+        incantations::INCANTATIONS,
+        key_items::KEY_ITEMS,
+        pots_and_perfumes::POTS_AND_PERFUMES,
+        prattling_pate::PRATTLING_PATE,
+        sorceries::SORCERIES,
+        spirit_ashes::SPIRIT_ASHES,
+        talismans::TALISMANS,
+        upgrade_materials::UPGRADE_MATERIALS,
+        weapons::WEAPONS,
+    },
+    clap::ValueEnum,
+    once_cell::sync::Lazy,
+    std::fmt,
 };
-use clap::ValueEnum;
-use once_cell::sync::Lazy;
-use std::fmt;
 
 #[derive(Clone, Copy)]
 pub struct Item {
-    pub id: u32,
-    pub name: &'static str,
-    pub stack_size: i32,
-    pub max_storage: i32,
-    pub category: Categories,
-    pub weapon_type: Option<u8>,
+    pub id:             u32,
+    pub name:           &'static str,
+    pub stack_size:     i32,
+    pub max_storage:    i32,
+    pub category:       Categories,
+    pub weapon_type:    Option<u8>,
     pub gem_mount_type: Option<u8>,
-    pub upgrade_type: Option<u8>,
-    pub event_id: Option<u32>,
-    pub dlc: bool,
+    pub upgrade_type:   Option<u8>,
+    pub event_id:       Option<u32>,
+    pub dlc:            bool,
 }
 
 impl Item {
     const fn default() -> Self {
         Self {
-            id: 0,
-            name: "",
-            stack_size: 1,
-            max_storage: 1,
-            category: Categories::Armor,
-            weapon_type: None,
+            id:             0,
+            name:           "",
+            stack_size:     1,
+            max_storage:    1,
+            category:       Categories::Armor,
+            weapon_type:    None,
             gem_mount_type: None,
-            upgrade_type: None,
-            event_id: None,
-            dlc: false,
+            upgrade_type:   None,
+            event_id:       None,
+            dlc:            false,
         }
     }
 }

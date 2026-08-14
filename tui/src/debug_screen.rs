@@ -1,15 +1,18 @@
-use crate::{
-    darksouls2_screen, eldenring_screen,
-    event::KeyContext,
-    popup::{Popup, PopupState},
-    screen::Screen,
-};
-use gubtool_core::{attached, game_version::Game};
-use ratatui::{
-    Frame,
-    layout::Rect,
-    text::{Line, Text},
-    widgets::{Paragraph, Wrap},
+use {
+    crate::{
+        darksouls2_screen,
+        eldenring_screen,
+        event::KeyContext,
+        popup::{Popup, PopupState},
+        screen::Screen,
+    },
+    gubtool_core::{attached, game_version::Game},
+    ratatui::{
+        Frame,
+        layout::Rect,
+        text::{Line, Text},
+        widgets::{Paragraph, Wrap},
+    },
 };
 
 #[derive(Default)]
@@ -35,24 +38,27 @@ impl Popup for DebugPopup {
 impl Screen for DebugPopup {
     fn draw(&mut self, frame: &mut Frame, rect: Rect) {
         let mut debug_info = vec![
-            format!("comm: {}", attached::comm().unwrap_or("")),
-            format!("exe_path: {:#?}", attached::path()),
+            format!("comm: {:?}", attached::comm()),
+            format!("exe_path: {:?}", attached::path()),
             format!("module_base: {:#X}", attached::module_base()),
             format!("is 32 bit: {}", attached::is_32()),
             format!("process uptime: {:.1}", attached::uptime()),
-            format!("\n"),
+            format!("port: {:?}", attached::port()),
+            "\n".to_string(),
         ];
 
         match attached::game() {
-            Some(Game::DarkSouls2) => debug_info.append(&mut darksouls2_screen::dbg_lines()),
-            Some(Game::EldenRing) => debug_info.append(&mut eldenring_screen::dbg_lines()),
-            None => (),
+            Ok(Game::DarkSouls2) => debug_info.append(&mut darksouls2_screen::dbg_lines()),
+            Ok(Game::EldenRing) => debug_info.append(&mut eldenring_screen::dbg_lines()),
+            Err(_) => (),
         }
         let lines: Vec<Line> = debug_info
             .iter()
             .map(|f| Line::raw(f.to_string()))
             .collect();
-        let paragraph = Paragraph::new(Text::from(lines)).wrap(Wrap { trim: false });
+        let paragraph = Paragraph::new(Text::from(lines)).wrap(Wrap {
+            trim: false,
+        });
         frame.render_widget(paragraph, rect);
     }
 }

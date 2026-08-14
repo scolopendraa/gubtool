@@ -1,9 +1,11 @@
-use crate::{event::KeyContext, screen::Screen};
-use crossterm::event::{KeyCode, KeyModifiers};
-use ratatui::{
-    Frame,
-    layout::{Constraint, Direction, Layout, Rect},
-    widgets::Clear,
+use {
+    crate::{event::KeyContext, screen::Screen},
+    crossterm::event::{KeyCode, KeyModifiers},
+    ratatui::{
+        Frame,
+        layout::{Constraint, Direction, Layout, Rect},
+        widgets::Clear,
+    },
 };
 
 pub trait Popup {
@@ -39,7 +41,7 @@ pub trait Popup {
         ctx.key_char('q') | ctx.key_with_modifiers(KeyCode::Esc, KeyModifiers::NONE)
     }
 
-    fn handle_keys_if_open(&mut self, ctx: &mut KeyContext) -> bool{
+    fn handle_keys_if_open(&mut self, ctx: &mut KeyContext) -> bool {
         if self.is_open() {
             self.screen().handle_keys(ctx);
 

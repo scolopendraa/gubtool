@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+anyhow = { workspace = true }
 bincode = { workspace = true }
 pelite = { workspace = true }
 serde = { workspace = true }
@@ -33,3 +34,6 @@ nix = { version = "0.31.1", features = ["ptrace", "uio", "signal"] }
 
 [build-dependencies]
 assemble = { version = "0.1.0", path = "../assemble" }
+
+[lints]
+workspace = true

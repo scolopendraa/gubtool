@@ -1,6 +1,8 @@
-use crate::{act_array::ActArray, parse_input::ParseInput};
-use gubtool_core::sys::error::ProcResult;
-use std::fmt::Display;
+use {
+    crate::{act_array::ActArray, parse_input::ParseInput},
+    gubtool_core::sys::sys_error::ProcResult,
+    std::fmt::Display,
+};
 
 pub enum Command {
     Unit(&'static dyn UnitCommand),

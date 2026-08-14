@@ -2,8 +2,10 @@ pub mod fuzzy_finder;
 mod input;
 pub mod input_prompt;
 
-use crate::event::{Event, send_event};
-use input::Input;
+use {
+    crate::event::{Event, send_event},
+    input::Input,
+};
 
 pub async fn request_input<T: shared::parse_input::ParseInput + 'static>(
     prompt: Option<&'static str>,

@@ -1,13 +1,13 @@
-use crate::{common::tabs::TabManager, event::KeyContext, panes::PaneManager};
-use ratatui::{Frame, layout::Rect};
+use {
+    crate::{common::tabs::TabManager, event::KeyContext, panes::PaneManager},
+    ratatui::{Frame, layout::Rect},
+};
 
 pub trait Screen {
     fn draw(&mut self, frame: &mut Frame, rect: Rect);
-    fn handle_keys(&mut self, _ctx: &mut KeyContext) {
-    }
+    fn handle_keys(&mut self, _ctx: &mut KeyContext) {}
     fn boxed(self) -> Box<Self>
-    where Self: Sized
-    {
+    where Self: Sized {
         Box::new(self)
     }
 }

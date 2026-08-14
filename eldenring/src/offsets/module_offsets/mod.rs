@@ -2,8 +2,10 @@ pub mod scan;
 mod structs;
 mod versions;
 
-use crate::offsets::module_offsets::structs::module_offsets;
-use gubtool_core::{address::Address, attached::module_base};
+use {
+    crate::offsets::module_offsets::structs::module_offsets,
+    gubtool_core::{address::Address, attached::module_base},
+};
 
 #[derive(Clone, Copy)]
 pub enum BasePointer {
@@ -74,6 +76,7 @@ pub enum Data {
 pub enum ExternalFunctionPointer {
     Kernel32CreateThread,
     Kernel32CloseHandle,
+    Kernel32LoadLibraryW,
 }
 
 impl Address for BasePointer {
@@ -172,6 +175,7 @@ impl Address for ExternalFunctionPointer {
         let offset = match self {
             Self::Kernel32CreateThread => f.kernel32_create_thread,
             Self::Kernel32CloseHandle => f.kernel32_close_handle,
+            Self::Kernel32LoadLibraryW => f.kernel32_load_library_w,
         };
         module_base() + offset
     }

@@ -1,28 +1,30 @@
-use crate::{
-    event,
-    mem::*,
-    offsets::{
-        ChainReadExt,
-        code_cave::CaveAddress,
-        module_offsets::{BasePointer, Function},
+use {
+    crate::{
+        event,
+        mem::*,
+        offsets::{ChainReadExt, code_cave::CaveAddress, module_offsets::Function},
+        player,
+        pointer_cache::ResolvedPtr,
+        resources::{
+            ASM,
+            bosses::{BOSSES, Boss},
+            talk_commands::TalkCommand,
+        },
+        utils::{dlc_check, player_loaded_check},
     },
-    player,
-    pointer_cache::ResolvedPtr,
-    resources::{
-        ASM,
-        bosses::{BOSSES, Boss},
-        talk_commands::TalkCommand,
+    anyhow::ensure,
+    gubtool_core::{
+        address::Address,
+        slice_ops::*,
+        sys::{ipc::CppValue, sys_error::ProcResult},
     },
-    utils::{dlc_check, player_loaded_check},
+    shared::{
+        command::{ToggleCommand, UnitCommand},
+        declare_command,
+        event_log::{EventLog, EventLogger},
+    },
+    std::fmt::Display,
 };
-use anyhow::ensure;
-use gubtool_core::{address::Address, slice_ops::*, sys::error::ProcResult};
-use shared::{
-    command::{ToggleCommand, UnitCommand},
-    declare_command,
-    event_log::{EventLog, EventLogger},
-};
-use std::fmt::Display;
 
 pub fn get_event(event_id: u32) -> ProcResult<bool> {
     if let Some((data_ptr, block_offset)) = event_flag_lookup(event_id)? {
@@ -36,33 +38,29 @@ pub fn get_event(event_id: u32) -> ProcResult<bool> {
 pub fn set_event(event_id: u32, state: bool) -> anyhow::Result<()> {
     player_loaded_check()?;
 
-    let mut fun = ASM.get_function("set_event");
-    let mut asm = fun.take_bytes();
+    let args = [
+        CppValue::uintptr_t(ResolvedPtr::VirtualMemFlag.get()?),
+        CppValue::uint32_t(event_id),
+        CppValue::uint8_t(state as u8),
+    ];
 
-    write_addr_to_slice(&mut asm, fun.reloc("virt_mem_flag"), BasePointer::VirtualMemFlag)?;
-    write_to_slice::<u32>(&mut asm, fun.reloc("event_id"), event_id)?;
-    write_to_slice::<u32>(&mut asm, fun.reloc("state"), state)?;
-    write_addr_to_slice(&mut asm, fun.reloc_find("fn_set_event"), Function::SetEvent)?;
-
-    spawn_thread_join(CaveAddress::SetEventAsm, asm)?;
-    Ok(())
+    run_game_function(Function::SetEvent, &args)
 }
 
 struct VirtMemInfo {
-    block_size: u32,
-    stride: u32,
-    mem_base: u64,
+    block_size:       u32,
+    stride:           u32,
+    mem_base:         u64,
     lookup_tree_root: u64,
 }
 
 impl VirtMemInfo {
     pub fn read() -> ProcResult<Self> {
-        let bytes = ResolvedPtr::VirtualMemFlag.get()
-            .read::<[u8; 0x40]>()?;
+        let bytes = ResolvedPtr::VirtualMemFlag.get().read::<[u8; 0x40]>()?;
         Ok(Self {
-            block_size: read_from_slice::<u32>(&bytes, 0x1C)?,
-            stride: read_from_slice::<u32>(&bytes, 0x20)?,
-            mem_base: read_from_slice::<u64>(&bytes, 0x28)?,
+            block_size:       read_from_slice::<u32>(&bytes, 0x1c)?,
+            stride:           read_from_slice::<u32>(&bytes, 0x20)?,
+            mem_base:         read_from_slice::<u64>(&bytes, 0x28)?,
             lookup_tree_root: read_from_slice::<u64>(&bytes, 0x38)?,
         })
     }
@@ -70,24 +68,24 @@ impl VirtMemInfo {
 
 #[derive(Clone, Copy)]
 struct Node {
-    left_child: u64,
+    left_child:  u64,
     right_child: u64,
-    is_leaf: bool,
-    block_idx: u32,
-    block_type: u32,
-    data_idx: u32,
+    is_leaf:     bool,
+    block_idx:   u32,
+    block_type:  u32,
+    data_idx:    u32,
 }
 
 impl Node {
     fn read_at(address: u64) -> ProcResult<Self> {
         let bytes = read::<[u8; 0x34]>(address)?;
         Ok(Self {
-            left_child: read_from_slice::<u64>(&bytes, 0x0)?,
+            left_child:  read_from_slice::<u64>(&bytes, 0x0)?,
             right_child: read_from_slice::<u64>(&bytes, 0x10)?,
-            is_leaf: read_from_slice::<u8>(&bytes, 0x19)? != 0x0,
-            block_idx: read_from_slice::<u32>(&bytes, 0x20)?,
-            block_type: read_from_slice::<u32>(&bytes, 0x28)?,
-            data_idx: read_from_slice::<u32>(&bytes, 0x30)?,
+            is_leaf:     read_from_slice::<u8>(&bytes, 0x19)? != 0x0,
+            block_idx:   read_from_slice::<u32>(&bytes, 0x20)?,
+            block_type:  read_from_slice::<u32>(&bytes, 0x28)?,
+            data_idx:    read_from_slice::<u32>(&bytes, 0x30)?,
         })
     }
 }
@@ -114,7 +112,9 @@ fn event_flag_lookup(event_id: u32) -> ProcResult<Option<(u64, u32)>> {
             current_node_ptr = current_node.left_child;
         };
     }
-    if let Some(node) = last_valid_node && node.block_idx <= block_idx {
+    if let Some(node) = last_valid_node
+        && node.block_idx <= block_idx
+    {
         let data_ptr = match node.block_type {
             1 => node.data_idx as u64 * virt_mem_info.stride as u64 + virt_mem_info.mem_base,
             2 => node.data_idx as u64,
@@ -122,28 +122,40 @@ fn event_flag_lookup(event_id: u32) -> ProcResult<Option<(u64, u32)>> {
         };
 
         if data_ptr == 0x0 {
-            return Ok(None)
+            return Ok(None);
         }
         return Ok(Some((data_ptr, block_offset)));
     }
     Ok(None)
 }
 
-pub fn execute_talk_command(command_id: i32, params: &'static [i32], chr_handle: u64) -> ProcResult {
+pub fn execute_talk_command(
+    command_id: i32,
+    params: &'static [i32],
+    chr_handle: u64,
+) -> anyhow::Result<()> {
     let params: Vec<u8> = params.iter().flat_map(|&x| x.to_le_bytes()).collect();
 
     let mut fun = ASM.get_function("execute_talk_command");
     let mut asm = fun.take_bytes();
 
     write_to_slice::<i32>(&mut asm, fun.reloc("command_id"), command_id)?;
-    write_addr_to_slice(&mut asm, fun.reloc("fn_external_event_temp_ctor"), Function::ExternalEventTempCtor)?;
+    write_addr_to_slice(
+        &mut asm,
+        fun.reloc("fn_external_event_temp_ctor"),
+        Function::ExternalEventTempCtor,
+    )?;
     write_addr_to_slice(&mut asm, fun.reloc("chr_handle"), chr_handle)?;
     write_to_slice::<i32>(&mut asm, fun.reloc("params_len"), params.len())?;
     write_addr_to_slice(&mut asm, fun.reloc("params_loc"), CaveAddress::EzStateParams)?;
-    write_addr_to_slice(&mut asm, fun.reloc("fn_execute_talk_command"), Function::ExecuteTalkCommand)?;
+    write_addr_to_slice(
+        &mut asm,
+        fun.reloc("fn_execute_talk_command"),
+        Function::ExecuteTalkCommand,
+    )?;
 
     write_bytes(CaveAddress::EzStateParams, &params)?;
-    spawn_thread_join(CaveAddress::EzStateTalkAsm, asm)
+    run_custom_function(asm)
 }
 
 impl TalkCommand {
@@ -162,8 +174,7 @@ impl TalkCommand {
             execute_talk_command(49, &[6001, 234], 0)?;
             execute_talk_command(49, &[6001, 235], 0)?;
         }
-        execute_talk_command(self.command_id, self.params, handle)?;
-        Ok(())
+        execute_talk_command(self.command_id, self.params, handle)
     }
 }
 
@@ -197,19 +208,12 @@ impl EventLogger for ErEventLogger {
     }
 }
 
-declare_command!(
-    EventLogHook,
-    FightFortissax,
-    FightEldenBeast,
-    UnlockMetyr,
-    DlcClear,
-);
+declare_command!(EventLogHook, FightFortissax, FightEldenBeast, UnlockMetyr, DlcClear,);
 
-const EVENT_LOG_HOOK_ORIGINAL: [u8; 5] = [0x48, 0x89, 0x5C, 0x24, 0x08];
+const EVENT_LOG_HOOK_ORIGINAL: [u8; 5] = [0x48, 0x89, 0x5c, 0x24, 0x08];
 impl ToggleCommand for EventLogHook {
     fn is(&self) -> ProcResult<bool> {
-        read::<[u8; 5]>(Function::SetEvent)
-            .map(|bytes| bytes != EVENT_LOG_HOOK_ORIGINAL)
+        read::<[u8; 5]>(Function::SetEvent).map(|bytes| bytes != EVENT_LOG_HOOK_ORIGINAL)
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
         match state {
@@ -219,9 +223,19 @@ impl ToggleCommand for EventLogHook {
                 let mut fun = ASM.get_function("event_log");
                 let mut asm = fun.take_bytes();
 
-                write_addr_to_slice(&mut asm, fun.reloc("write_index"), CaveAddress::EventLogWriteIdx)?;
+                write_addr_to_slice(
+                    &mut asm,
+                    fun.reloc("write_index"),
+                    CaveAddress::EventLogWriteIdx,
+                )?;
                 write_addr_to_slice(&mut asm, fun.reloc("buffer"), CaveAddress::EventLogBuffer)?;
-                write_rel_i32(&mut asm, location, fun.reloc("hook_loc"), Function::SetEvent.add_offset(5), 4)?;
+                write_rel_i32(
+                    &mut asm,
+                    location,
+                    fun.reloc("hook_loc"),
+                    Function::SetEvent.add_offset(5),
+                    4,
+                )?;
 
                 install_hook(&asm, location, Function::SetEvent, 5)?;
             }
@@ -260,9 +274,26 @@ impl UnitCommand for UnlockMetyr {
     fn execute(&self) -> anyhow::Result<()> {
         dlc_check()?;
         let events = [
-            2050400600, 2053460600, 2051459226, 2051459228, 2051459229, 2051459230, 2051455023,
-            2051459249, 2051452717, 2050407000, 400662, 4856, 4855, 4854, 4849, 2051452718, 2051459213,
-            2051450715, 9440, 2051450180,
+            2050400600,
+            2053460600,
+            2051459226,
+            2051459228,
+            2051459229,
+            2051459230,
+            2051455023,
+            2051459249,
+            2051452717,
+            2050407000,
+            400662,
+            4856,
+            4855,
+            4854,
+            4849,
+            2051452718,
+            2051459213,
+            2051450715,
+            9440,
+            2051450180,
         ];
         events.iter().try_for_each(|&i| set_event(i, true))?;
         Ok(())
@@ -270,7 +301,9 @@ impl UnitCommand for UnlockMetyr {
 }
 
 pub fn mass_revive(first_encounter: bool) -> anyhow::Result<()> {
-    BOSSES.iter().try_for_each(|boss| boss.revive(first_encounter))
+    BOSSES
+        .iter()
+        .try_for_each(|boss| boss.revive(first_encounter))
 }
 
 impl Boss {
@@ -308,7 +341,7 @@ impl Boss {
 pub enum AliveStatus {
     Dead,
     Alive,
-    AliveSecondEncounter
+    AliveSecondEncounter,
 }
 
 impl Display for AliveStatus {

@@ -1,37 +1,39 @@
-use crate::{
-    common::{
-        controls::{Control, draw_controls},
-        helpers::bordered_block,
+use {
+    crate::{
+        common::{
+            controls::{Control, draw_controls},
+            helpers::bordered_block,
+        },
+        event::KeyContext,
+        panes::{Pane, TableController, TableControllerSource},
+        screen::Screen,
+        theme::{get_theme_version, theme},
     },
-    event::KeyContext,
-    panes::{Pane, TableController, TableControllerSource},
-    screen::Screen,
-    theme::{get_theme_version, theme},
-};
-use crossterm::event::{KeyCode, KeyModifiers};
-use ratatui::{
-    Frame,
-    buffer::Buffer,
-    layout::{Constraint, Rect},
-    style::{Modifier, Stylize},
-    widgets::{Row, Table, TableState},
+    crossterm::event::{KeyCode, KeyModifiers},
+    ratatui::{
+        Frame,
+        buffer::Buffer,
+        layout::{Constraint, Rect},
+        style::{Modifier, Stylize},
+        widgets::{Row, Table, TableState},
+    },
 };
 
 pub struct TablePane {
-    pane_controller: TableControllerSource,
-    table: Table<'static>,
-    state: TableState,
-    size: usize,
-    is_frozen: bool,
+    pane_controller:   TableControllerSource,
+    table:             Table<'static>,
+    state:             TableState,
+    size:              usize,
+    is_frozen:         bool,
     is_non_selectable: bool,
-    has_header: bool,
-    title: Option<&'static str>,
-    controls: Option<&'static [Control]>,
-    theme_version: Option<usize>,
+    has_header:        bool,
+    title:             Option<&'static str>,
+    controls:          Option<&'static [Control]>,
+    theme_version:     Option<usize>,
 }
 
 pub struct TableView {
-    rows: Vec<Row<'static>>,
+    rows:   Vec<Row<'static>>,
     widths: Option<Widths>,
     header: Option<Row<'static>>,
 }
@@ -46,8 +48,7 @@ impl TableView {
     }
 
     pub fn with_widths<T>(mut self, widths: T) -> Self
-    where T: Into<Widths>
-    {
+    where T: Into<Widths> {
         self.widths = Some(widths.into());
         self
     }
@@ -78,9 +79,7 @@ impl TablePane {
     }
 
     pub fn new_owned<C>(table_controller: C) -> Self
-    where
-        C: TableController + 'static,
-    {
+    where C: TableController + 'static {
         let table = Table::default();
         let state = TableState::default().with_selected(Some(0));
         let pane_controller = TableControllerSource::Owned(Box::new(table_controller));
@@ -190,7 +189,8 @@ impl TablePane {
         let view = self.pane_controller.make_table_view();
         self.size = view.rows.len();
 
-        let widths = view.widths
+        let widths = view
+            .widths
             .unwrap_or(Widths::Static(&[Constraint::Fill(1)]));
 
         let mut table = Table::new(view.rows, widths.as_slice());
@@ -204,9 +204,7 @@ impl TablePane {
     }
     pub fn increment_saturating(&mut self, val: usize) {
         if let Some(idx) = self.selected() {
-            let new_idx = idx
-                .saturating_add(val)
-                .min(self.size.saturating_sub(1));
+            let new_idx = idx.saturating_add(val).min(self.size.saturating_sub(1));
             self.select(new_idx);
         }
     }
@@ -311,7 +309,11 @@ impl TablePane {
     fn highlight_row(&self, buf: &mut Buffer, area: Rect, active: bool) {
         if let Some(selected) = self.selected() {
             let theme = theme();
-            let top_left = if self.has_header { area.y + 1 } else { area.y };
+            let top_left = if self.has_header {
+                area.y + 1
+            } else {
+                area.y
+            };
             let y = top_left + selected as u16 - self.current_offset() as u16;
 
             for x in area.left()..area.right() {
@@ -354,8 +356,8 @@ impl<const N: usize> From<&'static [Constraint; N]> for Widths {
     }
 }
 
-impl Into<Widths> for Vec<Constraint> {
-    fn into(self) -> Widths {
-        Widths::Dynamic(self)
+impl From<Vec<Constraint>> for Widths {
+    fn from(value: Vec<Constraint>) -> Self {
+        Widths::Dynamic(value)
     }
 }

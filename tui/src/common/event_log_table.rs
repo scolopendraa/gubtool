@@ -1,18 +1,20 @@
-use crate::{
-    common::controls::Control,
-    event::{AnyhowExt, KeyContext, ResultExt, send_success},
-    panes::{TableController, TablePane, TableView},
-    theme::theme,
+use {
+    crate::{
+        common::controls::Control,
+        event::{AnyhowExt, KeyContext, ResultExt, send_success},
+        panes::{TableController, TablePane, TableView},
+        theme::theme,
+    },
+    ratatui::{
+        Frame,
+        layout::{Constraint, Offset, Rect},
+        style::Stylize,
+        text::Span,
+        widgets::{Cell, Row},
+    },
+    shared::event_log::EventLogger,
+    std::cell::RefCell,
 };
-use ratatui::{
-    Frame,
-    layout::{Constraint, Offset, Rect},
-    style::Stylize,
-    text::Span,
-    widgets::{Cell, Row},
-};
-use shared::event_log::EventLogger;
-use std::cell::RefCell;
 
 const CONTROLS: [Control; 3] = [
     Control::new("Enter", "Toggle"),
@@ -28,7 +30,13 @@ impl TableController for EventLogSelectable {
     fn make_table_view(&self) -> TableView {
         let _ = self.logger.borrow_mut().poll();
 
-        let rows = self.logger.borrow().entries().iter().enumerate().rev()
+        let rows = self
+            .logger
+            .borrow()
+            .entries()
+            .iter()
+            .enumerate()
+            .rev()
             .map(|(idx, record)| {
                 let state = match record.state {
                     true => Span::raw("TRUE").style(theme().success),
@@ -42,13 +50,7 @@ impl TableController for EventLogSelectable {
                 ])
             })
             .collect::<Vec<Row>>();
-        let header = Row::new([
-            "Index",
-            "Flag ID",
-            "State",
-            "Time Stamp",
-        ])
-        .bold();
+        let header = Row::new(["Index", "Flag ID", "State", "Time Stamp"]).bold();
 
         TableView::new(rows).with_header(header).with_widths(&[
             Constraint::Max(7),
@@ -71,7 +73,9 @@ impl TableController for EventLogSelectable {
         }
 
         if ctx.key_char('x') {
-            self.logger.borrow().export()
+            self.logger
+                .borrow()
+                .export()
                 .map(|path| send_success(format!("Exported to {}", path)))
                 .send_error();
         }

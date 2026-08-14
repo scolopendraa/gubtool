@@ -11,47 +11,47 @@ impl Item {
 
 pub static TALISMANS: [Item; 154] = [
     Item {
-        id: 0x200003E8,
+        id: 0x200003e8,
         name: "Crimson Amber Medallion",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200003E9,
+        id: 0x200003e9,
         name: "Crimson Amber Medallion +1",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200003EA,
+        id: 0x200003ea,
         name: "Crimson Amber Medallion +2",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200003F2,
+        id: 0x200003f2,
         name: "Cerulean Amber Medallion",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200003F3,
+        id: 0x200003f3,
         name: "Cerulean Amber Medallion +1",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200003F4,
+        id: 0x200003f4,
         name: "Cerulean Amber Medallion +2",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200003FC,
+        id: 0x200003fc,
         name: "Viridian Amber Medallion",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200003FD,
+        id: 0x200003fd,
         name: "Viridian Amber Medallion +1",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200003FE,
+        id: 0x200003fe,
         name: "Viridian Amber Medallion +2",
         ..Item::default_talismans()
     },
@@ -86,12 +86,12 @@ pub static TALISMANS: [Item; 154] = [
         ..Item::default_talismans()
     },
     Item {
-        id: 0x2000041A,
+        id: 0x2000041a,
         name: "Radagon's Scarseal",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x2000041B,
+        id: 0x2000041b,
         name: "Radagon's Soreseal",
         ..Item::default_talismans()
     },
@@ -101,7 +101,7 @@ pub static TALISMANS: [Item; 154] = [
         ..Item::default_talismans()
     },
     Item {
-        id: 0x2000042E,
+        id: 0x2000042e,
         name: "Prosthesis-Wearer Heirloom",
         ..Item::default_talismans()
     },
@@ -116,7 +116,7 @@ pub static TALISMANS: [Item; 154] = [
         ..Item::default_talismans()
     },
     Item {
-        id: 0x2000044C,
+        id: 0x2000044c,
         name: "Silver Scarab",
         ..Item::default_talismans()
     },
@@ -131,7 +131,7 @@ pub static TALISMANS: [Item; 154] = [
         ..Item::default_talismans()
     },
     Item {
-        id: 0x2000047E,
+        id: 0x2000047e,
         name: "Green Turtle Talisman",
         ..Item::default_talismans()
     },
@@ -156,87 +156,87 @@ pub static TALISMANS: [Item; 154] = [
         ..Item::default_talismans()
     },
     Item {
-        id: 0x2000049C,
+        id: 0x2000049c,
         name: "Clarifying Horn Charm",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x2000049D,
+        id: 0x2000049d,
         name: "Clarifying Horn Charm +1",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200004A6,
+        id: 0x200004a6,
         name: "Prince of Death's Pustule",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200004A7,
+        id: 0x200004a7,
         name: "Prince of Death's Cyst",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200004B0,
+        id: 0x200004b0,
         name: "Mottled Necklace",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200004B1,
+        id: 0x200004b1,
         name: "Mottled Necklace +1",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200004BA,
+        id: 0x200004ba,
         name: "Bull-Goat's Talisman",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200004C4,
+        id: 0x200004c4,
         name: "Marika's Scarseal",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200004C5,
+        id: 0x200004c5,
         name: "Marika's Soreseal",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200004CE,
+        id: 0x200004ce,
         name: "Warrior Jar Shard",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200004CF,
+        id: 0x200004cf,
         name: "Shard of Alexander",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200004E2,
+        id: 0x200004e2,
         name: "Millicent's Prosthesis",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200007D0,
+        id: 0x200007d0,
         name: "Magic Scorpion Charm",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200007DA,
+        id: 0x200007da,
         name: "Lightning Scorpion Charm",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200007E4,
+        id: 0x200007e4,
         name: "Fire Scorpion Charm",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200007EE,
+        id: 0x200007ee,
         name: "Sacred Scorpion Charm",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200007F8,
+        id: 0x200007f8,
         name: "Red-Feathered Branchsword",
         ..Item::default_talismans()
     },
@@ -246,7 +246,7 @@ pub static TALISMANS: [Item; 154] = [
         ..Item::default_talismans()
     },
     Item {
-        id: 0x2000080C,
+        id: 0x2000080c,
         name: "Spear Talisman",
         ..Item::default_talismans()
     },
@@ -266,7 +266,7 @@ pub static TALISMANS: [Item; 154] = [
         ..Item::default_talismans()
     },
     Item {
-        id: 0x2000082A,
+        id: 0x2000082a,
         name: "Dagger Talisman",
         ..Item::default_talismans()
     },
@@ -276,7 +276,7 @@ pub static TALISMANS: [Item; 154] = [
         ..Item::default_talismans()
     },
     Item {
-        id: 0x2000083E,
+        id: 0x2000083e,
         name: "Blue Dancer Charm",
         ..Item::default_talismans()
     },
@@ -291,7 +291,7 @@ pub static TALISMANS: [Item; 154] = [
         ..Item::default_talismans()
     },
     Item {
-        id: 0x2000085C,
+        id: 0x2000085c,
         name: "Lance Talisman",
         ..Item::default_talismans()
     },
@@ -306,7 +306,7 @@ pub static TALISMANS: [Item; 154] = [
         ..Item::default_talismans()
     },
     Item {
-        id: 0x2000087A,
+        id: 0x2000087a,
         name: "Kindred of Rot's Exultation",
         ..Item::default_talismans()
     },
@@ -316,7 +316,7 @@ pub static TALISMANS: [Item; 154] = [
         ..Item::default_talismans()
     },
     Item {
-        id: 0x2000088E,
+        id: 0x2000088e,
         name: "Roar Medallion",
         ..Item::default_talismans()
     },
@@ -326,167 +326,167 @@ pub static TALISMANS: [Item; 154] = [
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200008A2,
+        id: 0x200008a2,
         name: "Companion Jar",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200008AC,
+        id: 0x200008ac,
         name: "Perfumer's Talisman",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000BB8,
+        id: 0x20000bb8,
         name: "Graven-School Talisman",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000BB9,
+        id: 0x20000bb9,
         name: "Graven-Mass Talisman",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000BE0,
+        id: 0x20000be0,
         name: "Faithful's Canvas Talisman",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000BEA,
+        id: 0x20000bea,
         name: "Flock's Canvas Talisman",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000BF4,
+        id: 0x20000bf4,
         name: "Old Lord's Talisman",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000BFE,
+        id: 0x20000bfe,
         name: "Radagon Icon",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000C08,
+        id: 0x20000c08,
         name: "Primal Glintstone Blade",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000C12,
+        id: 0x20000c12,
         name: "Godfrey Icon",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000FA0,
+        id: 0x20000fa0,
         name: "Dragoncrest Shield Talisman",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000FA1,
+        id: 0x20000fa1,
         name: "Dragoncrest Shield Talisman +1",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000FA2,
+        id: 0x20000fa2,
         name: "Dragoncrest Shield Talisman +2",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000FA3,
+        id: 0x20000fa3,
         name: "Dragoncrest Greatshield Talisman",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000FAA,
+        id: 0x20000faa,
         name: "Spelldrake Talisman",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000FAB,
+        id: 0x20000fab,
         name: "Spelldrake Talisman +1",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000FAC,
+        id: 0x20000fac,
         name: "Spelldrake Talisman +2",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000FB4,
+        id: 0x20000fb4,
         name: "Flamedrake Talisman",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000FB5,
+        id: 0x20000fb5,
         name: "Flamedrake Talisman +1",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000FB6,
+        id: 0x20000fb6,
         name: "Flamedrake Talisman +2",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000FBE,
+        id: 0x20000fbe,
         name: "Boltdrake Talisman",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000FBF,
+        id: 0x20000fbf,
         name: "Boltdrake Talisman +1",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000FC0,
+        id: 0x20000fc0,
         name: "Boltdrake Talisman +2",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000FC8,
+        id: 0x20000fc8,
         name: "Haligdrake Talisman",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000FC9,
+        id: 0x20000fc9,
         name: "Haligdrake Talisman +1",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000FCA,
+        id: 0x20000fca,
         name: "Haligdrake Talisman +2",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000FD2,
+        id: 0x20000fd2,
         name: "Pearldrake Talisman",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000FD3,
+        id: 0x20000fd3,
         name: "Pearldrake Talisman +1",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000FD4,
+        id: 0x20000fd4,
         name: "Pearldrake Talisman +2",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000FDC,
+        id: 0x20000fdc,
         name: "Crucible Scale Talisman",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000FE6,
+        id: 0x20000fe6,
         name: "Crucible Feather Talisman",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000FF0,
+        id: 0x20000ff0,
         name: "Blue-Feathered Branchsword",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20000FFA,
+        id: 0x20000ffa,
         name: "Ritual Shield Talisman",
         ..Item::default_talismans()
     },
@@ -496,7 +496,7 @@ pub static TALISMANS: [Item; 154] = [
         ..Item::default_talismans()
     },
     Item {
-        id: 0x2000100E,
+        id: 0x2000100e,
         name: "Crucible Knot Talisman",
         ..Item::default_talismans()
     },
@@ -511,27 +511,27 @@ pub static TALISMANS: [Item; 154] = [
         ..Item::default_talismans()
     },
     Item {
-        id: 0x2000139C,
+        id: 0x2000139c,
         name: "Blessed Dew Talisman",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200013A6,
+        id: 0x200013a6,
         name: "Taker's Cameo",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200013B0,
+        id: 0x200013b0,
         name: "Godskin Swaddling Cloth",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200013BA,
+        id: 0x200013ba,
         name: "Assassin's Crimson Dagger",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200013C4,
+        id: 0x200013c4,
         name: "Assassin's Cerulean Dagger",
         ..Item::default_talismans()
     },
@@ -541,7 +541,7 @@ pub static TALISMANS: [Item; 154] = [
         ..Item::default_talismans()
     },
     Item {
-        id: 0x2000177A,
+        id: 0x2000177a,
         name: "Concealing Veil",
         ..Item::default_talismans()
     },
@@ -556,235 +556,235 @@ pub static TALISMANS: [Item; 154] = [
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200017A2,
+        id: 0x200017a2,
         name: "Shabriri's Woe",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200017AC,
+        id: 0x200017ac,
         name: "Daedicar's Woe",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200017B6,
+        id: 0x200017b6,
         name: "Sacrificial Twig",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200017C0,
+        id: 0x200017c0,
         name: "Furled Finger's Trick-Mirror",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200017CA,
+        id: 0x200017ca,
         name: "Host's Trick-Mirror",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x200017DE,
+        id: 0x200017de,
         name: "Ancestral Spirit's Horne",
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001B58,
+        id: 0x20001b58,
         name: "Crimson Amber Medallion +3",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001B62,
+        id: 0x20001b62,
         name: "Cerulean Amber Medallion +3",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001B6C,
+        id: 0x20001b6c,
         name: "Viridian Amber Medallion +3",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001B76,
+        id: 0x20001b76,
         name: "Two-Headed Turtle Talisman",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001B80,
+        id: 0x20001b80,
         name: "Stalwart Horn Charm +2",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001B8A,
+        id: 0x20001b8a,
         name: "Immunizing Horn Charm +2",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001B94,
+        id: 0x20001b94,
         name: "Clarifying Horn Charm +2",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001BA8,
+        id: 0x20001ba8,
         name: "Mottled Necklace +2",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001BB2,
+        id: 0x20001bb2,
         name: "Spelldrake Talisman +3",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001BBC,
+        id: 0x20001bbc,
         name: "Flamedrake Talisman +3",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001BC6,
+        id: 0x20001bc6,
         name: "Boltdrake Talisman +3",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001BD0,
+        id: 0x20001bd0,
         name: "Golden Braid",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001BDA,
+        id: 0x20001bda,
         name: "Pearldrake Talisman +3",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001BE4,
+        id: 0x20001be4,
         name: "Crimson Seed Talisman +1",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001BEE,
+        id: 0x20001bee,
         name: "Cerulean Seed Talisman +1",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001F40,
+        id: 0x20001f40,
         name: "Blessed Blue Dew Talisman",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001F4A,
+        id: 0x20001f4a,
         name: "Fine Crucible Feather Talisman",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001F54,
+        id: 0x20001f54,
         name: "Outer God Heirloom",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001F5E,
+        id: 0x20001f5e,
         name: "Shattered Stone Talisman",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001F68,
+        id: 0x20001f68,
         name: "Two-Handed Sword Talisman",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001F72,
+        id: 0x20001f72,
         name: "Crusade Insignia",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001F7C,
+        id: 0x20001f7c,
         name: "Aged One's Exultation",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001F86,
+        id: 0x20001f86,
         name: "Arrow's Soaring Sting Talisman",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001F9A,
+        id: 0x20001f9a,
         name: "Pearl Shield Talisman",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001FA4,
+        id: 0x20001fa4,
         name: "Dried Bouquet",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001FAE,
+        id: 0x20001fae,
         name: "Smithing Talisman",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001FB8,
+        id: 0x20001fb8,
         name: "Ailment Talisman",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001FC2,
+        id: 0x20001fc2,
         name: "Retaliatory Crossed-Tree",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001FCC,
+        id: 0x20001fcc,
         name: "Lacerating Crossed-Tree",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001FD6,
+        id: 0x20001fd6,
         name: "Sharpshot Talisman",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001FE0,
+        id: 0x20001fe0,
         name: "St. Trina's Smile",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001FEA,
+        id: 0x20001fea,
         name: "Talisman of the Dread",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001FF4,
+        id: 0x20001ff4,
         name: "Enraged Divine Beast",
         dlc: true,
         ..Item::default_talismans()
     },
     Item {
-        id: 0x20001FFE,
+        id: 0x20001ffe,
         name: "Beloved Stardust",
         dlc: true,
         ..Item::default_talismans()
@@ -802,7 +802,7 @@ pub static TALISMANS: [Item; 154] = [
         ..Item::default_talismans()
     },
     Item {
-        id: 0x2000201C,
+        id: 0x2000201c,
         name: "Rellana's Cameo",
         dlc: true,
         ..Item::default_talismans()

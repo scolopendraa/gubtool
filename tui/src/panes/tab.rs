@@ -1,19 +1,24 @@
-use crate::{
-    common::tabs::TabSelector,
-    event::KeyContext,
-    panes::{Pane, TablePane},
-    screen::Screen,
+use {
+    crate::{
+        common::tabs::TabSelector,
+        event::KeyContext,
+        panes::{Pane, TablePane},
+        screen::Screen,
+    },
+    ratatui::{Frame, layout::Rect},
 };
-use ratatui::{Frame, layout::Rect};
 
 pub struct TabPane {
-    lists: Vec<TablePane>,
+    lists:    Vec<TablePane>,
     selector: TabSelector,
 }
 
 impl TabPane {
     pub fn new(names: &'static [&'static str], lists: Vec<TablePane>) -> Self {
-        Self { lists, selector: TabSelector::new(names) }
+        Self {
+            lists,
+            selector: TabSelector::new(names),
+        }
     }
 
     fn current_list(&self) -> &TablePane {

@@ -1,20 +1,20 @@
-use crate::{
-    mem::read_address,
-    offsets::{
-        ChainReadExt,
-        game_manager_imp::{self, event_manager_offsets, game_data_manager_offsets},
-        module_offsets::BasePointer,
+use {
+    crate::{
+        mem::read_address,
+        offsets::{
+            ChainReadExt,
+            game_manager_imp::{self, event_manager_offsets, game_data_manager_offsets},
+            module_offsets::BasePointer,
+        },
+    },
+    gubtool_core::sys::sys_error::ProcResult,
+    std::{
+        collections::HashMap,
+        sync::{LazyLock, Mutex},
     },
 };
-use gubtool_core::sys::error::ProcResult;
-use std::{
-    collections::HashMap,
-    sync::{LazyLock, Mutex},
-};
 
-pub(crate) static POINTER_CACHE: LazyLock<PointerCache> = LazyLock::new(|| {
-    PointerCache::default()
-});
+pub(crate) static POINTER_CACHE: LazyLock<PointerCache> = LazyLock::new(PointerCache::default);
 
 #[derive(Default)]
 pub struct PointerCache {
@@ -44,9 +44,7 @@ impl PointerCache {
         }
 
         let resolved_pointer = match pointer {
-            ResolvedPtr::GameManagerImp => {
-                read_address(BasePointer::GameManagerImp)
-            }
+            ResolvedPtr::GameManagerImp => read_address(BasePointer::GameManagerImp),
             ResolvedPtr::GameDataManager => {
                 self.lookup(ResolvedPtr::GameManagerImp)
                     .read_offset(game_manager_imp::GAME_DATA_MANAGER)
@@ -102,5 +100,7 @@ impl ResolvedPtr {
 
 pub fn get_pointers() -> Vec<(String, u64)> {
     let map = POINTER_CACHE.map.lock().unwrap();
-    map.iter().map(|(name, addr)| (format!("{:?}", name), *addr)).collect()
+    map.iter()
+        .map(|(name, addr)| (format!("{:?}", name), *addr))
+        .collect()
 }

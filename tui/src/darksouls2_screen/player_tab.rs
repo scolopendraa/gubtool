@@ -1,38 +1,42 @@
-use crate::{
-    event::{KeyContext, ResultExt},
-    impl_tablecontroller_for_commands,
-    panes::{PaneManager, TableController, TablePane, TableView},
-    popup::{Popup, PopupState, centered_popup},
-    screen::Screen,
+use {
+    crate::{
+        event::{KeyContext, ResultExt},
+        impl_tablecontroller_for_commands,
+        panes::{PaneManager, TableController, TablePane, TableView},
+        popup::{Popup, PopupState, centered_popup},
+        screen::Screen,
+    },
+    crossterm::event::KeyCode,
+    darksouls2::{
+        covenant::{self, CovenantKind, covenants_with_progress},
+        player::{self, Stat},
+    },
+    ratatui::{
+        Frame,
+        layout::{Constraint, Direction, Layout, Rect},
+        style::Stylize,
+        widgets::Row,
+    },
+    shared::command::{Command, ValCmd},
 };
-use crossterm::event::KeyCode;
-use darksouls2::{
-    covenant::{self, CovenantKind, covenants_with_progress},
-    player::{self, Stat},
-};
-use ratatui::{
-    Frame,
-    layout::{Constraint, Direction, Layout, Rect},
-    style::Stylize,
-    widgets::Row,
-};
-use shared::command::{Command, ValCmd};
 
 pub(super) struct PlayerTab {
     pub pane_manager: PaneManager,
-    covenant_popup: CovenantPopup,
+    covenant_popup:   CovenantPopup,
 }
 
 impl PlayerTab {
     pub fn new() -> Self {
         PlayerTab {
-            pane_manager: PaneManager::new(vec![
+            pane_manager:   PaneManager::new(vec![
                 TablePane::new_static(&ToggleItems).boxed(),
                 TablePane::new_static(&ActionItems).boxed(),
-                TablePane::new_static(&StatItems).with_title("Stats").boxed(),
+                TablePane::new_static(&StatItems)
+                    .with_title("Stats")
+                    .boxed(),
             ]),
             covenant_popup: CovenantPopup {
-                pane: TablePane::new_static(&CovenantTable),
+                pane:        TablePane::new_static(&CovenantTable),
                 popup_state: PopupState::default(),
             },
         }
@@ -43,18 +47,12 @@ impl Screen for PlayerTab {
     fn draw(&mut self, frame: &mut Frame, rect: Rect) {
         let [area_one, right] = Layout::default()
             .direction(Direction::Horizontal)
-            .constraints(vec![
-                Constraint::Percentage(50),
-                Constraint::Percentage(50),
-            ])
+            .constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
             .areas(rect);
 
         let [area_two, area_three] = Layout::default()
             .direction(Direction::Vertical)
-            .constraints(vec![
-                Constraint::Percentage(50),
-                Constraint::Percentage(50),
-            ])
+            .constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
             .areas(right);
 
         let layout = [area_one, area_two, area_three];
@@ -68,13 +66,10 @@ impl Screen for PlayerTab {
             return;
         }
 
-        match self.pane_manager.current_command() {
-            Some(Command::Empty(_)) => {
-                if ctx.key_enter() {
-                    self.covenant_popup.show();
-                }
-            },
-            _ => (),
+        if let Some(Command::Empty(_)) = self.pane_manager.current_command()
+            && ctx.key_enter()
+        {
+            self.covenant_popup.show();
         }
 
         self.pane_manager.handle_keys(ctx);
@@ -136,19 +131,10 @@ impl TableController for CovenantTable {
                 Some(v) => format!("{}", v),
                 None => "".to_string(),
             };
-            let row = Row::new([
-                covenant,
-                progress,
-                rank,
-            ]);
+            let row = Row::new([covenant, progress, rank]);
             rows.push(row);
         }
-        let header = Row::new([
-            "Covenant",
-            "Progress",
-            "Rank",
-        ])
-        .bold();
+        let header = Row::new(["Covenant", "Progress", "Rank"]).bold();
 
         TableView::new(rows).with_header(header).with_widths(&[
             Constraint::Min(22),
@@ -165,7 +151,7 @@ impl TableController for CovenantTable {
 }
 
 struct CovenantPopup {
-    pane: TablePane,
+    pane:        TablePane,
     popup_state: PopupState,
 }
 

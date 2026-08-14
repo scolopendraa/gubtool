@@ -11,7 +11,7 @@ impl Item {
 
 pub static KEY_ITEMS: [Item; 213] = [
     Item {
-        id: 0x40001FAD,
+        id: 0x40001fad,
         name: "Academy Glintstone Key (Player)",
         stack_size: 1,
         max_storage: 1,
@@ -19,7 +19,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FEE,
+        id: 0x40001fee,
         name: "Academy Glintstone Key (Thops)",
         stack_size: 1,
         max_storage: 1,
@@ -27,7 +27,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x400022A2,
+        id: 0x400022a2,
         name: "Academy Scroll",
         stack_size: 1,
         max_storage: 1,
@@ -35,7 +35,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FE6,
+        id: 0x40001fe6,
         name: "Amber Draught",
         stack_size: 1,
         max_storage: 1,
@@ -43,7 +43,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FCE,
+        id: 0x40001fce,
         name: "Amber Starlight",
         stack_size: 1,
         max_storage: 1,
@@ -51,7 +51,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40000BB8,
+        id: 0x40000bb8,
         name: "Ancestral Infant's Head",
         stack_size: 1,
         max_storage: 600,
@@ -59,7 +59,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x400022A1,
+        id: 0x400022a1,
         name: "Ancient Dragon Prayerbook",
         stack_size: 1,
         max_storage: 1,
@@ -67,7 +67,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3DC,
+        id: 0x401ea3dc,
         name: "Ancient Ruins Cross Message",
         stack_size: 1,
         max_storage: 1,
@@ -76,7 +76,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000229B,
+        id: 0x4000229b,
         name: "Assassin's Prayerbook",
         stack_size: 1,
         max_storage: 1,
@@ -92,7 +92,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FEC,
+        id: 0x40001fec,
         name: "Black Knifeprint",
         stack_size: 1,
         max_storage: 1,
@@ -100,7 +100,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3D3,
+        id: 0x401ea3d3,
         name: "Black Syrup",
         stack_size: 1,
         max_storage: 1,
@@ -109,7 +109,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000230E,
+        id: 0x4000230e,
         name: "Black Whetblade",
         stack_size: 1,
         max_storage: 1,
@@ -141,7 +141,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401E9038,
+        id: 0x401e9038,
         name: "Bondstone",
         stack_size: 1,
         max_storage: 600,
@@ -150,7 +150,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FAF,
+        id: 0x40001faf,
         name: "Carian Inverted Statue",
         stack_size: 1,
         max_storage: 1,
@@ -158,7 +158,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3DB,
+        id: 0x401ea3db,
         name: "Castle Cross Message",
         stack_size: 1,
         max_storage: 1,
@@ -175,7 +175,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000200A,
+        id: 0x4000200a,
         name: "Champion's Song Painting",
         stack_size: 1,
         max_storage: 1,
@@ -183,7 +183,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FEB,
+        id: 0x40001feb,
         name: "Chrysalids' Memento",
         stack_size: 1,
         max_storage: 1,
@@ -199,7 +199,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000251C,
+        id: 0x4000251c,
         name: "Cracked Pot",
         stack_size: 20,
         max_storage: 0,
@@ -215,7 +215,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3C7,
+        id: 0x401ea3c7,
         name: "Cross Map",
         stack_size: 1,
         max_storage: 1,
@@ -224,7 +224,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FFF,
+        id: 0x40001fff,
         name: "Cursemark of Death",
         stack_size: 1,
         max_storage: 1,
@@ -232,7 +232,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FE8,
+        id: 0x40001fe8,
         name: "Dancer's Castanets",
         stack_size: 1,
         max_storage: 1,
@@ -240,7 +240,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FB9,
+        id: 0x40001fb9,
         name: "Dark Moon Ring",
         stack_size: 1,
         max_storage: 1,
@@ -248,7 +248,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000082A,
+        id: 0x4000082a,
         name: "Deathroot",
         stack_size: 99,
         max_storage: 600,
@@ -256,7 +256,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FA9,
+        id: 0x40001fa9,
         name: "Dectus Medallion (Left)",
         stack_size: 1,
         max_storage: 1,
@@ -264,7 +264,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FAA,
+        id: 0x40001faa,
         name: "Dectus Medallion (Right)",
         stack_size: 1,
         max_storage: 1,
@@ -280,7 +280,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA48A,
+        id: 0x401ea48a,
         name: "Domain of Dragons Painting",
         stack_size: 1,
         max_storage: 1,
@@ -289,7 +289,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x400022A0,
+        id: 0x400022a0,
         name: "Dragon Cult Prayerbook",
         stack_size: 1,
         max_storage: 1,
@@ -297,7 +297,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000274C,
+        id: 0x4000274c,
         name: "Dragon Heart",
         stack_size: 99,
         max_storage: 600,
@@ -305,7 +305,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FC6,
+        id: 0x40001fc6,
         name: "Drawing-Room Key",
         stack_size: 1,
         max_storage: 1,
@@ -321,7 +321,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40000B93,
+        id: 0x40000b93,
         name: "Elden Remembrance",
         stack_size: 99,
         max_storage: 600,
@@ -329,7 +329,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000006F,
+        id: 0x4000006f,
         name: "Festering Bloody Finger",
         stack_size: 99,
         max_storage: 99,
@@ -345,7 +345,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FBE,
+        id: 0x40001fbe,
         name: "Fingerprint Grape",
         stack_size: 1,
         max_storage: 1,
@@ -353,7 +353,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FDF,
+        id: 0x40001fdf,
         name: "Fingerslayer Blade",
         stack_size: 1,
         max_storage: 1,
@@ -369,7 +369,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x400000FA,
+        id: 0x400000fa,
         name: "Flask of Wondrous Physick",
         stack_size: 1,
         max_storage: 1,
@@ -377,7 +377,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000200D,
+        id: 0x4000200d,
         name: "Flightless Bird Painting",
         stack_size: 1,
         max_storage: 1,
@@ -393,7 +393,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3D9,
+        id: 0x401ea3d9,
         name: "Furnace Keeper's Note",
         stack_size: 1,
         max_storage: 1,
@@ -402,7 +402,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3C6,
+        id: 0x401ea3c6,
         name: "Gaol Lower Level Key",
         stack_size: 1,
         max_storage: 1,
@@ -411,7 +411,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3C5,
+        id: 0x401ea3c5,
         name: "Gaol Upper Level Key",
         stack_size: 1,
         max_storage: 1,
@@ -428,7 +428,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000230D,
+        id: 0x4000230d,
         name: "Glintstone Whetblade",
         stack_size: 1,
         max_storage: 1,
@@ -436,7 +436,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x400000BF,
+        id: 0x400000bf,
         name: "Godrick's Great Rune (Activated)",
         stack_size: 1,
         max_storage: 0,
@@ -444,7 +444,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FD4,
+        id: 0x40001fd4,
         name: "Godrick's Great Rune (Deactivated)",
         stack_size: 1,
         max_storage: 1,
@@ -460,7 +460,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FE2,
+        id: 0x40001fe2,
         name: "Gold Sewing Needle",
         stack_size: 1,
         max_storage: 1,
@@ -468,7 +468,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000229E,
+        id: 0x4000229e,
         name: "Golden Order Principia",
         stack_size: 1,
         max_storage: 1,
@@ -476,7 +476,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000271A,
+        id: 0x4000271a,
         name: "Golden Seed",
         stack_size: 99,
         max_storage: 600,
@@ -484,7 +484,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FFC,
+        id: 0x40001ffc,
         name: "Golden Tailoring Tools",
         stack_size: 1,
         max_storage: 1,
@@ -500,7 +500,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FEF,
+        id: 0x40001fef,
         name: "Haligtree Secret Medallion (Left)",
         stack_size: 1,
         max_storage: 1,
@@ -508,7 +508,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FF0,
+        id: 0x40001ff0,
         name: "Haligtree Secret Medallion (Right)",
         stack_size: 1,
         max_storage: 1,
@@ -516,7 +516,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3CB,
+        id: 0x401ea3cb,
         name: "Heart of Bayle",
         stack_size: 99,
         max_storage: 600,
@@ -525,7 +525,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA99C,
+        id: 0x401ea99c,
         name: "Hefty Cracked Pot",
         stack_size: 10,
         max_storage: 0,
@@ -534,7 +534,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3C8,
+        id: 0x401ea3c8,
         name: "Hole-Laden Necklace",
         stack_size: 1,
         max_storage: 1,
@@ -551,7 +551,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401E90BA,
+        id: 0x401e90ba,
         name: "Horned Bairn",
         stack_size: 1,
         max_storage: 600,
@@ -560,7 +560,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3C3,
+        id: 0x401ea3c3,
         name: "Igon's Furled Finger",
         stack_size: 1,
         max_storage: 1,
@@ -569,7 +569,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FFA,
+        id: 0x40001ffa,
         name: "Imbued Sword Key",
         stack_size: 99,
         max_storage: 1,
@@ -577,7 +577,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA488,
+        id: 0x401ea488,
         name: "Incursion Painting",
         stack_size: 1,
         max_storage: 1,
@@ -586,7 +586,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FC3,
+        id: 0x40001fc3,
         name: "Irina's Letter",
         stack_size: 1,
         max_storage: 1,
@@ -594,7 +594,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401E8CC8,
+        id: 0x401e8cc8,
         name: "Iris of Grace",
         stack_size: 99,
         max_storage: 600,
@@ -603,7 +603,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401E8CD2,
+        id: 0x401e8cd2,
         name: "Iris of Occultation",
         stack_size: 99,
         max_storage: 600,
@@ -612,7 +612,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000230A,
+        id: 0x4000230a,
         name: "Iron Whetblade",
         stack_size: 1,
         max_storage: 1,
@@ -620,7 +620,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3D7,
+        id: 0x401ea3d7,
         name: "Keep Wall Key",
         stack_size: 1,
         max_storage: 1,
@@ -629,7 +629,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FFE,
+        id: 0x40001ffe,
         name: "Knifeprint Clue",
         stack_size: 1,
         max_storage: 1,
@@ -637,7 +637,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401E8C6E,
+        id: 0x401e8c6e,
         name: "Lamenter's Mask",
         stack_size: 1,
         max_storage: 600,
@@ -654,7 +654,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FF9,
+        id: 0x40001ff9,
         name: "Larval Tear (Base Game)",
         stack_size: 99,
         max_storage: 600,
@@ -662,7 +662,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3E1,
+        id: 0x401ea3e1,
         name: "Larval Tear (DLC)",
         stack_size: 99,
         max_storage: 600,
@@ -671,7 +671,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3CF,
+        id: 0x401ea3cf,
         name: "Letter for Freyja",
         stack_size: 1,
         max_storage: 1,
@@ -680,7 +680,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FBF,
+        id: 0x40001fbf,
         name: "Letter from Volcano Manor (Istvan)",
         stack_size: 1,
         max_storage: 1,
@@ -688,7 +688,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FC4,
+        id: 0x40001fc4,
         name: "Letter from Volcano Manor (Rileigh)",
         stack_size: 1,
         max_storage: 1,
@@ -696,7 +696,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FED,
+        id: 0x40001fed,
         name: "Letter to Bernahl",
         stack_size: 1,
         max_storage: 1,
@@ -704,7 +704,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FE7,
+        id: 0x40001fe7,
         name: "Letter to Patches",
         stack_size: 1,
         max_storage: 1,
@@ -712,7 +712,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FDB,
+        id: 0x40001fdb,
         name: "Lord of Blood's Favor (Bloody)",
         stack_size: 1,
         max_storage: 1,
@@ -720,7 +720,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FDA,
+        id: 0x40001fda,
         name: "Lord of Blood's Favor (White)",
         stack_size: 1,
         max_storage: 1,
@@ -736,7 +736,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x400000C4,
+        id: 0x400000c4,
         name: "Malenia's Great Rune (Activated)",
         stack_size: 1,
         max_storage: 0,
@@ -744,7 +744,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FD9,
+        id: 0x40001fd9,
         name: "Malenia's Great Rune (Dectivated)",
         stack_size: 1,
         max_storage: 1,
@@ -752,7 +752,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000085C,
+        id: 0x4000085c,
         name: "Margit's Shackle",
         stack_size: 1,
         max_storage: 600,
@@ -768,7 +768,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000272E,
+        id: 0x4000272e,
         name: "Memory Stone",
         stack_size: 8,
         max_storage: 0,
@@ -776,7 +776,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FF6,
+        id: 0x40001ff6,
         name: "Mending Rune of Perfect Order",
         stack_size: 1,
         max_storage: 1,
@@ -784,7 +784,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FF7,
+        id: 0x40001ff7,
         name: "Mending Rune of the Death-Prince",
         stack_size: 1,
         max_storage: 1,
@@ -792,7 +792,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FF8,
+        id: 0x40001ff8,
         name: "Mending Rune of the Fell Curse",
         stack_size: 1,
         max_storage: 1,
@@ -800,7 +800,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3D5,
+        id: 0x401ea3d5,
         name: "Messmer's Kindling",
         stack_size: 1,
         max_storage: 1,
@@ -809,7 +809,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3E2,
+        id: 0x401ea3e2,
         name: "Message from Leda",
         stack_size: 1,
         max_storage: 1,
@@ -818,7 +818,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40000BE0,
+        id: 0x40000be0,
         name: "Mimic's Veil",
         stack_size: 1,
         max_storage: 600,
@@ -826,7 +826,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FD2,
+        id: 0x40001fd2,
         name: "Miniature Ranni",
         stack_size: 1,
         max_storage: 1,
@@ -834,7 +834,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FFB,
+        id: 0x40001ffb,
         name: "Miniature Ranni (Empty)",
         stack_size: 1,
         max_storage: 1,
@@ -842,7 +842,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3C0,
+        id: 0x401ea3c0,
         name: "Miquella's Great Rune",
         stack_size: 1,
         max_storage: 1,
@@ -851,7 +851,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000088E,
+        id: 0x4000088e,
         name: "Miquella's Needle",
         stack_size: 1,
         max_storage: 600,
@@ -859,7 +859,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x400021D4,
+        id: 0x400021d4,
         name: "Mirage Riddle",
         stack_size: 1,
         max_storage: 1,
@@ -867,7 +867,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x400000C3,
+        id: 0x400000c3,
         name: "Mohg's Great Rune (Activated)",
         stack_size: 1,
         max_storage: 0,
@@ -875,7 +875,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FD8,
+        id: 0x40001fd8,
         name: "Mohg's Great Rune (Dectivated)",
         stack_size: 1,
         max_storage: 1,
@@ -891,7 +891,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3DD,
+        id: 0x401ea3dd,
         name: "Monk's Missive",
         stack_size: 1,
         max_storage: 1,
@@ -900,7 +900,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x400000C1,
+        id: 0x400000c1,
         name: "Morgott's Great Rune (Activated)",
         stack_size: 1,
         max_storage: 0,
@@ -908,7 +908,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FD6,
+        id: 0x40001fd6,
         name: "Morgott's Great Rune (Dectivated)",
         stack_size: 1,
         max_storage: 1,
@@ -916,7 +916,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3CC,
+        id: 0x401ea3cc,
         name: "New Cross Map",
         stack_size: 1,
         max_storage: 1,
@@ -925,7 +925,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40000BC2,
+        id: 0x40000bc2,
         name: "Omen Bairn",
         stack_size: 1,
         max_storage: 600,
@@ -941,7 +941,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401E90C4,
+        id: 0x401e90c4,
         name: "Perfumed Oil of Ranah",
         stack_size: 1,
         max_storage: 600,
@@ -958,7 +958,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3E4,
+        id: 0x401ea3e4,
         name: "Prayer Room Key",
         stack_size: 1,
         max_storage: 1,
@@ -967,7 +967,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401E8C64,
+        id: 0x401e8c64,
         name: "Priestess Heart",
         stack_size: 1,
         max_storage: 600,
@@ -976,7 +976,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000200C,
+        id: 0x4000200c,
         name: "Prophecy Painting",
         stack_size: 1,
         max_storage: 1,
@@ -992,7 +992,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x400000C0,
+        id: 0x400000c0,
         name: "Radahn's Great Rune (Activated)",
         stack_size: 1,
         max_storage: 0,
@@ -1000,7 +1000,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FD5,
+        id: 0x40001fd5,
         name: "Radahn's Great Rune (Dectivated)",
         stack_size: 1,
         max_storage: 1,
@@ -1016,7 +1016,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FC5,
+        id: 0x40001fc5,
         name: "Red Letter",
         stack_size: 1,
         max_storage: 1,
@@ -1024,7 +1024,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000230B,
+        id: 0x4000230b,
         name: "Red-Hot Whetblade",
         stack_size: 1,
         max_storage: 1,
@@ -1032,7 +1032,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000200E,
+        id: 0x4000200e,
         name: "Redmane Painting",
         stack_size: 1,
         max_storage: 1,
@@ -1040,7 +1040,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40000BC3,
+        id: 0x40000bc3,
         name: "Regal Omen Bairn",
         stack_size: 1,
         max_storage: 600,
@@ -1048,7 +1048,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401E8FDB,
+        id: 0x401e8fdb,
         name: "Remembrance of a God and a Lord",
         stack_size: 99,
         max_storage: 600,
@@ -1057,7 +1057,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40000B8D,
+        id: 0x40000b8d,
         name: "Remembrance of Hoarah Loux",
         stack_size: 99,
         max_storage: 600,
@@ -1065,7 +1065,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401E8FDE,
+        id: 0x401e8fde,
         name: "Remembrance of Putrescence",
         stack_size: 99,
         max_storage: 600,
@@ -1074,7 +1074,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40000B8C,
+        id: 0x40000b8c,
         name: "Remembrance of the Black Blade",
         stack_size: 99,
         max_storage: 600,
@@ -1082,7 +1082,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40000B89,
+        id: 0x40000b89,
         name: "Remembrance of the Blasphemous",
         stack_size: 99,
         max_storage: 600,
@@ -1090,7 +1090,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40000B8B,
+        id: 0x40000b8b,
         name: "Remembrance of the Blood Lord",
         stack_size: 99,
         max_storage: 600,
@@ -1098,7 +1098,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401E8FD9,
+        id: 0x401e8fd9,
         name: "Remembrance of the Dancing Lion",
         stack_size: 99,
         max_storage: 600,
@@ -1107,7 +1107,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40000B8E,
+        id: 0x40000b8e,
         name: "Remembrance of the Dragonlord",
         stack_size: 99,
         max_storage: 600,
@@ -1115,7 +1115,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40000B91,
+        id: 0x40000b91,
         name: "Remembrance of the Fire Giant",
         stack_size: 99,
         max_storage: 600,
@@ -1123,7 +1123,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40000B8F,
+        id: 0x40000b8f,
         name: "Remembrance of the Full Moon Queen",
         stack_size: 99,
         max_storage: 600,
@@ -1131,7 +1131,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40000B86,
+        id: 0x40000b86,
         name: "Remembrance of the Grafted",
         stack_size: 99,
         max_storage: 600,
@@ -1139,7 +1139,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401E8FD5,
+        id: 0x401e8fd5,
         name: "Remembrance of the Impaler",
         stack_size: 99,
         max_storage: 600,
@@ -1148,7 +1148,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40000B90,
+        id: 0x40000b90,
         name: "Remembrance of the Lichdragon",
         stack_size: 99,
         max_storage: 600,
@@ -1156,7 +1156,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401E8FDC,
+        id: 0x401e8fdc,
         name: "Remembrance of the Lord of Frenzied Flame",
         stack_size: 99,
         max_storage: 600,
@@ -1165,7 +1165,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401E8FDD,
+        id: 0x401e8fdd,
         name: "Remembrance of the Mother of Fingers",
         stack_size: 99,
         max_storage: 600,
@@ -1174,7 +1174,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40000B94,
+        id: 0x40000b94,
         name: "Remembrance of the Naturalborn",
         stack_size: 99,
         max_storage: 600,
@@ -1182,7 +1182,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40000B88,
+        id: 0x40000b88,
         name: "Remembrance of the Omen King",
         stack_size: 99,
         max_storage: 600,
@@ -1190,7 +1190,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40000B92,
+        id: 0x40000b92,
         name: "Remembrance of the Regal Ancestor",
         stack_size: 99,
         max_storage: 600,
@@ -1198,7 +1198,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40000B8A,
+        id: 0x40000b8a,
         name: "Remembrance of the Rot Goddess",
         stack_size: 99,
         max_storage: 600,
@@ -1206,7 +1206,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401E8FD8,
+        id: 0x401e8fd8,
         name: "Remembrance of the Saint of the Bud",
         stack_size: 99,
         max_storage: 600,
@@ -1215,7 +1215,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401E8FD6,
+        id: 0x401e8fd6,
         name: "Remembrance of the Shadow Sunflower",
         stack_size: 99,
         max_storage: 600,
@@ -1224,7 +1224,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40000B87,
+        id: 0x40000b87,
         name: "Remembrance of the Starscourge",
         stack_size: 99,
         max_storage: 600,
@@ -1232,7 +1232,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401E8FD7,
+        id: 0x401e8fd7,
         name: "Remembrance of the Twin Moon Knight",
         stack_size: 99,
         max_storage: 600,
@@ -1241,7 +1241,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401E8FD4,
+        id: 0x401e8fd4,
         name: "Remembrance of the Wild Boar Rider",
         stack_size: 99,
         max_storage: 600,
@@ -1258,7 +1258,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EABF4,
+        id: 0x401eabf4,
         name: "Revered Spirit Ash",
         stack_size: 99,
         max_storage: 600,
@@ -1267,7 +1267,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000251D,
+        id: 0x4000251d,
         name: "Ritual Pot",
         stack_size: 10,
         max_storage: 0,
@@ -1275,7 +1275,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401E8C5A,
+        id: 0x401e8c5a,
         name: "Rock Heart",
         stack_size: 1,
         max_storage: 600,
@@ -1284,7 +1284,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000201F,
+        id: 0x4000201f,
         name: "Rogier's Letter",
         stack_size: 1,
         max_storage: 1,
@@ -1292,7 +1292,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FAB,
+        id: 0x40001fab,
         name: "Rold Medallion",
         stack_size: 1,
         max_storage: 1,
@@ -1308,7 +1308,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3D0,
+        id: 0x401ea3d0,
         name: "Ruins Map (1st)",
         stack_size: 1,
         max_storage: 1,
@@ -1317,7 +1317,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3D1,
+        id: 0x401ea3d1,
         name: "Ruins Map (2nd)",
         stack_size: 1,
         max_storage: 1,
@@ -1326,7 +1326,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3D2,
+        id: 0x401ea3d2,
         name: "Ruins Map (3rd)",
         stack_size: 1,
         max_storage: 1,
@@ -1335,7 +1335,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001F4A,
+        id: 0x40001f4a,
         name: "Rusty Key",
         stack_size: 1,
         max_storage: 1,
@@ -1343,7 +1343,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FC2,
+        id: 0x40001fc2,
         name: "Rya's Necklace",
         stack_size: 1,
         max_storage: 1,
@@ -1351,7 +1351,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x400000C2,
+        id: 0x400000c2,
         name: "Rykard's Great Rune (Activated)",
         stack_size: 1,
         max_storage: 0,
@@ -1359,7 +1359,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FD7,
+        id: 0x40001fd7,
         name: "Rykard's Great Rune (Dectivated)",
         stack_size: 1,
         max_storage: 1,
@@ -1375,7 +1375,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000230C,
+        id: 0x4000230c,
         name: "Sanctified Whetblade",
         stack_size: 1,
         max_storage: 1,
@@ -1383,7 +1383,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EAB90,
+        id: 0x401eab90,
         name: "Scadutree Fragment",
         stack_size: 99,
         max_storage: 600,
@@ -1392,7 +1392,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40000CF8,
+        id: 0x40000cf8,
         name: "Scriptstone",
         stack_size: 10,
         max_storage: 600,
@@ -1401,7 +1401,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3CE,
+        id: 0x401ea3ce,
         name: "Secret Rite Scroll",
         stack_size: 1,
         max_storage: 1,
@@ -1418,7 +1418,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FD0,
+        id: 0x40001fd0,
         name: "Sellen's Primal Glintstone",
         stack_size: 1,
         max_storage: 1,
@@ -1426,7 +1426,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FE9,
+        id: 0x40001fe9,
         name: "Sellian Sealbreaker",
         stack_size: 1,
         max_storage: 1,
@@ -1442,7 +1442,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FCF,
+        id: 0x40001fcf,
         name: "Seluvis's Introduction",
         stack_size: 1,
         max_storage: 1,
@@ -1450,7 +1450,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FE4,
+        id: 0x40001fe4,
         name: "Seluvis's Potion",
         stack_size: 1,
         max_storage: 1,
@@ -1458,7 +1458,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FC1,
+        id: 0x40001fc1,
         name: "Serpent's Amnion",
         stack_size: 1,
         max_storage: 1,
@@ -1474,7 +1474,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FE1,
+        id: 0x40001fe1,
         name: "Sewing Needle",
         stack_size: 1,
         max_storage: 1,
@@ -1482,7 +1482,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x400004D8,
+        id: 0x400004d8,
         name: "Shabriri Grape",
         stack_size: 99,
         max_storage: 999,
@@ -1490,7 +1490,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000006D,
+        id: 0x4000006d,
         name: "Small Golden Effigy",
         stack_size: 1,
         max_storage: 0,
@@ -1498,7 +1498,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000006E,
+        id: 0x4000006e,
         name: "Small Red Effigy",
         stack_size: 1,
         max_storage: 0,
@@ -1506,7 +1506,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000200B,
+        id: 0x4000200b,
         name: "Sorcerer Painting",
         stack_size: 1,
         max_storage: 1,
@@ -1522,7 +1522,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FDE,
+        id: 0x40001fde,
         name: "Spirit Calling Bell",
         stack_size: 1,
         max_storage: 1,
@@ -1530,7 +1530,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001F40,
+        id: 0x40001f40,
         name: "Stonesword Key",
         stack_size: 99,
         max_storage: 600,
@@ -1538,7 +1538,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3DE,
+        id: 0x401ea3de,
         name: "Storehouse Cross Message",
         stack_size: 1,
         max_storage: 1,
@@ -1547,7 +1547,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3CD,
+        id: 0x401ea3cd,
         name: "Storeroom Key",
         stack_size: 1,
         max_storage: 1,
@@ -1556,7 +1556,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FE3,
+        id: 0x40001fe3,
         name: "Tailoring Tools",
         stack_size: 1,
         max_storage: 1,
@@ -1596,7 +1596,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000006C,
+        id: 0x4000006c,
         name: "Taunter's Tongue",
         stack_size: 1,
         max_storage: 0,
@@ -1604,7 +1604,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x400007F8,
+        id: 0x400007f8,
         name: "Telescope",
         stack_size: 1,
         max_storage: 600,
@@ -1612,7 +1612,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA489,
+        id: 0x401ea489,
         name: "The Sacred Tower Painting",
         stack_size: 1,
         max_storage: 1,
@@ -1629,7 +1629,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401E8CDC,
+        id: 0x401e8cdc,
         name: "Thiollier's Concoction",
         stack_size: 99,
         max_storage: 600,
@@ -1638,7 +1638,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FC0,
+        id: 0x40001fc0,
         name: "Tonic of Forgetfulness",
         stack_size: 1,
         max_storage: 1,
@@ -1646,7 +1646,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3E0,
+        id: 0x401ea3e0,
         name: "Torn Diary Page",
         stack_size: 1,
         max_storage: 1,
@@ -1655,7 +1655,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3E5,
+        id: 0x401ea3e5,
         name: "Tower of Shadow Message",
         stack_size: 1,
         max_storage: 1,
@@ -1664,7 +1664,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000229A,
+        id: 0x4000229a,
         name: "Two Fingers' Prayerbook",
         stack_size: 1,
         max_storage: 1,
@@ -1672,7 +1672,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000230F,
+        id: 0x4000230f,
         name: "Unalloyed Gold Needle (Broken)",
         stack_size: 1,
         max_storage: 1,
@@ -1704,7 +1704,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40001FC9,
+        id: 0x40001fc9,
         name: "Volcano Manor Invitation",
         stack_size: 1,
         max_storage: 1,
@@ -1728,7 +1728,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x401EA3C4,
+        id: 0x401ea3c4,
         name: "Well Depths Key",
         stack_size: 1,
         max_storage: 1,
@@ -1737,7 +1737,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000218E,
+        id: 0x4000218e,
         name: "Whetstone Knife",
         stack_size: 1,
         max_storage: 1,
@@ -1753,7 +1753,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x40000C08,
+        id: 0x40000c08,
         name: "Wraith Calling Bell",
         stack_size: 1,
         max_storage: 600,
@@ -1761,7 +1761,7 @@ pub static KEY_ITEMS: [Item; 213] = [
         ..Item::default_key_item()
     },
     Item {
-        id: 0x4000201D,
+        id: 0x4000201d,
         name: "Zorayas's Letter",
         stack_size: 1,
         max_storage: 1,

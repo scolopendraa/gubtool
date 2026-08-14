@@ -1,16 +1,18 @@
-use crate::{
-    app::App,
-    event::{Event, send_event},
-    theme::{ThemeChoice, set_theme},
+use {
+    crate::{
+        app::App,
+        event::{Event, send_event},
+        theme::{ThemeChoice, set_theme},
+    },
+    anyhow::Result,
+    config::Config,
+    gubtool_core::{
+        appdata::{AppDataError, app_data_dir},
+        game_version::Game,
+    },
+    serde::{Deserialize, Serialize},
+    std::{fs, path::PathBuf},
 };
-use anyhow::Result;
-use config::Config;
-use gubtool_core::{
-    appdata::{AppDataError, app_data_dir},
-    game_version::Game,
-};
-use serde::{Deserialize, Serialize};
-use std::{fs, path::PathBuf};
 
 #[derive(Serialize, Deserialize, Clone, Default)]
 pub struct UiState {
@@ -36,9 +38,7 @@ impl Config for UiState {
         Ok(())
     }
     fn update<F>(modifier: F) -> Result<(), AppDataError>
-    where
-        F: FnOnce(&mut UiState),
-    {
+    where F: FnOnce(&mut UiState) {
         let mut toml = Self::read().unwrap_or_default();
         modifier(&mut toml);
         Self::write(&toml)
@@ -54,16 +54,16 @@ impl UiState {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct GlobalState {
-    pub theme: ThemeChoice,
-    pub game_screen: Game,
+    pub theme:          ThemeChoice,
+    pub game_screen:    Game,
     pub has_pressed_f1: bool,
 }
 
 impl Default for GlobalState {
     fn default() -> Self {
         Self {
-            theme: ThemeChoice::default(),
-            game_screen: Game::EldenRing,
+            theme:          ThemeChoice::default(),
+            game_screen:    Game::EldenRing,
             has_pressed_f1: false,
         }
     }

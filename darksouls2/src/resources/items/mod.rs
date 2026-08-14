@@ -9,36 +9,44 @@ pub mod spells;
 pub mod upgrade_materials;
 pub mod weapons;
 
-use crate::resources::items::{
-    armor::ARMOR, arrows::ARROWS, consumables::CONSUMABLES, gestures::GESTURES,
-    key_items::KEY_ITEMS, rings::RINGS, spells::SPELLS, upgrade_materials::UPGRADE_MATERIALS,
-    weapons::WEAPONS,
+use {
+    crate::resources::items::{
+        armor::ARMOR,
+        arrows::ARROWS,
+        consumables::CONSUMABLES,
+        gestures::GESTURES,
+        key_items::KEY_ITEMS,
+        rings::RINGS,
+        spells::SPELLS,
+        upgrade_materials::UPGRADE_MATERIALS,
+        weapons::WEAPONS,
+    },
+    once_cell::sync::Lazy,
+    std::fmt,
 };
-use once_cell::sync::Lazy;
-use std::fmt;
 
 #[derive(Clone, Copy)]
 pub struct Item {
-    pub id: i32,
-    pub name: &'static str,
-    pub stack_size: i32,
-    pub category: Categories,
-    pub infuse_id: Option<i32>,
-    pub max_upgrade: Option<i32>,
-    pub durability: Option<i32>,
+    pub id:           i32,
+    pub name:         &'static str,
+    pub stack_size:   i32,
+    pub category:     Categories,
+    pub infuse_id:    Option<i32>,
+    pub max_upgrade:  Option<i32>,
+    pub durability:   Option<i32>,
     pub scholar_only: bool,
 }
 
 impl Item {
     const fn default() -> Self {
         Self {
-            id: 0,
-            name: "",
-            stack_size: 0,
-            category: Categories::Armor,
-            infuse_id: None,
-            max_upgrade: None,
-            durability: None,
+            id:           0,
+            name:         "",
+            stack_size:   0,
+            category:     Categories::Armor,
+            infuse_id:    None,
+            max_upgrade:  None,
+            durability:   None,
             scholar_only: false,
         }
     }

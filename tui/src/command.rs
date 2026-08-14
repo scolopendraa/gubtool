@@ -1,16 +1,22 @@
-use crate::{
-    common::helpers::create_toggle_string, event::AnyhowExt, input::request_input,
-    panes::TableView, spawn_task,
+use {
+    crate::{
+        common::helpers::create_toggle_string,
+        event::AnyhowExt,
+        input::request_input,
+        panes::TableView,
+        spawn_task,
+    },
+    ratatui::widgets::Row,
+    shared::{
+        command::{Command, OptCmd, OptionCommand, ValCmd, ValueCommand},
+        parse_input::ParseInput,
+    },
+    std::fmt::Display,
 };
-use ratatui::widgets::Row;
-use shared::{
-    command::{Command, OptCmd, OptionCommand, ValCmd, ValueCommand},
-    parse_input::ParseInput,
-};
-use std::fmt::Display;
 
 pub fn commands_to_table_view(commands: &'static [Command]) -> TableView {
-    let rows = commands.iter()
+    let rows = commands
+        .iter()
         .map(|c| {
             let text = match c {
                 Command::Toggle(v) => create_toggle_string(&c.to_string(), v.is().unwrap_or(false)),
@@ -18,7 +24,7 @@ pub fn commands_to_table_view(commands: &'static [Command]) -> TableView {
                 Command::Stat(v) => format!("{:02} {c}", v.get()),
                 Command::Empty(_) => format!("{c}"),
                 Command::Value(v) => display_val_cmd(v),
-                Command::Option(v) => display_opt_cmd(v)
+                Command::Option(v) => display_opt_cmd(v),
             };
             Row::new([text])
         })
@@ -56,9 +62,7 @@ fn display_val_cmd(val_cmd: &ValCmd) -> String {
 }
 
 fn display_val<T>(cmd: &'static dyn ValueCommand<T>) -> String
-where
-    T: Display + Send + 'static + ParseInput + Default
-{
+where T: Display + Send + 'static + ParseInput + Default {
     if cmd.can_get() {
         format!("{cmd}: {:.2}", cmd.get().unwrap_or_default())
     } else {
@@ -73,9 +77,7 @@ fn display_opt_cmd(opt_cmd: &OptCmd) -> String {
 }
 
 fn display_opt<T>(cmd: &'static dyn OptionCommand<T>) -> String
-where
-    T: Display + Send + 'static + ParseInput + Default
-{
+where T: Display + Send + 'static + ParseInput + Default {
     match cmd.get() {
         Some(v) => format!("{cmd}: {:.2}", v),
         None => format!("{cmd}:"),
@@ -94,9 +96,7 @@ fn execute_val_cmd(val_cmd: &ValCmd) {
 }
 
 fn request_and_set_val<T>(cmd: &'static dyn ValueCommand<T>)
-where
-    T: Display + Send + 'static + ParseInput + Default,
-{
+where T: Display + Send + 'static + ParseInput + Default {
     spawn_task! {
         if let Some(val) = request_input::<T>(None).await {
             cmd.set(val).send_error();
@@ -111,9 +111,7 @@ fn execute_opt_cmd(opt_cmd: &OptCmd) {
 }
 
 fn request_and_set_opt<T>(cmd: &'static dyn OptionCommand<T>)
-where
-    T: Display + Send + 'static + ParseInput + Default,
-{
+where T: Display + Send + 'static + ParseInput + Default {
     spawn_task! {
         let val = request_input::<T>(None).await;
         cmd.set(val).send_error();

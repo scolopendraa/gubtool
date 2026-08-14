@@ -1,16 +1,18 @@
-use crate::{
-    event::KeyContext,
-    impl_tablecontroller_for_commands,
-    panes::{PaneManager, TablePane},
-    screen::Screen,
+use {
+    crate::{
+        event::KeyContext,
+        impl_tablecontroller_for_commands,
+        panes::{PaneManager, TablePane},
+        screen::Screen,
+    },
+    crossterm::event::KeyCode,
+    eldenring::player::{self, Stat},
+    ratatui::{
+        Frame,
+        layout::{Constraint, Direction, Layout, Rect},
+    },
+    shared::command::{Command, ValCmd},
 };
-use crossterm::event::KeyCode;
-use eldenring::player::{self, Stat};
-use ratatui::{
-    Frame,
-    layout::{Constraint, Direction, Layout, Rect},
-};
-use shared::command::{Command, ValCmd};
 
 pub(super) struct PlayerTab {
     pub pane_manager: PaneManager,
@@ -32,18 +34,12 @@ impl Screen for PlayerTab {
     fn draw(&mut self, frame: &mut Frame, rect: Rect) {
         let [area_one, right] = Layout::default()
             .direction(Direction::Horizontal)
-            .constraints(vec![
-                Constraint::Percentage(50),
-                Constraint::Percentage(50),
-            ])
+            .constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
             .areas(rect);
 
         let [area_two, area_three] = Layout::default()
             .direction(Direction::Vertical)
-            .constraints(vec![
-                Constraint::Percentage(50),
-                Constraint::Percentage(50),
-            ])
+            .constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
             .areas(right);
 
         let layout = [area_one, area_two, area_three];

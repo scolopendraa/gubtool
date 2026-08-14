@@ -6,5 +6,11 @@ include!("scholar1_0_2.rs");
 include!("scholar1_0_3.rs");
 
 use crate::offsets::module_offsets::structs::{
-    BasePointers, Data, ExternalFunctionPointers, Functions, Hooks, ModuleOffsets, Patches,
+    BasePointers,
+    Data,
+    ExternalFunctionPointers,
+    Functions,
+    Hooks,
+    ModuleOffsets,
+    Patches,
 };

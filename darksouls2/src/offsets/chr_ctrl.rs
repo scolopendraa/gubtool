@@ -36,13 +36,13 @@ pub const COORDS: Offset = Offset {
 };
 
 pub const HEALTH: Offset = Offset {
-    vanilla: 0xFC,
+    vanilla: 0xfc,
     scholar: 0x168,
 };
 
 pub const MIN_HEALTH: Offset = Offset {
     vanilla: 0x100,
-    scholar: 0x16C,
+    scholar: 0x16c,
 };
 
 pub const MAX_HEALTH: Offset = Offset {
@@ -51,33 +51,33 @@ pub const MAX_HEALTH: Offset = Offset {
 };
 
 pub const POISE: Offset = Offset {
-    vanilla: 0x1AC,
+    vanilla: 0x1ac,
     scholar: 0x218,
 };
 
 pub const MIN_POISE: Offset = Offset {
-    vanilla: 0x1B0,
-    scholar: 0x21C,
+    vanilla: 0x1b0,
+    scholar: 0x21c,
 };
 
 pub const MAX_POISE: Offset = Offset {
-    vanilla: 0x1B4,
+    vanilla: 0x1b4,
     scholar: 0x220,
 };
 
 pub const POSTURE: Offset = Offset {
-    vanilla: 0x14C,
-    scholar: 0x1B8,
+    vanilla: 0x14c,
+    scholar: 0x1b8,
 };
 
 pub const MIN_POSTURE: Offset = Offset {
     vanilla: 0x150,
-    scholar: 0x1BC,
+    scholar: 0x1bc,
 };
 
 pub const MAX_POSTURE: Offset = Offset {
     vanilla: 0x154,
-    scholar: 0x1C0,
+    scholar: 0x1c0,
 };
 
 pub mod stats_offsets {
@@ -89,35 +89,35 @@ pub mod stats_offsets {
     };
 
     pub const SOUL_LEVEL: Offset = Offset {
-        vanilla: 0xCC,
-        scholar: 0xD0,
+        vanilla: 0xcc,
+        scholar: 0xd0,
     };
 
     pub const SOULS: Offset = Offset {
-        vanilla: 0xE8,
-        scholar: 0xEC,
+        vanilla: 0xe8,
+        scholar: 0xec,
     };
 
     pub const SOUL_MEMORY: Offset = Offset {
-        vanilla: 0xF0,
-        scholar: 0xF4,
+        vanilla: 0xf0,
+        scholar: 0xf4,
     };
 
     pub const COVENANT: Offset = Offset {
-        vanilla: 0x1A9,
-        scholar: 0x1AD,
+        vanilla: 0x1a9,
+        scholar: 0x1ad,
     };
 }
 
 pub const BOSS_OPERATOR: Offset = Offset {
-    vanilla: 0xAC,
-    scholar: 0xE8,
+    vanilla: 0xac,
+    scholar: 0xe8,
 };
 
 pub mod boss_operator_offsets {
     use crate::offsets::Offset;
     pub const CHR_AI_MANIPULATOR: Offset = Offset {
-        vanilla: 0xC,
+        vanilla: 0xc,
         scholar: 0x18,
     };
 }

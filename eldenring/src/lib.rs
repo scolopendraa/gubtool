@@ -4,25 +4,29 @@ pub mod emevd;
 pub mod event;
 pub mod game_state;
 pub mod item;
-mod mem;
 mod offsets;
 mod phase_transition;
-mod pointer_cache;
 pub mod player;
+mod pointer_cache;
 pub mod resources;
 pub mod target;
 pub mod travel;
 pub mod utility;
 pub mod utils;
 
-pub use attach::attach;
-pub use pointer_cache::get_pointers;
-
-use crate::{
-    game_state::{GAME_STATE, STATE_FLAGS},
-    pointer_cache::POINTER_CACHE,
+use {
+    crate::{
+        game_state::{GAME_STATE, STATE_FLAGS},
+        pointer_cache::POINTER_CACHE,
+    },
+    std::sync::atomic::Ordering,
 };
-use std::sync::atomic::Ordering;
+pub use {attach::attach, pointer_cache::get_pointers};
+
+mod mem {
+    gubtool_core::declare_mem_functions!(Game::EldenRing);
+    gubtool_core::declare_x64_specifics!();
+}
 
 pub fn init() {
     GAME_STATE.init();
@@ -30,6 +34,8 @@ pub fn init() {
 
 pub fn reset() {
     POINTER_CACHE.reset_pointers();
+    player::player().update();
+    player::torrent().update();
     STATE_FLAGS.reset();
 }
 

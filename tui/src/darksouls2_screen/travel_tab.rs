@@ -1,26 +1,28 @@
-use crate::{
-    common::controls::Control,
-    event::{AnyhowExt, KeyContext, ResultExt, request_search},
-    input::fuzzy_finder::SearchRequest,
-    panes::{PaneManager, TableController, TablePane, TableView},
-    screen::Screen,
-    theme::theme,
+use {
+    crate::{
+        common::controls::Control,
+        event::{AnyhowExt, KeyContext, request_search},
+        input::fuzzy_finder::SearchRequest,
+        panes::{PaneManager, TableController, TablePane, TableView},
+        screen::Screen,
+        theme::theme,
+    },
+    crossterm::event::{KeyCode, KeyModifiers},
+    darksouls2::{
+        bonfire,
+        resources::{bonfires, bosses},
+    },
+    nucleo_matcher::Utf32String,
+    ratatui::{
+        Frame,
+        layout::{Constraint, Direction, Layout, Offset, Rect},
+        style::Stylize,
+        text::Span,
+        widgets::{Cell, Row},
+    },
+    ratatui_themes::Style,
+    std::thread,
 };
-use crossterm::event::{KeyCode, KeyModifiers};
-use darksouls2::{
-    bonfire,
-    resources::{bonfires, bosses},
-};
-use nucleo_matcher::Utf32String;
-use ratatui::{
-    Frame,
-    layout::{Constraint, Direction, Layout, Offset, Rect},
-    style::Stylize,
-    text::Span,
-    widgets::{Cell, Row},
-};
-use ratatui_themes::Style;
-use std::thread;
 
 pub(super) struct TravelTab {
     pub pane_manager: PaneManager,
@@ -48,10 +50,7 @@ impl Screen for TravelTab {
     fn draw(&mut self, frame: &mut Frame, rect: Rect) {
         let rects = Layout::default()
             .direction(Direction::Horizontal)
-            .constraints(vec![
-                Constraint::Percentage(40),
-                Constraint::Percentage(60),
-            ])
+            .constraints(vec![Constraint::Percentage(40), Constraint::Percentage(60)])
             .split(rect);
 
         self.pane_manager.draw(frame, &rects);
@@ -75,7 +74,8 @@ impl Screen for TravelTab {
 struct BossList;
 impl TableController for BossList {
     fn make_table_view(&self) -> TableView {
-        let rows = bosses::BOSSES.iter()
+        let rows = bosses::BOSSES
+            .iter()
             .map(|boss| Row::new([boss.name]))
             .collect();
 
@@ -83,9 +83,7 @@ impl TableController for BossList {
     }
     fn handle_keys_selected(&self, selected: usize, ctx: &mut KeyContext) {
         if ctx.key_enter() {
-            thread::spawn(move || {
-                bosses::BOSSES[selected].warp().send_error()
-            });
+            thread::spawn(move || bosses::BOSSES[selected].warp().send_error());
         }
         if ctx.key_char('f') {
             request_search(&BossesSearch);
@@ -96,7 +94,8 @@ impl TableController for BossList {
 struct BonfireTable;
 impl TableController for BonfireTable {
     fn make_table_view(&self) -> TableView {
-        let rows = bonfires::BONFIRES.iter()
+        let rows = bonfires::BONFIRES
+            .iter()
             .map(|bonfire| {
                 Row::new([
                     Cell::from(bonfire.name),
@@ -104,24 +103,19 @@ impl TableController for BonfireTable {
                 ])
             })
             .collect();
-        TableView::new(rows).with_widths(&[
-            Constraint::Min(30),
-            Constraint::Max(26),
-        ])
+        TableView::new(rows).with_widths(&[Constraint::Min(30), Constraint::Max(26)])
     }
     fn handle_keys_selected(&self, selected: usize, ctx: &mut KeyContext) {
         if ctx.key_enter() {
-            thread::spawn(move || {
-                bonfires::BONFIRES[selected].warp().send_error()
-            });
+            thread::spawn(move || bonfires::BONFIRES[selected].warp().send_error());
         }
 
         if ctx.key_with_modifiers(KeyCode::Char('t'), KeyModifiers::CONTROL) {
-            bonfires::BONFIRES[selected].unlock().send_error();
+            bonfire::light_all_bonfires().send_error();
         }
 
         if ctx.key_char('t') {
-            bonfire::light_all_bonfires().send_error();
+            bonfires::BONFIRES[selected].unlock().send_error();
         }
 
         if ctx.key_char('r') {
@@ -137,7 +131,8 @@ impl TableController for BonfireTable {
 struct BossesSearch;
 impl SearchRequest for BossesSearch {
     fn items(&self) -> Vec<Utf32String> {
-        bosses::BOSSES.iter()
+        bosses::BOSSES
+            .iter()
             .map(|boss| Utf32String::from(boss.name))
             .collect()
     }
@@ -146,7 +141,8 @@ impl SearchRequest for BossesSearch {
 struct BonfireSearch;
 impl SearchRequest for BonfireSearch {
     fn items(&self) -> Vec<Utf32String> {
-        bonfires::BONFIRES.iter()
+        bonfires::BONFIRES
+            .iter()
             .map(|bonfire| Utf32String::from(format!("{}|{}", bonfire.name, bonfire.main_area)))
             .collect()
     }
@@ -183,13 +179,18 @@ impl TravelTab {
         let selected_idx = self.pane_manager.get_list_selected(1).unwrap_or_default();
         let bonfire = &bonfires::BONFIRES[selected_idx];
         let lit = bonfire.is_lit().unwrap_or_default();
-        let text = if !darksouls2::is_player_loaded() { "" } else if lit { "Lit" } else { "Unlit" };
+        let text = if !darksouls2::is_player_loaded() {
+            ""
+        } else if lit {
+            "Lit"
+        } else {
+            "Unlit"
+        };
         let style = if lit {
             Style::from(theme().success)
         } else {
             Style::from(theme().error)
         };
-        Span::raw(text)
-            .style(style)
+        Span::raw(text).style(style)
     }
 }

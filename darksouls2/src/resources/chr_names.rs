@@ -1,5 +1,5 @@
 pub static CHR_NAMES: phf::Map<i32, &'static str> = phf::phf_map! {
-    0001 => "Human NPC",
+       1 => "Human NPC",
     1000 => "Goblin	Forest",
     1010 => "Kobold",
     1020 => "Hollow Soldier",

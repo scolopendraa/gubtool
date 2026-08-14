@@ -1,21 +1,23 @@
-use crate::{
-    common::helpers::line_gauge,
-    event::KeyContext,
-    impl_tablecontroller_for_commands,
-    panes::{PaneManager, TablePane},
-    screen::Screen,
-    theme::theme,
+use {
+    crate::{
+        common::helpers::line_gauge,
+        event::KeyContext,
+        impl_tablecontroller_for_commands,
+        panes::{PaneManager, TablePane},
+        screen::Screen,
+        theme::theme,
+    },
+    crossterm::event::KeyCode,
+    darksouls2::{player, target},
+    num_format::{Locale, ToFormattedString},
+    ratatui::{
+        Frame,
+        layout::{Constraint, Direction, Layout, Rect},
+        style::{Style, Stylize},
+        widgets::{LineGauge, Paragraph},
+    },
+    shared::command::{Command, ValCmd},
 };
-use crossterm::event::KeyCode;
-use darksouls2::{player, target};
-use num_format::{Locale, ToFormattedString};
-use ratatui::{
-    Frame,
-    layout::{Constraint, Direction, Layout, Rect},
-    style::{Style, Stylize},
-    widgets::{LineGauge, Paragraph},
-};
-use shared::command::{Command, ValCmd};
 
 pub(super) struct TargetTab {
     pub pane_manager: PaneManager,
@@ -48,10 +50,7 @@ impl Screen for TargetTab {
 
         let lists_layout = Layout::default()
             .direction(Direction::Horizontal)
-            .constraints(vec![
-                Constraint::Percentage(50),
-                Constraint::Percentage(50)
-            ])
+            .constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
             .split(main);
 
         frame.render_widget(chr_name_paragraph(), chr_name);
@@ -75,13 +74,10 @@ const ACTION_ITEMS: [Command; 4] = [
     Command::Value(ValCmd::I32(&target::RepeatAction)),
 ];
 
-const TOGGLE_ITEMS: [Command; 1] = [
-    Command::Toggle(&target::RepeatLastAction),
-];
+const TOGGLE_ITEMS: [Command; 1] = [Command::Toggle(&target::RepeatLastAction)];
 
 impl_tablecontroller_for_commands!(ActionItems, ACTION_ITEMS);
 impl_tablecontroller_for_commands!(ToggleItems, TOGGLE_ITEMS);
-
 
 fn hp_line_gauge() -> LineGauge<'static> {
     let current = target::target()
@@ -153,9 +149,9 @@ fn chr_name_paragraph() -> Paragraph<'static> {
         .map(|t| t.name_from_chr_id())
         .unwrap_or_default();
     Paragraph::new(name)
-    .centered()
-    .style(Style::from(theme().fg))
-    .bold()
+        .centered()
+        .style(Style::from(theme().fg))
+        .bold()
 }
 
 fn paragraph() -> Paragraph<'static> {
@@ -173,13 +169,10 @@ fn paragraph() -> Paragraph<'static> {
         .and_then(|target| {
             player::player()
                 .chr_ctrl()
-                .and_then(|mut player| target.get_distance(&mut player))
+                .and_then(|player| target.get_distance(player))
         })
         .unwrap_or_default();
 
-    Paragraph::new(format!(
-        "\nLast Act: {last_act}\nDistance: {:.2}",
-        distance,
-    ))
-    .style(Style::from(theme().fg))
+    Paragraph::new(format!("\nLast Act: {last_act}\nDistance: {:.2}", distance,))
+        .style(Style::from(theme().fg))
 }

@@ -1,17 +1,19 @@
-use crate::{
-    common::controls::Control,
-    event::{Event, KeyContext, ResultExt, send_event},
-    panes::{Pane, TableController, TablePane, TableView},
-    popup::{Popup, PopupState, centered_popup},
-    screen::Screen,
-};
-use crossterm::event::{KeyCode, KeyModifiers};
-use gubtool_core::attached;
-use ratatui::{
-    Frame,
-    layout::{Constraint, Direction, Layout, Margin, Rect},
-    style::Stylize,
-    widgets::{Block, Borders, Paragraph, Row, Wrap},
+use {
+    crate::{
+        common::controls::Control,
+        event::{Event, KeyContext, ResultExt, send_event},
+        panes::{Pane, TableController, TablePane, TableView},
+        popup::{Popup, PopupState, centered_popup},
+        screen::Screen,
+    },
+    crossterm::event::{KeyCode, KeyModifiers},
+    gubtool_core::attached,
+    ratatui::{
+        Frame,
+        layout::{Constraint, Direction, Layout, Margin, Rect},
+        style::Stylize,
+        widgets::{Block, Borders, Paragraph, Row, Wrap},
+    },
 };
 
 const CONTROLS: [Control; 2] = [
@@ -20,7 +22,7 @@ const CONTROLS: [Control; 2] = [
 ];
 
 pub struct ProcessSelector {
-    table: TablePane,
+    table:       TablePane,
     popup_state: PopupState,
 }
 
@@ -30,26 +32,23 @@ impl TableController for ProcessTable {
         attached::refresh_processes();
 
         let processes = attached::game_processes();
-        let rows: Vec<Row> = processes.iter().map(|process| {
-            let comm = if attached::pid() == Some(process.pid) {
+        let rows: Vec<Row> = processes
+            .iter()
+            .map(|process| {
+                let comm = if attached::pid() == Ok(process.pid) {
                     format!("*{}", process.comm)
                 } else {
                     format!(" {}", process.comm)
                 };
-            Row::new([
-                comm,
-                process.pid.to_string(),
-                format!("{}", process.game_version),
-            ])
-        })
-        .collect::<Vec<Row>>();
+                Row::new([
+                    comm,
+                    process.pid.to_string(),
+                    format!("{}", process.game_version),
+                ])
+            })
+            .collect::<Vec<Row>>();
 
-        let header = Row::new([
-            "Name",
-            "PID",
-            "Game Version",
-        ])
-        .bold();
+        let header = Row::new(["Name", "PID", "Game Version"]).bold();
 
         TableView::new(rows).with_header(header).with_widths(&[
             Constraint::Min(28),
@@ -71,7 +70,6 @@ impl TableController for ProcessTable {
             if selected < processes.len() {
                 processes[selected].kill();
             }
-
         }
     }
 }
@@ -94,21 +92,23 @@ impl Popup for ProcessSelector {
 
         let [_processes_area, path_area] = Layout::default()
             .direction(Direction::Vertical)
-            .constraints(vec![
-                Constraint::Fill(1),
-                Constraint::Length(4),
-            ])
+            .constraints(vec![Constraint::Fill(1), Constraint::Length(4)])
             .areas(rect.inner(Margin::new(1, 1)));
 
         let text = {
             let processes = attached::game_processes();
-            if let Some(idx) = self.table.selected() && idx < processes.len() {
+            if let Some(idx) = self.table.selected()
+                && idx < processes.len()
+            {
                 format!("{}", processes[idx].exe_path.display())
             } else {
                 "".to_string()
             }
         };
-        let path = Paragraph::new(text).wrap(Wrap { trim: true })
+        let path = Paragraph::new(text)
+            .wrap(Wrap {
+                trim: true,
+            })
             .block(Block::new().borders(Borders::TOP));
 
         frame.render_widget(path, path_area);
@@ -118,7 +118,7 @@ impl Popup for ProcessSelector {
 impl ProcessSelector {
     pub fn new() -> Self {
         Self {
-            table: TablePane::new_static(&ProcessTable)
+            table:       TablePane::new_static(&ProcessTable)
                 .with_title("Process Selection")
                 .with_controls(&CONTROLS),
             popup_state: PopupState::default(),

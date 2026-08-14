@@ -1,25 +1,30 @@
-use crate::{
-    event::KeyContext,
-    panes::{TableController, TablePane, TableView},
-    popup::{Popup, PopupState, centered_popup},
-    screen::Screen,
-    theme::theme,
-};
-use ratatui::{
-    Frame,
-    layout::{Alignment, Constraint, Direction, Layout, Rect},
-    text::{Line, Span},
-    widgets::{Cell, Row},
+use {
+    crate::{
+        event::KeyContext,
+        panes::{TableController, TablePane, TableView},
+        popup::{Popup, PopupState, centered_popup},
+        screen::Screen,
+        theme::theme,
+    },
+    ratatui::{
+        Frame,
+        layout::{Alignment, Constraint, Direction, Layout, Rect},
+        text::{Line, Span},
+        widgets::{Cell, Row},
+    },
 };
 
 pub struct Control {
-    key: &'static str,
+    key:    &'static str,
     action: &'static str,
 }
 
 impl Control {
     pub const fn new(key: &'static str, action: &'static str) -> Self {
-        Self { key, action }
+        Self {
+            key,
+            action,
+        }
     }
 }
 
@@ -27,25 +32,24 @@ pub fn draw_controls(frame: &mut Frame, rect: Rect, controls: &[Control]) {
     let controls = controls_line(controls);
     let [_, controls_area] = Layout::default()
         .direction(Direction::Vertical)
-        .constraints(vec![
-            Constraint::Fill(1),
-            Constraint::Length(1),
-        ])
+        .constraints(vec![Constraint::Fill(1), Constraint::Length(1)])
         .areas(rect);
     frame.render_widget(controls, controls_area);
 }
 
 fn controls_line(controls: &[Control]) -> Line<'static> {
-    let mut spans: Vec<Span> = controls.iter().flat_map(|control| {
-        vec![
-            Span::raw("[").style(theme().fg),
-            Span::raw(control.key.to_string()).style(theme().info),
-            Span::raw("→ ").style(theme().fg),
-            Span::raw(control.action.to_string()).style(theme().fg),
-            Span::raw("] ").style(theme().fg),
-        ]
-    })
-    .collect();
+    let mut spans: Vec<Span> = controls
+        .iter()
+        .flat_map(|control| {
+            vec![
+                Span::raw("[").style(theme().fg),
+                Span::raw(control.key.to_string()).style(theme().info),
+                Span::raw("→ ").style(theme().fg),
+                Span::raw(control.action.to_string()).style(theme().fg),
+                Span::raw("] ").style(theme().fg),
+            ]
+        })
+        .collect();
 
     spans.pop();
     spans.push(Span::raw("]").style(theme().fg));
@@ -53,7 +57,7 @@ fn controls_line(controls: &[Control]) -> Line<'static> {
 }
 
 pub struct HelpPopup {
-    pane: TablePane,
+    pane:        TablePane,
     popup_state: PopupState,
 }
 
@@ -65,7 +69,10 @@ impl HelpPopup {
             .as_non_selectable()
             .with_title("Controls")
             .freeze();
-        Self { pane, popup_state: PopupState::default() }
+        Self {
+            pane,
+            popup_state: PopupState::default(),
+        }
     }
 }
 
@@ -75,7 +82,9 @@ struct HelpController {
 
 impl HelpController {
     const fn new(entries: &'static [Control]) -> Self {
-        Self { entries }
+        Self {
+            entries,
+        }
     }
 }
 
@@ -83,31 +92,33 @@ impl TableController for HelpController {
     fn make_table_view(&self) -> TableView {
         let mut max_key_len = 0;
         let mut max_action_len = 0;
-        let rows: Vec<Row> = self.entries.iter().map(|f| {
-            let key_len = f.key.len();
-            if key_len > max_key_len {
-                max_key_len = key_len
-            }
+        let rows: Vec<Row> = self
+            .entries
+            .iter()
+            .map(|f| {
+                let key_len = f.key.len();
+                if key_len > max_key_len {
+                    max_key_len = key_len
+                }
 
-            let action_len = f.action.len();
-            if action_len > max_action_len {
-                max_action_len = action_len
-            }
+                let action_len = f.action.len();
+                if action_len > max_action_len {
+                    max_action_len = action_len
+                }
 
-            Row::new([
-                Cell::from(f.key).style(theme().info),
-                Cell::from(f.action).style(theme().fg),
-            ])
-        })
-        .collect();
+                Row::new([
+                    Cell::from(f.key).style(theme().info),
+                    Cell::from(f.action).style(theme().fg),
+                ])
+            })
+            .collect();
 
         TableView::new(rows).with_widths(vec![
             Constraint::Min(max_key_len as u16 + 2),
             Constraint::Min(max_action_len as u16 + 2),
         ])
     }
-    fn handle_keys_selected(&self, _selected: usize, _ctx: &mut KeyContext) {
-    }
+    fn handle_keys_selected(&self, _selected: usize, _ctx: &mut KeyContext) {}
 }
 
 impl Popup for HelpPopup {

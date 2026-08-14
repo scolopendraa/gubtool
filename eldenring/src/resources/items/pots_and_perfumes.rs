@@ -18,7 +18,7 @@ pub static POTS_AND_PERFUMES: [Item; 57] = [
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x40000E1A,
+        id: 0x40000e1a,
         name: "Acid Spraymist",
         ..Item::default_pots_and_perfumes()
     },
@@ -48,18 +48,18 @@ pub static POTS_AND_PERFUMES: [Item; 57] = [
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x401E8764,
+        id: 0x401e8764,
         name: "Eternal Sleep Pot",
         dlc: true,
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x4000014A,
+        id: 0x4000014a,
         name: "Fetid Pot",
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x4000012C,
+        id: 0x4000012c,
         name: "Fire Pot",
         ..Item::default_pots_and_perfumes()
     },
@@ -69,108 +69,108 @@ pub static POTS_AND_PERFUMES: [Item; 57] = [
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x401E8746,
+        id: 0x401e8746,
         name: "Frenzied Flame Pot",
         dlc: true,
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x4000012E,
+        id: 0x4000012e,
         name: "Giantsflame Fire Pot",
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x401E85CA,
+        id: 0x401e85ca,
         name: "Hefty Fetid Pot",
         dlc: true,
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x401E85AC,
+        id: 0x401e85ac,
         name: "Hefty Fire Pot",
         dlc: true,
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x401E85D4,
+        id: 0x401e85d4,
         name: "Hefty Fly Pot",
         dlc: true,
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x401E85E8,
+        id: 0x401e85e8,
         name: "Hefty Freezing Pot",
         dlc: true,
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x401E86EC,
+        id: 0x401e86ec,
         name: "Hefty Frenzied Flame Pot",
         dlc: true,
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x401E8728,
+        id: 0x401e8728,
         name: "Hefty Furnace Pot",
         dlc: true,
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x401E85C0,
+        id: 0x401e85c0,
         name: "Hefty Lightning Pot",
         dlc: true,
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x401E8714,
+        id: 0x401e8714,
         name: "Hefty Magic Pot",
         dlc: true,
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x401E85FC,
+        id: 0x401e85fc,
         name: "Hefty Oil Pot",
         dlc: true,
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x401E85F2,
+        id: 0x401e85f2,
         name: "Hefty Poison Pot",
         dlc: true,
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x401E870A,
+        id: 0x401e870a,
         name: "Hefty Rancor Pot",
         dlc: true,
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x401E8732,
+        id: 0x401e8732,
         name: "Hefty Red Lightning Pot",
         dlc: true,
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x401E85B6,
+        id: 0x401e85b6,
         name: "Hefty Rock Pot",
         dlc: true,
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x401E871E,
+        id: 0x401e871e,
         name: "Hefty Rot Pot",
         dlc: true,
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x401E86D8,
+        id: 0x401e86d8,
         name: "Hefty Volcano Pot",
         dlc: true,
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x4000015E,
+        id: 0x4000015e,
         name: "Holy Water Pot",
         ..Item::default_pots_and_perfumes()
     },
@@ -185,7 +185,7 @@ pub static POTS_AND_PERFUMES: [Item; 57] = [
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x4000017C,
+        id: 0x4000017c,
         name: "Oil Pot",
         ..Item::default_pots_and_perfumes()
     },
@@ -195,33 +195,33 @@ pub static POTS_AND_PERFUMES: [Item; 57] = [
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x40000DFC,
+        id: 0x40000dfc,
         name: "Poison Spraymist",
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x4000028A,
+        id: 0x4000028a,
         name: "Rancor Pot",
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x401E873C,
+        id: 0x401e873c,
         name: "Red Lightning Pot",
         dlc: true,
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x4000012D,
+        id: 0x4000012d,
         name: "Redmane Fire Pot",
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x4000251D,
+        id: 0x4000251d,
         name: "Ritual Pot",
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x400001AE,
+        id: 0x400001ae,
         name: "Roped Fetid Pot",
         ..Item::default_pots_and_perfumes()
     },
@@ -231,53 +231,53 @@ pub static POTS_AND_PERFUMES: [Item; 57] = [
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x400001D6,
+        id: 0x400001d6,
         name: "Roped Fly Pot",
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x401E8778,
+        id: 0x401e8778,
         name: "Roped Frenzied Flame Pot",
         dlc: true,
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x400001FE,
+        id: 0x400001fe,
         name: "Roped Holy Water Pot",
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x400001A4,
+        id: 0x400001a4,
         name: "Roped Lightning Pot",
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x400001CC,
+        id: 0x400001cc,
         name: "Roped Magic Pot",
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x400001C2,
+        id: 0x400001c2,
         name: "Roped Oil Pot",
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x400001B8,
+        id: 0x400001b8,
         name: "Roped Poison Pot",
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x400001EA,
+        id: 0x400001ea,
         name: "Roped Volcano Pot",
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x4000029E,
+        id: 0x4000029e,
         name: "Rot Pot",
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x4000015F,
+        id: 0x4000015f,
         name: "Sacred Order Pot",
         ..Item::default_pots_and_perfumes()
     },
@@ -297,22 +297,22 @@ pub static POTS_AND_PERFUMES: [Item; 57] = [
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x40000DDE,
+        id: 0x40000dde,
         name: "Bloodboil Aromatic",
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x40000DC0,
+        id: 0x40000dc0,
         name: "Ironjar Aromatic",
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x40000DB6,
+        id: 0x40000db6,
         name: "Spark Aromatic",
         ..Item::default_pots_and_perfumes()
     },
     Item {
-        id: 0x40000DAC,
+        id: 0x40000dac,
         name: "Uplifting Aromatic",
         ..Item::default_pots_and_perfumes()
     },

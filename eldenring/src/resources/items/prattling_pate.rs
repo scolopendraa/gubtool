@@ -12,7 +12,7 @@ impl Item {
 
 pub static PRATTLING_PATE: [Item; 9] = [
     Item {
-        id: 0x4000089A,
+        id: 0x4000089a,
         name: "Prattling Pate \"Apologies\"",
         ..Item::default_prattling_pate()
     },
@@ -22,23 +22,23 @@ pub static PRATTLING_PATE: [Item; 9] = [
         ..Item::default_prattling_pate()
     },
     Item {
-        id: 0x401E8CE6,
+        id: 0x401e8ce6,
         name: "Prattling Pate \"Lamentation\"",
         dlc: true,
         ..Item::default_prattling_pate()
     },
     Item {
-        id: 0x4000089E,
+        id: 0x4000089e,
         name: "Prattling Pate \"Let's get to it\"",
         ..Item::default_prattling_pate()
     },
     Item {
-        id: 0x4000089D,
+        id: 0x4000089d,
         name: "Prattling Pate \"My beloved\"",
         ..Item::default_prattling_pate()
     },
     Item {
-        id: 0x4000089C,
+        id: 0x4000089c,
         name: "Prattling Pate \"Please help\"",
         ..Item::default_prattling_pate()
     },
@@ -48,12 +48,12 @@ pub static PRATTLING_PATE: [Item; 9] = [
         ..Item::default_prattling_pate()
     },
     Item {
-        id: 0x4000089B,
+        id: 0x4000089b,
         name: "Prattling Pate \"Wonderful\"",
         ..Item::default_prattling_pate()
     },
     Item {
-        id: 0x4000089F,
+        id: 0x4000089f,
         name: "Prattling Pate \"You're beautiful\"",
         ..Item::default_prattling_pate()
     },

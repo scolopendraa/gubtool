@@ -1,14 +1,22 @@
-use crate::{
-    offsets::module_offsets::structs::{
-        BasePointers, Data, ExternalFunctionPointers, Functions, Hooks, ModuleOffsets, Patches,
+use {
+    crate::{
+        offsets::module_offsets::structs::{
+            BasePointers,
+            Data,
+            ExternalFunctionPointers,
+            Functions,
+            Hooks,
+            ModuleOffsets,
+            Patches,
+        },
+        resources::scan_patterns::*,
     },
-    resources::scan_patterns::*,
+    gubtool_core::{
+        aob_scanner::{AobScanner, ScanStrategy, pattern::AobScan, scan_error::ScanError},
+        parallel_scan,
+    },
+    std::path::PathBuf,
 };
-use gubtool_core::{
-    aob_scanner::{ScanStrategy, scan_error::ScanError},
-    parallel_scan,
-};
-use std::path::PathBuf;
 
 fn scan(strategy: ScanStrategy) -> Result<ModuleOffsets, ScanError> {
     parallel_scan!(
@@ -66,6 +74,7 @@ fn scan(strategy: ScanStrategy) -> Result<ModuleOffsets, ScanError> {
 
             kernel32_create_thread: KERNEL32_CREATE_THREAD,
             kernel32_close_handle: KERNEL32_CLOSE_HANDLE,
+            kernel32_load_library_w: KERNEL32_LOAD_LIBRARY_W,
         }
     );
 
@@ -127,10 +136,16 @@ fn scan(strategy: ScanStrategy) -> Result<ModuleOffsets, ScanError> {
     let external_fn_ptrs = ExternalFunctionPointers {
         kernel32_create_thread,
         kernel32_close_handle,
+        kernel32_load_library_w,
     };
 
     let offsets = ModuleOffsets {
-        base_ptrs, functions, hooks, patches, data, external_fn_ptrs
+        base_ptrs,
+        functions,
+        hooks,
+        patches,
+        data,
+        external_fn_ptrs,
     };
 
     Ok(offsets)
@@ -147,15 +162,35 @@ pub fn scan_mem_exhaustive() -> Result<ModuleOffsets, ScanError> {
 }
 
 pub fn scan_disk<T>(path: T) -> Result<ModuleOffsets, ScanError>
-where T: Into<PathBuf>
-{
+where T: Into<PathBuf> {
     let strategy = ScanStrategy::Disk(&path.into());
     scan(strategy)
 }
 
 pub fn scan_disk_exhaustive<T>(path: T) -> Result<ModuleOffsets, ScanError>
-where T: Into<PathBuf>
-{
+where T: Into<PathBuf> {
     let strategy = ScanStrategy::DiskExhaustive(&path.into());
     scan(strategy)
+}
+
+pub fn scan_pattern_all_versions<T>(exe_folder_path: T, pattern: &'static AobScan)
+where T: Into<PathBuf> + Send + Copy + Sync {
+    let exes = [
+        "120", "121", "122", "123", "130", "131", "132", "140", "141", "150", "160", "170", "180",
+        "181", "190", "191", "200", "201", "220", "223", "230", "240", "250", "260", "261", "262",
+    ];
+
+    rayon::scope(|scope| {
+        for exe in exes {
+            let path = exe_folder_path.into().join(format!("{exe}.exe"));
+            scope.spawn(move |_| {
+                let strategy = ScanStrategy::DiskExhaustive(&path);
+                let result = AobScanner::from_strategy(pattern, strategy)
+                    .and_then(|scanner| scanner.scan())
+                    .unwrap();
+
+                println!("{}: {:#X?}", exe, result);
+            });
+        }
+    });
 }

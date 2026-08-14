@@ -3,9 +3,11 @@ pub mod code_cave;
 pub mod game_manager_imp;
 pub mod module_offsets;
 
-use crate::mem::{read, read_address, write};
-use gubtool_core::{attached::is_32, sys::error::ProcResult};
-use pelite::Pod;
+use {
+    crate::mem::{read, read_address, write},
+    gubtool_core::{attached::is_32, sys::sys_error::ProcResult},
+    pelite::Pod,
+};
 
 pub struct Offset {
     pub vanilla: u64,
@@ -15,7 +17,11 @@ pub struct Offset {
 impl Offset {
     #[inline(always)]
     pub fn resolve(&self) -> u64 {
-        if is_32() { self.vanilla } else { self.scholar }
+        if is_32() {
+            self.vanilla
+        } else {
+            self.scholar
+        }
     }
 }
 

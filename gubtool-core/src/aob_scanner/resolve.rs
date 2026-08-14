@@ -1,10 +1,12 @@
-use crate::{
-    address::{WIN32_PREFFERED_IMAGE_BASE, WIN64_PREFFERED_IMAGE_BASE},
-    aob_scanner::{AobScanner, ScanError, ScanLocation, pattern::AddressingMode},
-    attached::{self, AddressSize},
-    pe::{PeParser, error::ParsePeError},
+use {
+    crate::{
+        address::{WIN32_PREFFERED_IMAGE_BASE, WIN64_PREFFERED_IMAGE_BASE},
+        aob_scanner::{AobScanner, ScanError, ScanLocation, pattern::AddressingMode},
+        attached::{self, AddressSize},
+        pe::{PeParser, error::ParsePeError},
+    },
+    std::path::PathBuf,
 };
-use std::path::PathBuf;
 
 impl AobScanner {
     pub(super) fn resolve_address(&self, mut offset: u64) -> Result<u64, ScanError> {
@@ -21,21 +23,26 @@ impl AobScanner {
                         (self.read_u32(file_offset)? as u64)
                             .saturating_sub(WIN32_PREFFERED_IMAGE_BASE)
                     }
-                    AddressingMode::Relative { bytes_to_next_instr } => {
+                    AddressingMode::Relative {
+                        bytes_to_next_instr,
+                    } => {
                         let rel_offset = self.read_i32(file_offset)?;
 
-                        rva.checked_add_signed(
-                            rel_offset as i64 + bytes_to_next_instr as i64
-                        )
-                        .ok_or(ScanError::OverflowRelative { scan_name: self.scan.name })?
+                        rva.checked_add_signed(rel_offset as i64 + bytes_to_next_instr as i64)
+                            .ok_or(ScanError::OverflowRelative {
+                                scan_name: self.scan.name,
+                            })?
                     }
-                    AddressingMode::VfTableRelative { table_offset } => {
+                    AddressingMode::VfTableRelative {
+                        table_offset,
+                    } => {
                         let rel_offset = self.read_i32(file_offset)?;
 
-                        let table = rva.checked_add_signed(
-                            rel_offset as i64 + 4
-                        )
-                        .ok_or(ScanError::OverflowRelative { scan_name: self.scan.name })?;
+                        let table = rva.checked_add_signed(rel_offset as i64 + 4).ok_or(
+                            ScanError::OverflowRelative {
+                                scan_name: self.scan.name,
+                            },
+                        )?;
 
                         let function_pointer = rva_to_file_offset(&f.path, table + table_offset)?;
 
@@ -46,7 +53,7 @@ impl AobScanner {
                             AddressSize::Bits32 => {
                                 (self.read_u32(function_pointer)? as u64)
                                     .saturating_sub(WIN32_PREFFERED_IMAGE_BASE)
-                            },
+                            }
                             AddressSize::Bits64 => {
                                 self.read_u64(function_pointer)?
                                     .saturating_sub(WIN64_PREFFERED_IMAGE_BASE)
@@ -60,21 +67,27 @@ impl AobScanner {
                 let absolute_off = match self.scan.scan_mode {
                     AddressingMode::Absolute => offset,
                     AddressingMode::Direct32 => self.read_u32(offset)? as u64,
-                    AddressingMode::Relative { bytes_to_next_instr } => {
+                    AddressingMode::Relative {
+                        bytes_to_next_instr,
+                    } => {
                         let rel_offset = self.read_i32(offset)?;
 
-                        offset.checked_add_signed(
-                            rel_offset as i64 + bytes_to_next_instr as i64
-                        )
-                        .ok_or(ScanError::OverflowRelative { scan_name: self.scan.name })?
+                        offset
+                            .checked_add_signed(rel_offset as i64 + bytes_to_next_instr as i64)
+                            .ok_or(ScanError::OverflowRelative {
+                                scan_name: self.scan.name,
+                            })?
                     }
-                    AddressingMode::VfTableRelative { table_offset } => {
+                    AddressingMode::VfTableRelative {
+                        table_offset,
+                    } => {
                         let rel_offset = self.read_i32(offset)?;
 
-                        let table = offset.checked_add_signed(
-                            rel_offset as i64 + 4
-                        )
-                        .ok_or(ScanError::OverflowRelative { scan_name: self.scan.name })?;
+                        let table = offset.checked_add_signed(rel_offset as i64 + 4).ok_or(
+                            ScanError::OverflowRelative {
+                                scan_name: self.scan.name,
+                            },
+                        )?;
 
                         let function_pointer = table + table_offset;
 
@@ -117,9 +130,7 @@ fn rva_to_file_offset(path: &PathBuf, rva: u64) -> Result<u64, ParsePeError> {
         let virtual_end = virtual_start + section.SizeOfRawData as u64;
 
         if rva >= virtual_start && rva < virtual_end {
-            return Ok(
-                section.PointerToRawData as u64 + (rva - virtual_start)
-            );
+            return Ok(section.PointerToRawData as u64 + (rva - virtual_start));
         }
     }
 

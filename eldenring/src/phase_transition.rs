@@ -1,11 +1,16 @@
-use crate::{
-    chr_ins::ChrIns,
-    resources::entity_ids,
-    utils::{wait_for_cutscence_completion, wait_for_event},
+use {
+    crate::{
+        chr_ins::ChrIns,
+        resources::entity_ids,
+        target::target,
+        utils::{wait_for_cutscence_completion, wait_for_event},
+    },
+    anyhow::bail,
 };
-use anyhow::bail;
 
-pub fn next_phase(chr: &mut ChrIns) -> anyhow::Result<()> {
+pub fn target_next_phase() -> anyhow::Result<()> {
+    let mut target_guard = target();
+    let chr = target_guard.chr_ins()?;
     match chr.entity_id()? {
         entity_ids::MARGIT_BOSS => {
             if !chr.has_speffect(16200)? {
@@ -25,10 +30,10 @@ pub fn next_phase(chr: &mut ChrIns) -> anyhow::Result<()> {
             }
         }
         // entity_ids::STARSCOURGE_RADAHN => {
-            // if true {
-                // chr.set_hp_pct(50)?;
-                // chr.force_animation_playback(3035, false, false, false)?
-            // }
+        // if true {
+        // chr.set_hp_pct(50)?;
+        // chr.force_animation_playback(3035, false, false, false)?
+        // }
         // }
         entity_ids::DTS_BOSS => {
             if !chr.has_speffect(13708)? {
@@ -42,7 +47,7 @@ pub fn next_phase(chr: &mut ChrIns) -> anyhow::Result<()> {
             maliketh_ins.set_hp_pct(55.0)?;
             wait_for_cutscence_completion()?;
             wait_for_event(13002802, true, 5)?;
-            maliketh_ins.set_as_target()?
+            maliketh_ins.set_as_target(&mut target_guard)?
         }
         entity_ids::MOHG_LOB => {
             if !chr.has_speffect(10643)? {
@@ -71,7 +76,7 @@ pub fn next_phase(chr: &mut ChrIns) -> anyhow::Result<()> {
             p2_ins.set_hp(p2_max_hp - p1_max_hp)?;
             chr.set_hp(0)?;
             wait_for_cutscence_completion()?;
-            p2_ins.set_as_target()?
+            p2_ins.set_as_target(&mut target_guard)?
         }
         entity_ids::PLACIDUSAX => {
             if !chr.has_speffect(16890)? {
@@ -90,11 +95,10 @@ pub fn next_phase(chr: &mut ChrIns) -> anyhow::Result<()> {
             if chr.get_hp_pct()? > 1.0 {
                 chr.set_hp_pct(1.0)?;
                 wait_for_cutscence_completion()?;
-                ChrIns::from_entity_id(entity_ids::RYKARD)?
-                    .set_as_target()?;
+                ChrIns::from_entity_id(entity_ids::RYKARD)?.set_as_target(&mut target_guard)?;
             }
         }
-        _ => bail!("Not implemented for current target")
+        _ => bail!("Not implemented for current target"),
     }
     Ok(())
 }

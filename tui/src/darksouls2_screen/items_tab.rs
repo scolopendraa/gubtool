@@ -1,31 +1,38 @@
-use crate::{
-    app::App,
-    common::helpers::item_options_style,
-    event::{AnyhowExt, KeyContext, request_search},
-    input::{fuzzy_finder::SearchRequest, request_input},
-    panes::{PaneManager, TableController, TablePane, TableView},
-    screen::Screen,
-    spawn_task,
-    theme::theme,
-};
-use darksouls2::{
-    item::{self, ItemSpawnRequest},
-    resources::items::{Categories, ITEMS, infusions::Infusion},
-};
-use nucleo_matcher::Utf32String;
-use ratatui::{
-    Frame,
-    layout::{Constraint, Direction, Layout, Rect},
-    style::Stylize,
-    widgets::{Cell, Row},
-};
-use std::{
-    sync::{LazyLock, Mutex},
-    thread,
+use {
+    crate::{
+        app::App,
+        common::helpers::item_options_style,
+        event::{AnyhowExt, KeyContext, request_search},
+        input::{fuzzy_finder::SearchRequest, request_input},
+        panes::{PaneManager, TableController, TablePane, TableView},
+        screen::Screen,
+        spawn_task,
+        theme::theme,
+    },
+    darksouls2::{
+        item::{self, ItemSpawnRequest},
+        resources::items::{Categories, ITEMS, infusions::Infusion},
+    },
+    nucleo_matcher::Utf32String,
+    ratatui::{
+        Frame,
+        layout::{Constraint, Direction, Layout, Rect},
+        style::Stylize,
+        widgets::{Cell, Row},
+    },
+    std::{
+        sync::{LazyLock, Mutex},
+        thread,
+    },
 };
 
 static SPAWN_REQUEST: LazyLock<Mutex<ItemSpawnRequest>> = LazyLock::new(|| {
-    Mutex::new(ItemSpawnRequest { item: ITEMS[0], quantity: 1, upgrade: 0, infusion: Infusion::Normal })
+    Mutex::new(ItemSpawnRequest {
+        item:     ITEMS[0],
+        quantity: 1,
+        upgrade:  0,
+        infusion: Infusion::Normal,
+    })
 });
 
 pub(super) struct ItemTab {
@@ -45,21 +52,16 @@ impl Screen for ItemTab {
 
         let [item_area, right_area] = Layout::default()
             .direction(Direction::Horizontal)
-            .constraints(vec![
-                Constraint::Percentage(65),
-                Constraint::Fill(1)
-            ])
+            .constraints(vec![Constraint::Percentage(65), Constraint::Fill(1)])
             .areas(layout);
 
         let [options, mass_spawn] = Layout::default()
             .direction(Direction::Vertical)
-            .constraints(vec![
-                Constraint::Length(5),
-                Constraint::Fill(1)
-            ])
+            .constraints(vec![Constraint::Length(5), Constraint::Fill(1)])
             .areas(right_area);
 
-        self.pane_manager.draw(frame, &[item_area, options, mass_spawn]);
+        self.pane_manager
+            .draw(frame, &[item_area, options, mass_spawn]);
     }
 
     fn handle_keys(&mut self, ctx: &mut KeyContext) {
@@ -75,8 +77,7 @@ impl ItemTab {
                     .with_title("Items")
                     .freeze()
                     .boxed(),
-                TablePane::new_static(&OptionsItems)
-                    .boxed(),
+                TablePane::new_static(&OptionsItems).boxed(),
                 TablePane::new_static(&MassSpawnItems)
                     .with_title("Mass Spawn")
                     .freeze()
@@ -89,7 +90,8 @@ impl ItemTab {
 struct ItemSelector;
 impl TableController for ItemSelector {
     fn make_table_view(&self) -> TableView {
-        let rows = ITEMS.iter()
+        let rows = ITEMS
+            .iter()
             .map(|item| {
                 Row::new([
                     Cell::from(item.name),
@@ -98,10 +100,7 @@ impl TableController for ItemSelector {
             })
             .collect();
 
-        TableView::new(rows).with_widths(&[
-            Constraint::Min(40),
-            Constraint::Max(25),
-        ])
+        TableView::new(rows).with_widths(&[Constraint::Min(40), Constraint::Max(25)])
     }
     fn handle_keys_selected(&self, _selected: usize, ctx: &mut KeyContext) {
         if ctx.key_enter() {
@@ -137,33 +136,25 @@ impl TableController for OptionsItems {
 
         let item = SPAWN_REQUEST.lock().unwrap();
         match selected {
-            0 => {
-                if item.can_quantity() {
-                    drop(item);
-                    spawn_task! {
-                        if let Some(val) = request_input::<u32>(None).await {
-                            let mut item = SPAWN_REQUEST.lock().unwrap();
-                            item.quantity = val;
-                        }
+            0 if item.can_quantity() => {
+                drop(item);
+                spawn_task! {
+                    if let Some(val) = request_input::<u32>(None).await {
+                        let mut item = SPAWN_REQUEST.lock().unwrap();
+                        item.quantity = val;
                     }
                 }
             }
-            1 => {
-                if item.can_upgrade() {
-                    drop(item);
-                    spawn_task! {
-                        if let Some(val) = request_input::<u32>(None).await {
-                            let mut item = SPAWN_REQUEST.lock().unwrap();
-                            item.upgrade = val;
-                        }
+            1 if item.can_upgrade() => {
+                drop(item);
+                spawn_task! {
+                    if let Some(val) = request_input::<u32>(None).await {
+                        let mut item = SPAWN_REQUEST.lock().unwrap();
+                        item.upgrade = val;
                     }
                 }
             }
-            2 => {
-                if item.can_infuse() {
-                    request_search(&InfusionSearch);
-                }
-            }
+            2 if item.can_infuse() => request_search(&InfusionSearch),
             _ => (),
         }
     }
@@ -172,7 +163,8 @@ impl TableController for OptionsItems {
 struct ItemSearch;
 impl SearchRequest for ItemSearch {
     fn items(&self) -> Vec<Utf32String> {
-        ITEMS.iter()
+        ITEMS
+            .iter()
             .map(|item| Utf32String::from(format!("{}|{}", item.name, item.category)))
             .collect()
     }
@@ -181,7 +173,12 @@ impl SearchRequest for ItemSearch {
 struct InfusionSearch;
 impl SearchRequest for InfusionSearch {
     fn items(&self) -> Vec<Utf32String> {
-        SPAWN_REQUEST.lock().unwrap().item.available_infusions().iter()
+        SPAWN_REQUEST
+            .lock()
+            .unwrap()
+            .item
+            .available_infusions()
+            .iter()
             .map(|infusion| Utf32String::from(format!("{}", infusion)))
             .collect()
     }

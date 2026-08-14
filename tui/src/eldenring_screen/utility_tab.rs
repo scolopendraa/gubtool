@@ -1,20 +1,22 @@
-use crate::{
-    event::{AnyhowExt, KeyContext},
-    impl_tablecontroller_for_commands,
-    panes::{PaneManager, TabPane, TableController, TablePane, TableView},
-    screen::Screen,
+use {
+    crate::{
+        event::{AnyhowExt, KeyContext},
+        impl_tablecontroller_for_commands,
+        panes::{PaneManager, TabPane, TableController, TablePane, TableView},
+        screen::Screen,
+    },
+    crossterm::event::KeyCode,
+    eldenring::{
+        resources::talk_commands::{MENUS, SHOPS},
+        utility,
+    },
+    ratatui::{
+        Frame,
+        layout::{Constraint, Direction, Layout, Rect},
+        widgets::Row,
+    },
+    shared::command::{Command, ValCmd},
 };
-use crossterm::event::KeyCode;
-use eldenring::{
-    resources::talk_commands::{MENUS, SHOPS},
-    utility,
-};
-use ratatui::{
-    Frame,
-    layout::{Constraint, Direction, Layout, Rect},
-    widgets::Row,
-};
-use shared::command::{Command, ValCmd};
 
 pub(super) struct UtilityTab {
     pub pane_manager: PaneManager,
@@ -26,14 +28,12 @@ impl UtilityTab {
             pane_manager: PaneManager::new(vec![
                 TablePane::new_static(&Toggles).boxed(),
                 TablePane::new_static(&Actions).boxed(),
-                TabPane::new(
-                    &["Menus", "Shops"],
-                    vec![
-                        TablePane::new_static(&MenusList).freeze(),
-                        TablePane::new_static(&ShopsList).freeze(),
-                    ],
-                ).boxed(),
-            ])
+                TabPane::new(&["Menus", "Shops"], vec![
+                    TablePane::new_static(&MenusList).freeze(),
+                    TablePane::new_static(&ShopsList).freeze(),
+                ])
+                .boxed(),
+            ]),
         }
     }
 }
@@ -42,18 +42,12 @@ impl Screen for UtilityTab {
     fn draw(&mut self, frame: &mut Frame, rect: Rect) {
         let [area_one, right_area] = Layout::default()
             .direction(Direction::Horizontal)
-            .constraints(vec![
-                Constraint::Percentage(50),
-                Constraint::Percentage(50),
-            ])
+            .constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
             .areas(rect);
 
         let [area_two, area_three] = Layout::default()
             .direction(Direction::Vertical)
-            .constraints(vec![
-                Constraint::Percentage(50),
-                Constraint::Percentage(50),
-            ])
+            .constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
             .areas(right_area);
 
         let layout = [area_one, area_two, area_three];
@@ -114,7 +108,7 @@ impl TableController for ShopsList {
     }
     fn handle_keys_selected(&self, selected: usize, ctx: &mut KeyContext) {
         if ctx.key_enter() {
-           SHOPS[selected].execute().send_error();
+            SHOPS[selected].execute().send_error();
         }
     }
 }

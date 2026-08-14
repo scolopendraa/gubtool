@@ -1,11 +1,13 @@
-use crate::{
-    Config,
-    attach::{self, AttachConfig},
-};
-use notify::{Event, EventKind, RecursiveMode, Watcher};
-use std::{
-    fs,
-    sync::{self},
+use {
+    crate::{
+        Config,
+        attach::{self, AttachConfig},
+    },
+    notify::{Event, EventKind, RecursiveMode, Watcher},
+    std::{
+        fs,
+        sync::{self},
+    },
 };
 
 pub fn watch() -> notify::Result<()> {
@@ -29,13 +31,9 @@ pub fn watch() -> notify::Result<()> {
         let _ = tx.send(event);
     })?;
 
-    watcher.watch(
-        &attach_path,
-        RecursiveMode::NonRecursive,
-    )?;
+    watcher.watch(&attach_path, RecursiveMode::NonRecursive)?;
 
     while let Ok(event) = rx.recv() {
-
         for path in event.paths {
             if path == attach_path {
                 *attach::CONFIG.write().unwrap() = AttachConfig::read().unwrap_or_default();

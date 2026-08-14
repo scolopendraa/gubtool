@@ -1,33 +1,35 @@
-use crate::{
-    event::KeyContext,
-    panes::{TableController, TablePane, TableView},
-    popup::{Popup, PopupState, centered_popup},
-    screen::Screen,
-    ui_state::UiState,
+use {
+    crate::{
+        event::KeyContext,
+        panes::{TableController, TablePane, TableView},
+        popup::{Popup, PopupState, centered_popup},
+        screen::Screen,
+        ui_state::UiState,
+    },
+    config::Config,
+    ratatui::{
+        Frame,
+        layout::Rect,
+        widgets::{BorderType, Row},
+    },
+    ratatui_themes::{Color, ThemeName, ThemePalette},
+    serde::{Deserialize, Deserializer, Serialize, Serializer, de::IntoDeserializer},
+    std::{iter, sync::RwLock},
 };
-use config::Config;
-use ratatui::{
-    Frame,
-    layout::Rect,
-    widgets::{BorderType, Row},
-};
-use ratatui_themes::{Color, ThemeName, ThemePalette};
-use serde::{Deserialize, Deserializer, Serialize, Serializer, de::IntoDeserializer};
-use std::{iter, sync::RwLock};
 
-pub const HIGHLIGHT_SYMBOL: &'static str = "> ";
+pub const HIGHLIGHT_SYMBOL: &str = "> ";
 pub const BORDER_TYPE: BorderType = BorderType::Rounded;
 const TERMINAL_PALETTE: ThemePalette = ThemePalette {
-    accent: Color::Blue,
+    accent:    Color::Blue,
     secondary: Color::Magenta,
-    bg: Color::Reset,
-    fg: Color::Reset,
-    muted: Color::DarkGray,
+    bg:        Color::Reset,
+    fg:        Color::Reset,
+    muted:     Color::DarkGray,
     selection: Color::Cyan,
-    error: Color::Red,
-    warning: Color::Yellow,
-    success: Color::Green,
-    info: Color::Cyan,
+    error:     Color::Red,
+    warning:   Color::Yellow,
+    success:   Color::Green,
+    info:      Color::Cyan,
 };
 
 static GLOBAL_THEME: RwLock<GlobalTheme> = RwLock::new(GlobalTheme::new());
@@ -37,7 +39,6 @@ pub enum ThemeChoice {
     Terminal,
     Preset(ThemeName),
 }
-
 
 impl ThemeChoice {
     #[cfg(windows)]
@@ -81,9 +82,7 @@ impl Default for ThemeChoice {
 
 impl<'de> Deserialize<'de> for ThemeChoice {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
+    where D: Deserializer<'de> {
         let value = String::deserialize(deserializer)?;
 
         if value == "terminal" {
@@ -96,9 +95,7 @@ impl<'de> Deserialize<'de> for ThemeChoice {
 
 impl Serialize for ThemeChoice {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
+    where S: Serializer {
         match self {
             Self::Terminal => serializer.serialize_str("terminal"),
             Self::Preset(theme) => theme.serialize(serializer),
@@ -113,7 +110,10 @@ struct GlobalTheme {
 
 impl GlobalTheme {
     const fn new() -> Self {
-        Self { palette: ThemeChoice::PLATFORM_DEFAULT.palette(), version: 0 }
+        Self {
+            palette: ThemeChoice::PLATFORM_DEFAULT.palette(),
+            version: 0,
+        }
     }
 }
 
@@ -132,7 +132,7 @@ pub fn get_theme_version() -> usize {
 }
 
 pub struct ThemeSelector {
-    list: TablePane,
+    list:  TablePane,
     popup: PopupState,
 }
 
@@ -168,7 +168,10 @@ impl TableController for ThemeList {
         if ctx.key_enter()
             && let Some(theme) = ThemeChoice::from_index(selected)
         {
-            UiState::update(|c| { c.global.theme = theme; }).ok();
+            UiState::update(|c| {
+                c.global.theme = theme;
+            })
+            .ok();
             set_theme(theme);
         }
     }
@@ -177,8 +180,7 @@ impl TableController for ThemeList {
 impl ThemeSelector {
     pub fn new() -> Self {
         Self {
-            list: TablePane::new_static(&ThemeList)
-                .with_title("Themes"),
+            list:  TablePane::new_static(&ThemeList).with_title("Themes"),
             popup: PopupState::default(),
         }
     }

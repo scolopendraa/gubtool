@@ -1,3 +1,7 @@
+push esi
+push edi
+push ebp
+push ebx
 mov ebx, OFFSET bonfire_manager
 mov esi, OFFSET fn_bonfire_unlock
 mov edi, DWORD PTR [ebx+0x14]
@@ -20,4 +24,8 @@ cmp eax, edi
 jl loop_start
 add esp, 0x4
 done:
+pop ebx
+pop ebp
+pop edi
+pop esi
 ret

@@ -1,14 +1,9 @@
-main:
-movabs r8, OFFSET should_process_flag
-cmp BYTE PTR [r8], 0x1
-jne nothing_to_process
 movabs r14, OFFSET game_man_imp
 mov r14, QWORD PTR [r14]
 mov r13, r14
 mov r14, QWORD PTR [r14+0xa8]
 mov r14, QWORD PTR [r14+0x10]
 mov r14, QWORD PTR [r14+0x10]
-mov BYTE PTR [r8], 0x0
 movabs r8, OFFSET adjust_quantity_flag
 cmp BYTE PTR [r8], 0x1
 jne skip_adjust
@@ -53,12 +48,4 @@ mov rdx, r15
 movabs rax, OFFSET fn_show_item_dialogue
 call rax
 add rsp, 0x208
-nothing_to_process:
-mov rcx, 0x5
-movabs rax, OFFSET fn_sleep
-mov rax, QWORD PTR [rax]
-call rax
-movabs r8, OFFSET should_exit_flag
-cmp BYTE PTR [r8], 0x1
-jne main
 ret

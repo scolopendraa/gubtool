@@ -1,60 +1,69 @@
-use crate::{
-    attach_options::AttachOptions,
-    common::controls::{Control, HelpPopup},
-    darksouls2_screen::DarkSouls2Screen,
-    debug_screen::DebugPopup,
-    eldenring_screen::EldenRingScreen,
-    event::{
-        AnyhowExt, Event, InfoType, KeyContext, ResultExt, send_event, start_event_loop_thread,
+use {
+    crate::{
+        attach_options::AttachOptions,
+        common::controls::{Control, HelpPopup},
+        darksouls2_screen::DarkSouls2Screen,
+        debug_screen::DebugPopup,
+        eldenring_screen::EldenRingScreen,
+        event::{
+            AnyhowExt,
+            Event,
+            InfoType,
+            KeyContext,
+            ResultExt,
+            send_event,
+            start_event_loop_thread,
+        },
+        game_screen_selector::GameScreenSelector,
+        impl_game_screen,
+        input::{fuzzy_finder::FuzzyFinder, input_prompt::InputPrompt},
+        memory_viewer_screen::MemoryViewerScreen,
+        popup::Popup,
+        process_selector::ProcessSelector,
+        screen::GameScreen,
+        spawn_task,
+        theme::{ThemeSelector, theme},
+        ui_state::UiState,
     },
-    game_screen_selector::GameScreenSelector,
-    impl_game_screen,
-    input::{fuzzy_finder::FuzzyFinder, input_prompt::InputPrompt},
-    memory_viewer_screen::MemoryViewerScreen,
-    popup::Popup,
-    process_selector::ProcessSelector,
-    screen::GameScreen,
-    spawn_task,
-    theme::{ThemeSelector, theme},
-    ui_state::UiState,
-};
-use color_eyre::eyre::Result;
-use config::Config;
-use crossterm::event::{KeyCode, KeyModifiers};
-use gubtool_core::{
-    attached::{self, is_attached},
-    game_version::Game,
-};
-use ratatui::{
-    DefaultTerminal, Frame,
-    layout::{Alignment, Constraint, Direction, Layout},
-    style::Stylize,
-    widgets::{Block, Paragraph},
-};
-use std::{
-    cell::{LazyCell, RefCell},
-    rc::Rc,
+    color_eyre::eyre::Result,
+    config::Config,
+    crossterm::event::{KeyCode, KeyModifiers},
+    gubtool_core::{
+        attached::{self, detach_if_invalid, is_attached},
+        game_version::Game,
+    },
+    ratatui::{
+        DefaultTerminal,
+        Frame,
+        layout::{Alignment, Constraint, Direction, Layout},
+        style::Stylize,
+        widgets::{Block, Paragraph},
+    },
+    std::{
+        cell::{LazyCell, RefCell},
+        rc::Rc,
+    },
 };
 
 pub struct App {
-    running: bool,
-    pub game_screen: Rc<RefCell<Game>>,
-    help: HelpPopup,
-    debug: DebugPopup,
-    show_info: bool,
-    info_message: String,
-    info_type: InfoType,
-    input: InputPrompt,
-    fuzzy_finder: FuzzyFinder,
+    running:            bool,
+    pub game_screen:    Rc<RefCell<Game>>,
+    help:               HelpPopup,
+    debug:              DebugPopup,
+    show_info:          bool,
+    info_message:       String,
+    info_type:          InfoType,
+    input:              InputPrompt,
+    fuzzy_finder:       FuzzyFinder,
     pub has_pressed_f1: bool,
 
-    theme_selector: ThemeSelector,
-    process_selector: ProcessSelector,
-    game_screen_selector: GameScreenSelector,
-    pub attach_options: AttachOptions,
+    theme_selector:           ThemeSelector,
+    process_selector:         ProcessSelector,
+    game_screen_selector:     GameScreenSelector,
+    pub attach_options:       AttachOptions,
     pub memory_viewer_screen: MemoryViewerScreen,
 
-    elden_ring: LazyCell<EldenRingScreen>,
+    elden_ring:   LazyCell<EldenRingScreen>,
     dark_souls_2: LazyCell<DarkSouls2Screen>,
 }
 
@@ -62,29 +71,25 @@ impl App {
     pub fn new() -> Self {
         let game_screen = Rc::new(RefCell::new(Game::EldenRing));
         App {
-            running: true,
-            game_screen: Rc::clone(&game_screen),
-            help: HelpPopup::new(&HELP_ENTRIES),
-            debug: DebugPopup::default(),
-            show_info: false,
+            running:        true,
+            game_screen:    Rc::clone(&game_screen),
+            help:           HelpPopup::new(&HELP_ENTRIES),
+            debug:          DebugPopup::default(),
+            show_info:      false,
             has_pressed_f1: false,
-            info_message: "".to_string(),
-            info_type: InfoType::SysError,
-            input: InputPrompt::default(),
-            fuzzy_finder: FuzzyFinder::default(),
+            info_message:   "".to_string(),
+            info_type:      InfoType::SysError,
+            input:          InputPrompt::default(),
+            fuzzy_finder:   FuzzyFinder::default(),
 
-            theme_selector: ThemeSelector::new(),
-            process_selector: ProcessSelector::new(),
+            theme_selector:       ThemeSelector::new(),
+            process_selector:     ProcessSelector::new(),
             game_screen_selector: GameScreenSelector::new(),
-            attach_options: AttachOptions::new(Rc::clone(&game_screen)),
+            attach_options:       AttachOptions::new(Rc::clone(&game_screen)),
             memory_viewer_screen: MemoryViewerScreen::new(),
 
-            elden_ring: LazyCell::new(|| {
-                EldenRingScreen::new()
-            }),
-            dark_souls_2: LazyCell::new(|| {
-                DarkSouls2Screen::new()
-            }),
+            elden_ring:   LazyCell::new(EldenRingScreen::new),
+            dark_souls_2: LazyCell::new(DarkSouls2Screen::new),
         }
     }
 
@@ -99,31 +104,22 @@ impl App {
             terminal.draw(|frame| self.draw(frame))?;
 
             match rx.recv()? {
-                Event::Key(mut ctx) => {
-                    self.handle_keys(&mut ctx)
-                }
+                Event::Key(mut ctx) => self.handle_keys(&mut ctx),
                 Event::Info((text, info_type)) => {
                     self.info_message = text;
                     self.info_type = info_type;
                     self.show_info = true;
                 }
                 Event::RenderTick => {
-                    if is_attached() {
-                        match attached::detach_if_invalid() {
-                            Some(Game::EldenRing) => eldenring::reset(),
-                            Some(Game::DarkSouls2) => darksouls2::reset(),
-                            None => (),
-                        }
-                    }
+                    detach_if_invalid();
+
                     match attached::game() {
-                        Some(Game::EldenRing) => eldenring::update(),
-                        Some(Game::DarkSouls2) => darksouls2::update(),
-                        None => try_auto_attach(),
+                        Ok(Game::EldenRing) => eldenring::update(),
+                        Ok(Game::DarkSouls2) => darksouls2::update(),
+                        Err(_) => try_auto_attach(),
                     }
                 }
-                Event::Input((prompt, sender, type_id)) => {
-                    self.input.show(prompt, sender, type_id)
-                }
+                Event::Input((prompt, sender, type_id)) => self.input.show(prompt, sender, type_id),
                 Event::SearchRequest(request) => {
                     self.fuzzy_finder.show(request);
                 }
@@ -132,15 +128,21 @@ impl App {
                 }
                 Event::GameScreen(game) => {
                     *self.game_screen.borrow_mut() = game;
-                    let _ = UiState::update(|c| c.global.game_screen = game );
+                    let _ = UiState::update(|c| c.global.game_screen = game);
                 }
                 Event::Attach => {
-                    if let Some(game) = attached::game() {
+                    if let Ok(game) = attached::game() {
                         send_event(Event::GameScreen(game));
                         spawn_task! {
                             match game {
-                                Game::DarkSouls2 => darksouls2::attach().await,
-                                Game::EldenRing => eldenring::attach().await,
+                                Game::DarkSouls2 => {
+                                    darksouls2::reset();
+                                    darksouls2::attach().await
+                                }
+                                Game::EldenRing => {
+                                    eldenring::reset();
+                                    eldenring::attach().await
+                                }
                             }
                             .send_error()
                         }
@@ -162,10 +164,7 @@ impl App {
                 Constraint::Length(1),
             ]
         } else {
-            vec![
-                Constraint::Length(1),
-                Constraint::Fill(1),
-            ]
+            vec![Constraint::Length(1), Constraint::Fill(1)]
         };
 
         let layout = Layout::default()
@@ -175,10 +174,7 @@ impl App {
 
         let [pid_area, version_area] = Layout::default()
             .direction(Direction::Horizontal)
-            .constraints([
-                Constraint::Max(25),
-                Constraint::Fill(1)
-            ])
+            .constraints([Constraint::Max(25), Constraint::Fill(1)])
             .areas(layout[0]);
 
         frame.render_widget(pid_paragraph(), pid_area);
@@ -255,7 +251,7 @@ impl App {
             self.help.show();
             if !self.has_pressed_f1 {
                 self.has_pressed_f1 = true;
-                let _ = UiState::update(|c| c.global.has_pressed_f1 = true );
+                let _ = UiState::update(|c| c.global.has_pressed_f1 = true);
             }
         }
 
@@ -293,22 +289,21 @@ fn pid_paragraph() -> Paragraph<'static> {
         Paragraph::new(format!("Process ID: {}", attached::pid().unwrap()))
     } else {
         Paragraph::new("Scanning for game...")
-    }.style(theme().fg)
+    }
+    .style(theme().fg)
 }
 
 fn version_paragraph() -> Paragraph<'static> {
-    if let Some(game_version)  = attached::game_version() {
+    if let Ok(game_version) = attached::game_version() {
         Paragraph::new(format!("{}", game_version))
     } else {
         Paragraph::new("")
-    }.style(theme().fg)
-        .alignment(Alignment::Right)
+    }
+    .style(theme().fg)
+    .alignment(Alignment::Right)
 }
 
-impl_game_screen!(
-    DarkSouls2Screen,
-    EldenRingScreen
-);
+impl_game_screen!(DarkSouls2Screen, EldenRingScreen);
 
 const HELP_ENTRIES: [Control; 17] = [
     Control::new("hjkl, ← ↑ ↓ → ", "Navigate list"),

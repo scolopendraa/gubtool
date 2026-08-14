@@ -5,16 +5,17 @@ pub const BLOCK_ID: u64 = 0x38;
 pub const CHR_CTRL: u64 = 0x58;
 pub const NPC_PARAM_ID: u64 = 0x60;
 pub const CHR_ID: u64 = 0x64;
-pub const TEAM_TYPE: u64 = 0x6C;
+pub const TEAM_TYPE: u64 = 0x6c;
 pub const SPECIAL_EFFECT: u64 = 0x178;
 
 pub fn entity_id() -> u64 {
     match version() {
-        Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) |
-        Some(Version1_2_3) | Some(Version1_3_0) | Some(Version1_3_1) |
-        Some(Version1_3_2) | Some(Version1_4_0) | Some(Version1_4_1) |
-        Some(Version1_5_0) | Some(Version1_6_0) | Some(Version1_7_0) => 0x1E4,
-    _ => 0x1E8,
+        Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) | Some(Version1_2_3)
+        | Some(Version1_3_0) | Some(Version1_3_1) | Some(Version1_3_2) | Some(Version1_4_0)
+        | Some(Version1_4_1) | Some(Version1_5_0) | Some(Version1_6_0) | Some(Version1_7_0) => {
+            0x1e4
+        }
+        _ => 0x1e8,
     }
 }
 
@@ -25,36 +26,35 @@ pub const CHR_RESIST_MODULE: u64 = 0x20;
 pub const CHR_BEHAVIOR_MODULE: u64 = 0x28;
 pub const CHR_SUPER_ARMOR_MODULE: u64 = 0x40;
 pub const CHR_PHYSICS_MODULE: u64 = 0x68;
-pub const CHR_RIDE_MODULE: u64 = 0xE8;
-
+pub const CHR_RIDE_MODULE: u64 = 0xe8;
 
 pub mod data_offsets {
     pub const HEALTH: u64 = 0x138;
-    pub const MAX_HEALTH: u64 = 0x13C;
+    pub const MAX_HEALTH: u64 = 0x13c;
     pub const FP: u64 = 0x148;
-    pub const MAX_FP: u64 = 0x14C;
+    pub const MAX_FP: u64 = 0x14c;
     pub const SP: u64 = 0x154;
     pub const MAX_SP: u64 = 0x158;
 }
 
 pub mod time_act_offsets {
-    pub const ANIMATION_ID: u64 = 0xD0;
+    pub const ANIMATION_ID: u64 = 0xd0;
 }
 
 pub mod super_armor_offsets {
     pub const CURRENT_POISE: u64 = 0x10;
     pub const MAX_POISE: u64 = 0x14;
-    pub const POISE_TIMER: u64 = 0x1C;
+    pub const POISE_TIMER: u64 = 0x1c;
 }
 
 pub mod physics_offsets {
     pub const COORDS: u64 = 0x70;
-    pub const NO_GRAVITY: u64 = 0x1D6;
+    pub const NO_GRAVITY: u64 = 0x1d6;
     pub const HURT_CAPSULE_RADIUS: u64 = 0x344;
 }
 
 pub mod behavior_offsets {
-    pub const ANIMATION_SPEED: u64 = 0x17C8;
+    pub const ANIMATION_SPEED: u64 = 0x17c8;
 }
 
 pub mod speffect_offsets {
@@ -72,26 +72,28 @@ pub mod speffect_entry {
 pub mod ai_think_offsets {
     use gubtool_core::{attached::version, game_version::EldenRingVersion::*};
     pub const NPC_THINK_PARAM_ID: u64 = 0x28;
-    pub const LUA_TIMERS_ARRAY: u64 = 0x8C;
-    pub const LUA_NUMBERS_ARRAY: u64 = 0x6CC;
+    pub const LUA_TIMERS_ARRAY: u64 = 0x8c;
+    pub const LUA_NUMBERS_ARRAY: u64 = 0x6cc;
 
     pub fn last_act() -> u64 {
         match version() {
-            Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) |
-            Some(Version1_2_3) | Some(Version1_3_0) | Some(Version1_3_1) |
-            Some(Version1_3_2) | Some(Version1_4_0) | Some(Version1_4_1) |
-            Some(Version1_5_0) | Some(Version1_6_0) | Some(Version1_7_0) => 0xE9B2,
-            _ => 0xE9C2,
+            Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) | Some(Version1_2_3)
+            | Some(Version1_3_0) | Some(Version1_3_1) | Some(Version1_3_2) | Some(Version1_4_0)
+            | Some(Version1_4_1) | Some(Version1_5_0) | Some(Version1_6_0) | Some(Version1_7_0) => {
+                0xe9b2
+            }
+            _ => 0xe9c2,
         }
     }
 
     pub fn force_act() -> u64 {
         match version() {
-            Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) |
-            Some(Version1_2_3) | Some(Version1_3_0) | Some(Version1_3_1) |
-            Some(Version1_3_2) | Some(Version1_4_0) | Some(Version1_4_1) |
-            Some(Version1_5_0) | Some(Version1_6_0) | Some(Version1_7_0) => 0xE9B1,
-            _ => 0xE9C1,
+            Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) | Some(Version1_2_3)
+            | Some(Version1_3_0) | Some(Version1_3_1) | Some(Version1_3_2) | Some(Version1_4_0)
+            | Some(Version1_4_1) | Some(Version1_5_0) | Some(Version1_6_0) | Some(Version1_7_0) => {
+                0xe9b1
+            }
+            _ => 0xe9c1,
         }
     }
 }
@@ -102,9 +104,9 @@ pub mod ride_offsets {
 
 pub fn data_flags() -> u64 {
     match version() {
-        Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) |
-        Some(Version1_2_3) | Some(Version1_3_0) | Some(Version1_3_1) | Some(Version1_3_2) => 0x197,
-        _ => 0x19B,
+        Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) | Some(Version1_2_3)
+        | Some(Version1_3_0) | Some(Version1_3_1) | Some(Version1_3_2) => 0x197,
+        _ => 0x19b,
     }
 }
 
@@ -116,10 +118,11 @@ pub mod bit_flags {
 
 pub fn com_manipulator() -> u64 {
     match version() {
-        Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) |
-        Some(Version1_2_3) | Some(Version1_3_0) | Some(Version1_3_1) |
-        Some(Version1_3_2) | Some(Version1_4_0) | Some(Version1_4_1) |
-        Some(Version1_5_0) | Some(Version1_6_0) | Some(Version1_7_0) => 0x570,
+        Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) | Some(Version1_2_3)
+        | Some(Version1_3_0) | Some(Version1_3_1) | Some(Version1_3_2) | Some(Version1_4_0)
+        | Some(Version1_4_1) | Some(Version1_5_0) | Some(Version1_6_0) | Some(Version1_7_0) => {
+            0x570
+        }
         _ => 0x580,
     }
 }

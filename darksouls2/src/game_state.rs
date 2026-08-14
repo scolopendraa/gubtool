@@ -1,26 +1,28 @@
-use crate::{
-    POINTER_CACHE,
-    mem::*,
-    offsets::{
-        ChainReadExt, code_cave::CaveAddress, game_manager_imp, module_offsets::BasePointer,
+use {
+    crate::{
+        POINTER_CACHE,
+        mem::*,
+        offsets::{
+            ChainReadExt,
+            code_cave::CaveAddress,
+            game_manager_imp,
+            module_offsets::BasePointer,
+        },
+        player::{self, player},
+        target::{act_logger, target},
+        utility,
     },
-    player::{self, player},
-    target::{act_logger, target},
-    utility,
-};
-use gubtool_core::{address::Address, slice_ops::*, sys::error::ProcResult};
-use std::sync::{
-    LazyLock, Mutex,
-    atomic::{AtomicBool, Ordering},
+    gubtool_core::{address::Address, slice_ops::*, sys::sys_error::ProcResult},
+    std::sync::{
+        LazyLock,
+        Mutex,
+        atomic::{AtomicBool, Ordering},
+    },
 };
 
-pub(crate) static GAME_STATE: LazyLock<GameState> = LazyLock::new(|| {
-    GameState::default()
-});
+pub(crate) static GAME_STATE: LazyLock<GameState> = LazyLock::new(GameState::default);
 
-pub(crate) static STATE_FLAGS: LazyLock<StateFlags> = LazyLock::new(|| {
-    StateFlags::default()
-});
+pub(crate) static STATE_FLAGS: LazyLock<StateFlags> = LazyLock::new(StateFlags::default);
 
 #[derive(Default)]
 pub struct GameState {
@@ -64,18 +66,19 @@ pub struct StateFlags {
 impl StateFlags {
     pub fn update(&self) {
         let mut buffer = self.buffer.lock().unwrap();
-        *buffer = read::<[u8; 0x20]>(CaveAddress::StateHandlerFlags)
-            .unwrap_or_default();
+        *buffer = read::<[u8; 0x20]>(CaveAddress::StateHandlerFlags).unwrap_or_default();
     }
 
     pub fn is_flag(&self, flag_offset: StateFlag) -> bool {
-        read_from_slice::<u8>(&*self.buffer.lock().unwrap(), flag_offset as u64)
-            .unwrap_or_default() != 0x0
+        read_from_slice::<u8>(&*self.buffer.lock().unwrap(), flag_offset as u64).unwrap_or_default()
+            != 0x0
     }
 
     pub fn on_loaded(&self) {
         if self.is_flag(StateFlag::PlayerNoDeath) {
-            let _ = player::player().chr_ctrl().and_then(|chr| chr.set_no_death(true));
+            let _ = player::player()
+                .chr_ctrl()
+                .and_then(|chr| chr.set_no_death(true));
         }
     }
 
@@ -104,7 +107,7 @@ pub fn set_flag(flag_offset: StateFlag, state: bool) -> ProcResult {
 #[repr(u64)]
 pub enum StateFlag {
     PlayerNoDeath = 0x0,
-    FastQuitout = 0x1,
+    FastQuitout   = 0x1,
 }
 
 fn is_loading_screen() -> bool {

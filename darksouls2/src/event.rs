@@ -1,34 +1,41 @@
-use crate::{
-    mem::*,
-    offsets::{
-        code_cave::CaveAddress,
-        module_offsets::{Function, Hook},
+use {
+    crate::{
+        mem::*,
+        offsets::{
+            code_cave::CaveAddress,
+            module_offsets::{Function, Hook},
+        },
+        pointer_cache::ResolvedPtr,
+        resources::{asm_function, bosses::Boss, map_ids::MapId},
+        utility,
+        utils::player_loaded_check,
     },
-    pointer_cache::ResolvedPtr,
-    resources::{asm_function, bosses::Boss, map_ids::MapId},
-    utility,
-    utils::player_loaded_check,
-};
-use anyhow::{anyhow, ensure};
-use gubtool_core::{address::Address, attached::is_32, slice_ops::*, sys::error::ProcResult};
-use shared::{
-    command::ToggleCommand,
-    declare_command,
-    event_log::{EventLog, EventLogger},
+    anyhow::{anyhow, ensure},
+    gubtool_core::{
+        address::Address,
+        attached::is_32,
+        slice_ops::*,
+        sys::{
+            ipc::{CppValue, X86CallingConvention},
+            sys_error::ProcResult,
+        },
+    },
+    shared::{
+        command::ToggleCommand,
+        declare_command,
+        event_log::{EventLog, EventLogger},
+    },
 };
 
 pub fn set_event_flag(flag_id: u32, state: bool) -> anyhow::Result<()> {
-    player_loaded_check()?;
+    let event_flag_manager = ResolvedPtr::EventFlagManager.get()?;
+    let args = [
+        CppValue::uintptr_t(event_flag_manager),
+        CppValue::uint32_t(flag_id),
+        CppValue::uint8_t(state as u8),
+    ];
 
-    let mut fun = asm_function("set_event");
-    let mut asm = fun.take_bytes();
-
-    write_addr_to_slice(&mut asm, fun.reloc("event_flag_man"), ResolvedPtr::EventFlagManager.get()?)?;
-    write_to_slice::<u32>(&mut asm, fun.reloc("state"), state)?;
-    write_to_slice::<u32>(&mut asm, fun.reloc("event_id"), flag_id)?;
-    write_addr_to_slice(&mut asm, fun.reloc("fn_set_event"), Function::SetEvent)?;
-
-    Ok(spawn_thread_join(CaveAddress::SetEventAsm, asm)?)
+    run_game_function(Function::SetEvent, &args, X86CallingConvention::__thiscall)
 }
 
 pub fn get_event_flag(flag_id: u32) -> ProcResult<bool> {
@@ -42,9 +49,9 @@ pub fn get_event_flag(flag_id: u32) -> ProcResult<bool> {
 #[derive(Debug)]
 struct Node {
     bitmap_ptr: u64,
-    size: u32,
-    key: u32,
-    next_node: u64,
+    size:       u32,
+    key:        u32,
+    next_node:  u64,
 }
 
 impl Node {
@@ -53,17 +60,17 @@ impl Node {
             let bytes = read::<[u8; 0x10]>(address)?;
             Ok(Self {
                 bitmap_ptr: read_from_slice::<u32>(&bytes, 0x0)? as u64,
-                size: read_from_slice::<u32>(&bytes, 0x4)?,
-                key: read_from_slice::<u32>(&bytes, 0x8)?,
-                next_node: read_from_slice::<u32>(&bytes, 0xC)? as u64,
+                size:       read_from_slice::<u32>(&bytes, 0x4)?,
+                key:        read_from_slice::<u32>(&bytes, 0x8)?,
+                next_node:  read_from_slice::<u32>(&bytes, 0xc)? as u64,
             })
         } else {
             let bytes = read::<[u8; 0x18]>(address)?;
             Ok(Self {
                 bitmap_ptr: read_from_slice::<u64>(&bytes, 0x0)?,
-                size: read_from_slice::<u32>(&bytes, 0x8)?,
-                key: read_from_slice::<u32>(&bytes, 0xC)?,
-                next_node: read_from_slice::<u64>(&bytes, 0x10)?,
+                size:       read_from_slice::<u32>(&bytes, 0x8)?,
+                key:        read_from_slice::<u32>(&bytes, 0xc)?,
+                next_node:  read_from_slice::<u64>(&bytes, 0x10)?,
             })
         }
     }
@@ -78,9 +85,9 @@ fn event_flag_lookup(flag_id: u32) -> ProcResult<Option<(u64, u8)>> {
     let bit_mask = 1u8 << (7 - (bit_index & 7));
 
     let first_node_offset = if is_32() {
-        0x10 + (hash % 0x1F) as u64 * 4
+        0x10 + (hash % 0x1f) as u64 * 4
     } else {
-        0x20 + (hash % 0x1F) as u64 * 8
+        0x20 + (hash % 0x1f) as u64 * 8
     };
 
     let mut node_ptr = read_address(event_flag_man + first_node_offset)?;
@@ -152,11 +159,10 @@ declare_command!(
     FreeLoyceKnightLowerGarrison => "Free Loyce Knight (Lower Garrison)",
 );
 
-const EVENT_LOG_HOOK_ORIGINAL: [u8; 5] = [0xB8, 0x59, 0x17, 0xB7, 0xD1];
+const EVENT_LOG_HOOK_ORIGINAL: [u8; 5] = [0xb8, 0x59, 0x17, 0xb7, 0xd1];
 impl ToggleCommand for EventLogHook {
     fn is(&self) -> ProcResult<bool> {
-        read::<[u8; 5]>(Hook::EventLog)
-            .map(|bytes| bytes != EVENT_LOG_HOOK_ORIGINAL)
+        read::<[u8; 5]>(Hook::EventLog).map(|bytes| bytes != EVENT_LOG_HOOK_ORIGINAL)
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
         if state {
@@ -170,7 +176,7 @@ impl ToggleCommand for EventLogHook {
                 CaveAddress::EventLogHook,
                 fun.reloc("hook_loc"),
                 Hook::EventLog.add_offset(5),
-                4
+                4,
             )?;
             install_hook(&asm, CaveAddress::EventLogHook, Hook::EventLog, 5)?;
         } else {
@@ -180,33 +186,43 @@ impl ToggleCommand for EventLogHook {
     }
 }
 
-const VANILLA_IVORY_SKIP_ORIGINAL: [u8; 6] = [0x55, 0x8B, 0xEC, 0x83, 0xEC, 0x08];
+const VANILLA_IVORY_SKIP_ORIGINAL: [u8; 6] = [0x55, 0x8b, 0xec, 0x83, 0xec, 0x08];
 const SCHOLAR_IVORY_SKIP_ORIGINAL: [u8; 5] = [0x48, 0x89, 0x74, 0x24, 0x10];
 impl ToggleCommand for SkipIvoryKingGauntlet {
     fn is(&self) -> ProcResult<bool> {
         if is_32() {
-            read::<[u8; 6]>(Function::SetEvent)
-                .map(|val| val != VANILLA_IVORY_SKIP_ORIGINAL)
+            read::<[u8; 6]>(Function::SetEvent).map(|val| val != VANILLA_IVORY_SKIP_ORIGINAL)
         } else {
-            read::<[u8; 5]>(Function::SetEvent)
-                .map(|val| val != SCHOLAR_IVORY_SKIP_ORIGINAL)
+            read::<[u8; 5]>(Function::SetEvent).map(|val| val != SCHOLAR_IVORY_SKIP_ORIGINAL)
         }
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
         if state {
-            let orig_instr_len = if is_32() { 6 } else { 5 };
+            let orig_instr_len = if is_32() {
+                6
+            } else {
+                5
+            };
             let mut fun = asm_function("ivory_skip");
             let mut asm = fun.take_bytes();
 
-            write_addr_to_slice(&mut asm, fun.reloc("fn_get_map_entity"), Function::GetMapEntityWithAreaIdAndObjId)?;
-            write_addr_to_slice(&mut asm, fun.reloc("fn_get_map_object"), Function::GetStateActComponent)?;
+            write_addr_to_slice(
+                &mut asm,
+                fun.reloc("fn_get_map_entity"),
+                Function::GetMapEntityWithAreaIdAndObjId,
+            )?;
+            write_addr_to_slice(
+                &mut asm,
+                fun.reloc("fn_get_map_object"),
+                Function::GetStateActComponent,
+            )?;
             write_addr_to_slice(&mut asm, fun.reloc("fn_set_event"), Function::SetEvent)?;
             write_rel_i32(
                 &mut asm,
                 CaveAddress::IvorySkipHook,
                 fun.reloc("hook_loc"),
                 Function::SetEvent.add_offset(orig_instr_len),
-                4
+                4,
             )?;
             install_hook(&asm, CaveAddress::IvorySkipHook, Function::SetEvent, orig_instr_len)?;
         } else {
@@ -221,24 +237,28 @@ impl ToggleCommand for SkipIvoryKingGauntlet {
     }
 }
 
-const VANILLA_LOYCE_SKIP_ORIGINAL: [u8; 7] = [0x88, 0x94, 0x08, 0xA1, 0x02, 0x00, 0x00];
-const SCHOLAR_LOYCE_SKIP_ORIGINAL: [u8; 8] = [0x44, 0x88, 0x84, 0x08, 0xA1, 0x03, 0x00, 0x00];
+const VANILLA_LOYCE_SKIP_ORIGINAL: [u8; 7] = [0x88, 0x94, 0x08, 0xa1, 0x02, 0x00, 0x00];
+const SCHOLAR_LOYCE_SKIP_ORIGINAL: [u8; 8] = [0x44, 0x88, 0x84, 0x08, 0xa1, 0x03, 0x00, 0x00];
 impl ToggleCommand for DisableLoyceKnights {
     fn is(&self) -> ProcResult<bool> {
         match is_32() {
             true => {
                 read::<[u8; 7]>(Hook::SetSharedFlag)
-                    .map(|val| val != [0x88, 0x94, 0x08, 0xA1, 0x02, 0x00, 0x00])
+                    .map(|val| val != [0x88, 0x94, 0x08, 0xa1, 0x02, 0x00, 0x00])
             }
             false => {
                 read::<[u8; 8]>(Hook::SetSharedFlag)
-                    .map(|val| val != [0x44, 0x88, 0x84, 0x08, 0xA1, 0x03, 0x00, 0x00])
+                    .map(|val| val != [0x44, 0x88, 0x84, 0x08, 0xa1, 0x03, 0x00, 0x00])
             }
         }
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
         if state {
-            let orig_instr_len = if is_32() { 7 } else { 8 };
+            let orig_instr_len = if is_32() {
+                7
+            } else {
+                8
+            };
             let mut fun = asm_function("ivory_knights");
             let mut asm = fun.take_bytes();
 
@@ -247,7 +267,7 @@ impl ToggleCommand for DisableLoyceKnights {
                 CaveAddress::IvoryKnightsHook,
                 fun.reloc("hook_loc"),
                 Hook::SetSharedFlag.add_offset(orig_instr_len),
-                4
+                4,
             )?;
             install_hook(&asm, CaveAddress::IvoryKnightsHook, Hook::SetSharedFlag, orig_instr_len)?;
         } else {
@@ -265,23 +285,23 @@ impl ToggleCommand for DisableLoyceKnights {
 #[repr(u32)]
 #[derive(Clone, Copy)]
 pub enum EventFlag {
-    GiantLordDefeated = 100972,
-    ThroneDuoDefeated = 100974,
-    NashandraDefeated = 100973,
-    VendrickDefeated = 100978,
-    UnlockAldia = 100747,
-    KingsRingAcquired = 100804,
-    VisibleAava = 537000012,
-    FridgidSnowstorm = 537010014,
-    ShadedWoodsChasmCleared = 403000001,
-    DrangleicCastleChasmCleared = 403000002,
-    BlackGulchChasmCleared = 403000003,
-    ActivateBrume = 536000010,
-    EleumLoyceWinds = 537000001,
-    EleumLoyceIce = 537000011,
-    LoyceKnightOuterWall = 537000020,
+    GiantLordDefeated            = 100972,
+    ThroneDuoDefeated            = 100974,
+    NashandraDefeated            = 100973,
+    VendrickDefeated             = 100978,
+    UnlockAldia                  = 100747,
+    KingsRingAcquired            = 100804,
+    VisibleAava                  = 537000012,
+    FridgidSnowstorm             = 537010014,
+    ShadedWoodsChasmCleared      = 403000001,
+    DrangleicCastleChasmCleared  = 403000002,
+    BlackGulchChasmCleared       = 403000003,
+    ActivateBrume                = 536000010,
+    EleumLoyceWinds              = 537000001,
+    EleumLoyceIce                = 537000011,
+    LoyceKnightOuterWall         = 537000020,
     LoyceKnightAbandonedDwelling = 537000021,
-    LoyceKnightLowerGarrison = 537000022,
+    LoyceKnightLowerGarrison     = 537000022,
 }
 
 impl EventFlag {

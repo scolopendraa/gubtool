@@ -1,13 +1,8 @@
-main:
-mov esi, OFFSET should_process_flag
-cmp BYTE PTR [esi], 0x1
-jne nothing_to_process
 mov ebx, DWORD PTR ds:OFFSET game_man_imp
 mov edi, ebx
 mov ebx, DWORD PTR [ebx+0x60]
 mov ebx, DWORD PTR [ebx+0x8]
 mov ebx, DWORD PTR [ebx+0x8]
-mov BYTE PTR [esi], 0x0
 cmp BYTE PTR ds:OFFSET adjust_quantity_flag, 0x1
 jne skip_adjust
 mov ecx, DWORD PTR [ebx+0x8]
@@ -50,10 +45,4 @@ mov ecx, DWORD PTR [edi+0xCC4]
 push ebx
 mov eax, OFFSET fn_show_item_dialogue
 call eax
-nothing_to_process:
-push 0x5
-mov eax, ds:OFFSET fn_sleep
-call eax
-cmp BYTE PTR ds:OFFSET should_exit_flag, 0x1
-jne main
 ret

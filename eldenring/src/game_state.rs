@@ -1,35 +1,39 @@
-use crate::{
-    chr_ins::ChrIns,
-    emevd,
-    mem::*,
-    offsets::{
-        ChainReadExt, code_cave::CaveAddress, cs_dlc_imp, game_data_man, menu_man,
-        module_offsets::BasePointer, world_chr_man,
+use {
+    crate::{
+        chr_ins::ChrIns,
+        emevd,
+        mem::*,
+        offsets::{
+            ChainReadExt,
+            code_cave::CaveAddress,
+            cs_dlc_imp,
+            game_data_man,
+            menu_man,
+            module_offsets::BasePointer,
+            world_chr_man,
+        },
+        player,
+        pointer_cache::POINTER_CACHE,
+        target::target,
+        utility,
     },
-    player,
-    pointer_cache::POINTER_CACHE,
-    target::target,
-    utility,
-};
-use gubtool_core::{address::Address, slice_ops::*, sys::error::ProcResult};
-use std::sync::{
-    LazyLock, Mutex,
-    atomic::{AtomicBool, Ordering},
+    gubtool_core::{address::Address, slice_ops::*, sys::sys_error::ProcResult},
+    std::sync::{
+        LazyLock,
+        Mutex,
+        atomic::{AtomicBool, Ordering},
+    },
 };
 
-pub(crate) static GAME_STATE: LazyLock<GameState> = LazyLock::new(|| {
-    GameState::default()
-});
+pub(crate) static GAME_STATE: LazyLock<GameState> = LazyLock::new(GameState::default);
 
-pub(crate) static STATE_FLAGS: LazyLock<StateFlags> = LazyLock::new(|| {
-    StateFlags::default()
-});
+pub(crate) static STATE_FLAGS: LazyLock<StateFlags> = LazyLock::new(StateFlags::default);
 
 #[derive(Default)]
 pub struct GameState {
-    pub loaded: AtomicBool,
+    pub loaded:               AtomicBool,
     has_invoked_load_delayed: AtomicBool,
-    pub dlc: AtomicBool,
+    pub dlc:                  AtomicBool,
 }
 
 #[derive(Default)]
@@ -41,7 +45,8 @@ impl GameState {
     pub fn init(&self) {
         let loaded = is_loaded();
         self.loaded.store(loaded, Ordering::Relaxed);
-        self.has_invoked_load_delayed.store(loaded, Ordering::Relaxed);
+        self.has_invoked_load_delayed
+            .store(loaded, Ordering::Relaxed);
         self.dlc.store(is_dlc_available(), Ordering::Relaxed);
     }
 
@@ -61,7 +66,8 @@ impl GameState {
             }
         } else if self.loaded.load(Ordering::Relaxed) {
             self.on_unloaded();
-            self.has_invoked_load_delayed.store(false, Ordering::Relaxed);
+            self.has_invoked_load_delayed
+                .store(false, Ordering::Relaxed);
             self.loaded.store(false, Ordering::Relaxed);
         }
     }
@@ -74,9 +80,8 @@ impl GameState {
         player::torrent().update();
 
         let handle = read::<u64>(CaveAddress::LookedUpHandle).unwrap_or_default();
-        if handle != 0x0 {
-            let chr_ins = ChrIns::from_handle(handle);
-            let _ = chr_ins.set_as_target();
+        if let Some(chr_ins) = ChrIns::from_handle(handle) {
+            let _ = chr_ins.set_as_target(&mut target());
         }
     }
 
@@ -95,20 +100,18 @@ impl GameState {
         }
     }
 
-    fn on_new_game(&self) {
-    }
+    fn on_new_game(&self) {}
 }
 
 impl StateFlags {
     pub fn update(&self) {
         let mut buffer = self.buffer.lock().unwrap();
-        *buffer = read::<[u8; 0x20]>(CaveAddress::StateHandlerFlags)
-            .unwrap_or_default();
+        *buffer = read::<[u8; 0x20]>(CaveAddress::StateHandlerFlags).unwrap_or_default();
     }
 
     pub fn is_flag(&self, flag_offset: StateFlag) -> bool {
-        read_from_slice::<u8>(&*self.buffer.lock().unwrap(), flag_offset as u64)
-            .unwrap_or_default() != 0x0
+        read_from_slice::<u8>(&*self.buffer.lock().unwrap(), flag_offset as u64).unwrap_or_default()
+            != 0x0
     }
 
     pub fn on_loaded(&self) {
@@ -155,12 +158,12 @@ pub fn set_flag(flag_offset: StateFlag, state: bool) -> ProcResult {
 #[repr(u64)]
 pub enum StateFlag {
     PlayerNoDamage = 0x0,
-    Rfbs = 0x1,
-    TitleCards = 0x2,
-    RuneArc = 0x3,
+    Rfbs           = 0x1,
+    TitleCards     = 0x2,
+    RuneArc        = 0x3,
     TorrentNoDeath = 0x4,
-    StutterFix = 0x5,
-    Hitboxes = 0x6,
+    StutterFix     = 0x5,
+    Hitboxes       = 0x6,
 }
 
 fn is_loaded() -> bool {

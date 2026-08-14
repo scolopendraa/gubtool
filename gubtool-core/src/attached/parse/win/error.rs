@@ -1,5 +1,4 @@
-use crate::pe::error::ParsePeError;
-use std::fmt::Display;
+use {crate::pe::error::ParsePeError, std::fmt::Display};
 
 #[derive(Debug, Clone)]
 pub enum ParseError {
@@ -16,7 +15,7 @@ pub enum ParseError {
         error: ParsePeError,
     },
     MatchProductVersion {
-        product_version: (u16, u16, u16)
+        product_version: (u16, u16, u16),
     },
 }
 
@@ -25,17 +24,27 @@ impl std::error::Error for ParseError {}
 impl Display for ParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::OpenProcess { err } => {
+            Self::OpenProcess {
+                err,
+            } => {
                 write!(f, "Could not open process: {err}")
             }
-            Self::ModuleBase { err } => {
+            Self::ModuleBase {
+                err,
+            } => {
                 write!(f, "Could not determine base pointer: {err}")
             }
-            Self::PathNotFound { err } => {
+            Self::PathNotFound {
+                err,
+            } => {
                 write!(f, "Could not find executable path: {err}")
             }
-            Self::ParsePe { error } => write!(f, "{error}"),
-            Self::MatchProductVersion { product_version: (major, minor, patch) } => {
+            Self::ParsePe {
+                error,
+            } => write!(f, "{error}"),
+            Self::MatchProductVersion {
+                product_version: (major, minor, patch),
+            } => {
                 write!(f, "Could not match product version ({major}, {minor}, {patch})")
             }
         }
@@ -44,6 +53,8 @@ impl Display for ParseError {
 
 impl From<ParsePeError> for ParseError {
     fn from(value: ParsePeError) -> Self {
-        Self::ParsePe { error: value }
+        Self::ParsePe {
+            error: value,
+        }
     }
 }

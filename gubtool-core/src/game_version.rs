@@ -1,5 +1,7 @@
-use serde::{Deserialize, Serialize};
-use std::fmt::Display;
+use {
+    serde::{Deserialize, Serialize},
+    std::fmt::Display,
+};
 
 #[derive(PartialEq, Clone, Copy, Debug)]
 pub enum GameVersion {
@@ -28,10 +30,18 @@ pub enum Game {
 
 #[derive(PartialEq, Clone, Copy, Debug)]
 pub enum DarkSouls2Version {
-    Vanilla1_0_3, Vanilla1_0_4, Vanilla1_0_5,
-    Vanilla1_0_6, Vanilla1_0_7, Vanilla1_0_10,
-    Vanilla1_0_11, Vanilla1_0_12, Scholar1_0_1,
-    Scholar1_0_2, Scholar1_0_3, VanillaUnknown,
+    Vanilla1_0_3,
+    Vanilla1_0_4,
+    Vanilla1_0_5,
+    Vanilla1_0_6,
+    Vanilla1_0_7,
+    Vanilla1_0_10,
+    Vanilla1_0_11,
+    Vanilla1_0_12,
+    Scholar1_0_1,
+    Scholar1_0_2,
+    Scholar1_0_3,
+    VanillaUnknown,
     ScholarUnknown,
 }
 
@@ -39,7 +49,7 @@ impl Version for DarkSouls2Version {
     fn from_game_version(game_version: &GameVersion) -> Option<Self> {
         match game_version {
             GameVersion::DarkSouls2(version) => Some(*version),
-            _ => None
+            _ => None,
         }
     }
 }
@@ -67,20 +77,40 @@ impl Display for DarkSouls2Version {
 
 #[derive(PartialEq, Clone, Copy, Debug)]
 pub enum EldenRingVersion {
-    Version1_2_0, Version1_2_1, Version1_2_2, Version1_2_3,
-    Version1_3_0, Version1_3_1, Version1_3_2, Version1_4_0,
-    Version1_4_1, Version1_5_0, Version1_6_0, Version1_7_0,
-    Version1_8_0, Version1_8_1, Version1_9_0, Version1_9_1,
-    Version2_0_0, Version2_0_1, Version2_2_0, Version2_2_3,
-    Version2_3_0, Version2_4_0, Version2_5_0, Version2_6_0,
-    Version2_6_1, Version2_6_2, VersionUnknown,
+    Version1_2_0,
+    Version1_2_1,
+    Version1_2_2,
+    Version1_2_3,
+    Version1_3_0,
+    Version1_3_1,
+    Version1_3_2,
+    Version1_4_0,
+    Version1_4_1,
+    Version1_5_0,
+    Version1_6_0,
+    Version1_7_0,
+    Version1_8_0,
+    Version1_8_1,
+    Version1_9_0,
+    Version1_9_1,
+    Version2_0_0,
+    Version2_0_1,
+    Version2_2_0,
+    Version2_2_3,
+    Version2_3_0,
+    Version2_4_0,
+    Version2_5_0,
+    Version2_6_0,
+    Version2_6_1,
+    Version2_6_2,
+    VersionUnknown,
 }
 
 impl Version for EldenRingVersion {
     fn from_game_version(game_version: &GameVersion) -> Option<Self> {
         match game_version {
             GameVersion::EldenRing(version) => Some(*version),
-            _ => None
+            _ => None,
         }
     }
 }

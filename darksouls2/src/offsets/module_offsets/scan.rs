@@ -1,13 +1,21 @@
-use crate::offsets::module_offsets::structs::{
-    BasePointers, Data, ExternalFunctionPointers, Functions, Hooks, ModuleOffsets, Patches,
+use {
+    crate::offsets::module_offsets::structs::{
+        BasePointers,
+        Data,
+        ExternalFunctionPointers,
+        Functions,
+        Hooks,
+        ModuleOffsets,
+        Patches,
+    },
+    gubtool_core::{
+        aob_scanner::{ScanStrategy, scan_error::ScanError},
+        attached::{self, AddressSize},
+        parallel_scan,
+        pe::PeParser,
+    },
+    std::path::PathBuf,
 };
-use gubtool_core::{
-    aob_scanner::{ScanStrategy, scan_error::ScanError},
-    attached::{self, AddressSize},
-    parallel_scan,
-    pe::PeParser,
-};
-use std::path::PathBuf;
 
 macro_rules! patterns {
     ($strategy:expr) => {{
@@ -154,8 +162,7 @@ pub fn scan_mem_exhaustive() -> Result<ModuleOffsets, ScanError> {
 }
 
 pub fn scan_disk<T>(path: T) -> Result<ModuleOffsets, ScanError>
-where T: Into<PathBuf>
-{
+where T: Into<PathBuf> {
     let path = path.into();
     let pe_image = PeParser::new(&path)?;
     let address_size = pe_image.address_size()?;
@@ -164,8 +171,7 @@ where T: Into<PathBuf>
 }
 
 pub fn scan_disk_exhaustive<T>(path: T) -> Result<ModuleOffsets, ScanError>
-where T: Into<PathBuf>
-{
+where T: Into<PathBuf> {
     let path = path.into();
     let pe_image = PeParser::new(&path)?;
     let address_size = pe_image.address_size()?;

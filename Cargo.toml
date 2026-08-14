@@ -38,3 +38,10 @@ strum = { version = "0.28", features = ["derive"] }
 
 [workspace.lints.rust]
 dead_code = "allow"
+
+[workspace.lints.clippy]
+new_without_default = "allow"
+wrong_self_convention = "allow"
+crate_in_macro_def = "allow"
+module_inception = "allow"
+type_complexity = "allow"

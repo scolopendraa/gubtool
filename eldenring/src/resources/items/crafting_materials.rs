@@ -18,55 +18,55 @@ pub static CRAFTING_MATERIALS: [Item; 108] = [
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x40003C3C,
+        id: 0x40003c3c,
         name: "Albinauric Bloodclot",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x400050C9,
+        id: 0x400050c9,
         name: "Altus Bloom",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x400050D3,
+        id: 0x400050d3,
         name: "Arteria Leaf",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x40003AB6,
+        id: 0x40003ab6,
         name: "Beast Blood",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401EBF18,
+        id: 0x401ebf18,
         name: "Beast Horn",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x40003AA2,
+        id: 0x40003aa2,
         name: "Beast Liver",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2A6,
+        id: 0x401ed2a6,
         name: "Black Pyrefly",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2BF,
+        id: 0x401ed2bf,
         name: "Blessed Bone Shard",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x4000515F,
+        id: 0x4000515f,
         name: "Blood-Tainted Excrement",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x400050F3,
+        id: 0x400050f3,
         name: "Bloodrose",
         ..Item::default_crafting_materials()
     },
@@ -76,7 +76,7 @@ pub static CRAFTING_MATERIALS: [Item; 108] = [
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x40003ACA,
+        id: 0x40003aca,
         name: "Budding Horn",
         ..Item::default_crafting_materials()
     },
@@ -86,68 +86,68 @@ pub static CRAFTING_MATERIALS: [Item; 108] = [
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2BA,
+        id: 0x401ed2ba,
         name: "Congealed Putrescence",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x40003B1A,
+        id: 0x40003b1a,
         name: "Crab Eggs",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x4000512C,
+        id: 0x4000512c,
         name: "Cracked Crystal",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x4000510E,
+        id: 0x4000510e,
         name: "Crystal Bud",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x4000516A,
+        id: 0x4000516a,
         name: "Crystal Cave Moss",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2AE,
+        id: 0x401ed2ae,
         name: "Deep-Purple Lily",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2A5,
+        id: 0x401ed2a5,
         name: "Dewgem",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x400050E6,
+        id: 0x400050e6,
         name: "Dewkissed Herba",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2B7,
+        id: 0x401ed2b7,
         name: "Dragon's Calorbloom",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2BE,
+        id: 0x401ed2be,
         name: "Ember of Messmer",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2B9,
+        id: 0x401ed2b9,
         name: "Empyrean-Blood Burgeon",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x400050C8,
+        id: 0x400050c8,
         name: "Erdleaf Flower",
         ..Item::default_crafting_materials()
     },
@@ -157,28 +157,28 @@ pub static CRAFTING_MATERIALS: [Item; 108] = [
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x400050B4,
+        id: 0x400050b4,
         name: "Faded Erdleaf Flower",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2B8,
+        id: 0x401ed2b8,
         name: "Finger Mimic",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x400050CA,
+        id: 0x400050ca,
         name: "Fire Blossom",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x40003AD4,
+        id: 0x40003ad4,
         name: "Flight Pinion",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401EBF40,
+        id: 0x401ebf40,
         name: "Fly Mold",
         dlc: true,
         ..Item::default_crafting_materials()
@@ -189,57 +189,57 @@ pub static CRAFTING_MATERIALS: [Item; 108] = [
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x40003AE8,
+        id: 0x40003ae8,
         name: "Four-Toed Fowl Foot",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2AD,
+        id: 0x401ed2ad,
         name: "Frozen Maggot",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x400050AC,
+        id: 0x400050ac,
         name: "Fulgurbloom",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2C3,
+        id: 0x401ed2c3,
         name: "Furnace Visage",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2B4,
+        id: 0x401ed2b4,
         name: "Gas Stone",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2B5,
+        id: 0x401ed2b5,
         name: "Ghostflame Bloom",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2A7,
+        id: 0x401ed2a7,
         name: "Glintslab Firefly",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x4000514C,
+        id: 0x4000514c,
         name: "Glintstone Firefly",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x4000514B,
+        id: 0x4000514b,
         name: "Gold Firefly",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x4000515E,
+        id: 0x4000515e,
         name: "Gold-Tinged Excrement",
         ..Item::default_crafting_materials()
     },
@@ -249,29 +249,29 @@ pub static CRAFTING_MATERIALS: [Item; 108] = [
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x400050F1,
+        id: 0x400050f1,
         name: "Golden Rowa",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x400050CB,
+        id: 0x400050cb,
         name: "Golden Sunflower",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2B6,
+        id: 0x401ed2b6,
         name: "Grave Cricket",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2B2,
+        id: 0x401ed2b2,
         name: "Grave Keeper's Brainpan",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x400050AE,
+        id: 0x400050ae,
         name: "Grave Violet",
         ..Item::default_crafting_materials()
     },
@@ -281,49 +281,49 @@ pub static CRAFTING_MATERIALS: [Item; 108] = [
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x40003B06,
+        id: 0x40003b06,
         name: "Great Dragonfly Head",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x40003BED,
+        id: 0x40003bed,
         name: "Hefty Beast Bone",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x400050D2,
+        id: 0x400050d2,
         name: "Herba",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2B3,
+        id: 0x401ed2b3,
         name: "Horn-Strewn Excrement",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x40003AFC,
+        id: 0x40003afc,
         name: "Human Bone Shard",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2A4,
+        id: 0x401ed2a4,
         name: "Knot Resin",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x40003B24,
+        id: 0x40003b24,
         name: "Land Octopus Ovary",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x40003C32,
+        id: 0x40003c32,
         name: "Living Jar Shard",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x40003AAC,
+        id: 0x40003aac,
         name: "Lump of Flesh",
         ..Item::default_crafting_materials()
     },
@@ -333,12 +333,12 @@ pub static CRAFTING_MATERIALS: [Item; 108] = [
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x400050AD,
+        id: 0x400050ad,
         name: "Miquella's Lily",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x40003B2E,
+        id: 0x40003b2e,
         name: "Miranda Powder",
         ..Item::default_crafting_materials()
     },
@@ -348,7 +348,7 @@ pub static CRAFTING_MATERIALS: [Item; 108] = [
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2C1,
+        id: 0x401ed2c1,
         name: "Nailstone",
         dlc: true,
         ..Item::default_crafting_materials()
@@ -359,58 +359,58 @@ pub static CRAFTING_MATERIALS: [Item; 108] = [
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2AF,
+        id: 0x401ed2af,
         name: "Nectarblood Burgeon",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x40003AC0,
+        id: 0x40003ac0,
         name: "Old Fang",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401EBF2C,
+        id: 0x401ebf2c,
         name: "Pearlescent Scale",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x400050AA,
+        id: 0x400050aa,
         name: "Poisonbloom",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2A1,
+        id: 0x401ed2a1,
         name: "Rada Fruit",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2BD,
+        id: 0x401ed2bd,
         name: "Rauh Burrow",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2C0,
+        id: 0x401ed2c0,
         name: "Red Fulgurbloom",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2A2,
+        id: 0x401ed2a2,
         name: "Redflesh Mushroom",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x4000510F,
+        id: 0x4000510f,
         name: "Rimed Crystal Bud",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x400050F2,
+        id: 0x400050f2,
         name: "Rimed Rowa",
         ..Item::default_crafting_materials()
     },
@@ -420,18 +420,18 @@ pub static CRAFTING_MATERIALS: [Item; 108] = [
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2BB,
+        id: 0x401ed2bb,
         name: "Roundrock",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x400050F0,
+        id: 0x400050f0,
         name: "Rowa Fruit",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x400006E0,
+        id: 0x400006e0,
         name: "Ruin Fragment",
         ..Item::default_crafting_materials()
     },
@@ -441,42 +441,42 @@ pub static CRAFTING_MATERIALS: [Item; 108] = [
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x4000513B,
+        id: 0x4000513b,
         name: "Sanctuary Stone",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2AC,
+        id: 0x401ed2ac,
         name: "Sanguine Amaryllis",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2AB,
+        id: 0x401ed2ab,
         name: "Scarlet Bud",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401EBF36,
+        id: 0x401ebf36,
         name: "Scorpion Liver",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2A9,
+        id: 0x401ed2a9,
         name: "Shadow Sunflower",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2C2,
+        id: 0x401ed2c2,
         name: "Sharp Gravel Stone",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x4000514A,
+        id: 0x4000514a,
         name: "Silver Firefly",
         ..Item::default_crafting_materials()
     },
@@ -486,12 +486,12 @@ pub static CRAFTING_MATERIALS: [Item; 108] = [
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x40003A98,
+        id: 0x40003a98,
         name: "Sliver of Meat",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x40003B10,
+        id: 0x40003b10,
         name: "Slumbering Egg",
         ..Item::default_crafting_materials()
     },
@@ -501,50 +501,50 @@ pub static CRAFTING_MATERIALS: [Item; 108] = [
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401EBF22,
+        id: 0x401ebf22,
         name: "Spirit Calculus",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2BC,
+        id: 0x401ed2bc,
         name: "Spiritgrave Stone",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x40003C46,
+        id: 0x40003c46,
         name: "Stormhawk Feather",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x40003C28,
+        id: 0x40003c28,
         name: "String",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x40003B38,
+        id: 0x40003b38,
         name: "Strip of White Flesh",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2B1,
+        id: 0x401ed2b1,
         name: "Swollen Grape",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x400050CD,
+        id: 0x400050cd,
         name: "Tarnished Golden Sunflower",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x40003BEC,
+        id: 0x40003bec,
         name: "Thin Beast Bones",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2AA,
+        id: 0x401ed2aa,
         name: "Toxic Mossling",
         dlc: true,
         ..Item::default_crafting_materials()
@@ -555,12 +555,12 @@ pub static CRAFTING_MATERIALS: [Item; 108] = [
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x400050AB,
+        id: 0x400050ab,
         name: "Trina's Lily",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x40003AF2,
+        id: 0x40003af2,
         name: "Turtle Neck Meat",
         ..Item::default_crafting_materials()
     },
@@ -570,24 +570,24 @@ pub static CRAFTING_MATERIALS: [Item; 108] = [
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2A3,
+        id: 0x401ed2a3,
         name: "Whiteflesh Mushroom",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2B0,
+        id: 0x401ed2b0,
         name: "Winter-Lantern Fly",
         dlc: true,
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x4000516D,
+        id: 0x4000516d,
         name: "Yellow Ember",
         ..Item::default_crafting_materials()
     },
     Item {
-        id: 0x401ED2A8,
+        id: 0x401ed2a8,
         name: "Yellow Fulgurbloom",
         dlc: true,
         ..Item::default_crafting_materials()

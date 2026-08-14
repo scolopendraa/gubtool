@@ -1,24 +1,26 @@
-use crate::{
-    common::helpers::line_gauge,
-    event::KeyContext,
-    impl_tablecontroller_for_commands,
-    panes::{PaneManager, TablePane},
-    screen::Screen,
-    theme::theme,
+use {
+    crate::{
+        common::helpers::line_gauge,
+        event::KeyContext,
+        impl_tablecontroller_for_commands,
+        panes::{PaneManager, TablePane},
+        screen::Screen,
+        theme::theme,
+    },
+    crossterm::event::KeyCode,
+    eldenring::{player, target},
+    num_format::{
+        Locale::{self},
+        ToFormattedString,
+    },
+    ratatui::{
+        Frame,
+        layout::{Constraint, Direction, Layout, Rect},
+        style::{Style, Stylize},
+        widgets::{LineGauge, Paragraph},
+    },
+    shared::command::{Command, ValCmd},
 };
-use crossterm::event::KeyCode;
-use eldenring::{player, target};
-use num_format::{
-    Locale::{self},
-    ToFormattedString,
-};
-use ratatui::{
-    Frame,
-    layout::{Constraint, Direction, Layout, Rect},
-    style::{Style, Stylize},
-    widgets::{LineGauge, Paragraph},
-};
-use shared::command::{Command, ValCmd};
 
 pub(super) struct TargetTab {
     pub pane_manager: PaneManager,
@@ -50,10 +52,7 @@ impl Screen for TargetTab {
 
         let lists_layout = Layout::default()
             .direction(Direction::Horizontal)
-            .constraints(vec![
-                Constraint::Percentage(50),
-                Constraint::Percentage(50)
-            ])
+            .constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
             .split(main);
 
         frame.render_widget(chr_name_paragraph(), chr_name);
@@ -132,9 +131,9 @@ fn chr_name_paragraph() -> Paragraph<'static> {
         .map(|t| t.name_from_chr_id())
         .unwrap_or_default();
     Paragraph::new(name)
-    .centered()
-    .style(Style::from(theme().fg))
-    .bold()
+        .centered()
+        .style(Style::from(theme().fg))
+        .bold()
 }
 
 fn paragraph() -> Paragraph<'static> {
@@ -156,11 +155,12 @@ fn paragraph() -> Paragraph<'static> {
         .and_then(|target| {
             player::player()
                 .chr_ins()
-                .and_then(|mut player| target.get_distance(&mut player))
+                .and_then(|player| target.get_distance(player))
         })
         .unwrap_or_default();
     Paragraph::new(format!(
-        "Reset Timer: {:.2}\n\nLast Act: {last_act}\nCurrent Animation: {current_animation}\nDistance: {:.2}",
+        "Reset Timer: {:.2}\n\nLast Act: {last_act}\nCurrent Animation: \
+         {current_animation}\nDistance: {:.2}",
         poise_timer, distance
     ))
     .style(Style::from(theme().fg))

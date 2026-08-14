@@ -1,13 +1,15 @@
-use crate::{
-    attached::{
-        self, AttachError, GameProcess, ParseState,
-        parse::{VALID_COMMS, parse_process},
-        process_exists,
+use {
+    crate::{
+        attached::{
+            AttachError,
+            GameProcess,
+            ParseState,
+            parse::{VALID_COMMS, parse_process},
+        },
+        sys::Pid,
     },
-    game_version::Game,
-    sys::Pid,
+    std::sync::{Mutex, MutexGuard},
 };
-use std::sync::{Mutex, MutexGuard};
 
 static GAME_PROCESSES: Mutex<Vec<GameProcess>> = Mutex::new(Vec::new());
 
@@ -15,18 +17,14 @@ pub fn refresh_processes() {
     let mut valid_processes = GAME_PROCESSES.lock().unwrap();
     for (pid, name) in system_processes() {
         for (valid_comm, game) in VALID_COMMS {
-            if name == *valid_comm
-                && valid_processes.iter().all(|p| pid != p.pid.as_u32())
-            {
+            if name == *valid_comm && valid_processes.iter().all(|p| pid != p.pid.as_u32()) {
                 valid_processes.push(parse_process(game, Pid::new(pid), name.clone()));
             }
         }
     }
 
     #[cfg(unix)]
-    valid_processes.retain(|p| {
-        p.exists()
-    });
+    valid_processes.retain(|p| p.exists());
 
     #[cfg(windows)]
     valid_processes.retain(|p| {
@@ -49,18 +47,7 @@ pub fn try_auto_attach() -> Option<Result<(), AttachError>> {
             ParseState::Valid => {
                 return Some(process.attach());
             }
-            ParseState::Invalid(_)  => continue
-        }
-    }
-    None
-}
-
-pub fn detach_if_invalid() -> Option<Game> {
-    if let Some(exists) = process_exists() {
-        if !exists {
-            let game = attached::game();
-            attached::detach();
-            return game;
+            ParseState::Invalid(_) => continue,
         }
     }
     None
@@ -96,11 +83,14 @@ fn system_processes() -> impl Iterator<Item = (u32, String)> {
     let mut out = Vec::new();
 
     unsafe {
-        use windows::Win32::System::Diagnostics::ToolHelp::Process32NextW;
         use windows::Win32::{
             Foundation::CloseHandle,
             System::Diagnostics::ToolHelp::{
-                CreateToolhelp32Snapshot, PROCESSENTRY32W, Process32FirstW, TH32CS_SNAPPROCESS,
+                CreateToolhelp32Snapshot,
+                PROCESSENTRY32W,
+                Process32FirstW,
+                Process32NextW,
+                TH32CS_SNAPPROCESS,
             },
         };
 

@@ -1,10 +1,12 @@
-use crate::theme::{self, theme};
-use ratatui::{
-    style::{Modifier, Stylize},
-    symbols,
-    widgets::{Block, LineGauge},
+use {
+    crate::theme::{self, theme},
+    ratatui::{
+        style::{Modifier, Stylize},
+        symbols,
+        widgets::{Block, LineGauge},
+    },
+    ratatui_themes::Style,
 };
-use ratatui_themes::Style;
 
 pub fn create_toggle_string(str: &str, state: bool) -> String {
     let toggle = match state {
@@ -55,5 +57,9 @@ macro_rules! spawn_task {
 }
 
 pub fn item_options_style(show: bool) -> Style {
-    if show { Style::default() } else { Style::new().add_modifier(Modifier::CROSSED_OUT) }
+    if show {
+        Style::default()
+    } else {
+        Style::new().add_modifier(Modifier::CROSSED_OUT)
+    }
 }

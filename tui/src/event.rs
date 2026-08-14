@@ -1,15 +1,17 @@
-use crate::input::fuzzy_finder::SearchRequest;
-use config::attach::attach_config_error::ApplyAttachError;
-use crossterm::event::{self, Event as CEvent, KeyCode, KeyEvent, KeyModifiers};
-use gubtool_core::{
-    appdata::{AppDataError, log_error},
-    attached::AttachError,
-    sys::error::ProcessError,
-};
-use std::{
-    sync::{OnceLock, mpsc},
-    thread,
-    time::Duration,
+use {
+    crate::input::fuzzy_finder::SearchRequest,
+    config::attach::attach_config_error::ApplyAttachError,
+    crossterm::event::{self, Event as CEvent, KeyCode, KeyEvent, KeyModifiers},
+    gubtool_core::{
+        appdata::{AppDataError, log_error},
+        attached::AttachError,
+        sys::{ipc::ipc_error::IpcError, sys_error::ProcessError},
+    },
+    std::{
+        sync::{OnceLock, mpsc},
+        thread,
+        time::Duration,
+    },
 };
 
 pub enum Event {
@@ -36,32 +38,28 @@ pub struct KeyContext {
 impl KeyContext {
     #[track_caller]
     pub fn key_with_modifiers(&mut self, code: KeyCode, modifiers: KeyModifiers) -> bool {
-        match self.key_event {
-            Some(key_event) => {
-                if key_event == KeyEvent::new(code, modifiers) {
-                    self.key_event = None;
-                    true
-                } else {
-                    false
-                }
-            }
-            None => false,
+        let matches = self
+            .key_event
+            .is_some_and(|key_event| key_event == KeyEvent::new(code, modifiers));
+
+        if matches {
+            self.key_event = None;
         }
+
+        matches
     }
 
     #[track_caller]
     pub fn key(&mut self, code: KeyCode) -> bool {
-        match self.key_event {
-            Some(key_event) => {
-                if key_event.code == code {
-                    self.key_event = None;
-                    true
-                } else {
-                    false
-                }
-            }
-            None => false,
+        let matches = self
+            .key_event
+            .is_some_and(|key_event| key_event.code == code);
+
+        if matches {
+            self.key_event = None;
         }
+
+        matches
     }
 
     #[track_caller]
@@ -115,7 +113,9 @@ pub fn start_event_loop_thread() -> mpsc::Receiver<Event> {
                 && let CEvent::Key(key) = event::read().unwrap()
                 && key.kind == event::KeyEventKind::Press
             {
-                let ctx = KeyContext { key_event: Some(key) };
+                let ctx = KeyContext {
+                    key_event: Some(key),
+                };
                 send_event(Event::Key(ctx))
             }
 
@@ -139,11 +139,12 @@ pub trait ResultExt<T> {
 }
 
 impl<T, E> ResultExt<T> for Result<T, E>
-where
-    E: std::error::Error + Send + Sync + 'static
+where E: std::error::Error + Send + Sync + 'static
 {
     fn send_error(self) {
-        let Err(err) = self else { return };
+        let Err(err) = self else {
+            return
+        };
         let (string, info_type) = handle_error(&err);
         send_event(Event::Info((string, info_type)))
     }
@@ -159,7 +160,9 @@ pub trait AnyhowExt<T> {
 
 impl<T> AnyhowExt<T> for Result<T, anyhow::Error> {
     fn send_error(self) {
-        let Err(err) = self else { return };
+        let Err(err) = self else {
+            return
+        };
         let (string, info_type) = handle_error(err.as_ref());
         send_event(Event::Info((string, info_type)))
     }
@@ -170,13 +173,22 @@ fn handle_error(err: &(dyn std::error::Error + 'static)) -> (String, InfoType) {
 
     if let Some(proc_error) = err.downcast_ref::<ProcessError>() {
         match proc_error {
-            ProcessError::InvalidGame { .. } | ProcessError::NullPointer { .. } => (),
+            ProcessError::InvalidGame {
+                ..
+            }
+            | ProcessError::NullPointer {
+                ..
+            } => (),
             _ => {
                 info_type = InfoType::SysError;
                 let _ = log_error(&proc_error);
             }
         }
-    } else if err.is::<AttachError>() || err.is::<ApplyAttachError>() || err.is::<AppDataError>(){
+    } else if err.is::<AttachError>()
+        || err.is::<ApplyAttachError>()
+        || err.is::<AppDataError>()
+        || err.is::<IpcError>()
+    {
         info_type = InfoType::SysError;
     }
 

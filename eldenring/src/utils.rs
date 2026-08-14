@@ -1,13 +1,14 @@
 pub use offsets::module_offsets::scan::*;
-
-use crate::{event::get_event, is_dlc_available, is_player_loaded, offsets, resources::ASM};
-use anyhow::bail;
-use gubtool_core::{attached::version, game_version::EldenRingVersion::*};
-use std::{
-    thread,
-    time::{Duration, Instant},
+use {
+    crate::{event::get_event, is_dlc_available, is_player_loaded, offsets, resources::ASM},
+    anyhow::bail,
+    gubtool_core::{attached::version, game_version::EldenRingVersion::*},
+    std::{
+        thread,
+        time::{Duration, Instant},
+    },
+    thiserror::Error,
 };
-use thiserror::Error;
 
 #[derive(Error, Debug)]
 #[error("DLC not found")]
@@ -22,7 +23,7 @@ pub struct VersionError;
 pub struct LoadedError;
 
 pub fn dlc_check() -> anyhow::Result<()> {
-    crate::mem::ensure_eldenring()?;
+    crate::mem::ensure_game()?;
     if is_dlc_available() {
         Ok(())
     } else {
@@ -32,18 +33,18 @@ pub fn dlc_check() -> anyhow::Result<()> {
 }
 
 pub fn is_version_dlc_compat() -> bool {
-    match version() {
-        Some(Version2_2_0) |
-        Some(Version2_2_3) |
-        Some(Version2_3_0) |
-        Some(Version2_4_0) |
-        Some(Version2_5_0) |
-        Some(Version2_6_0) |
-        Some(Version2_6_1) |
-        Some(Version2_6_2) |
-        None => true,
-        _ => false
-    }
+    matches!(
+        version(),
+        Some(Version2_2_0)
+            | Some(Version2_2_3)
+            | Some(Version2_3_0)
+            | Some(Version2_4_0)
+            | Some(Version2_5_0)
+            | Some(Version2_6_0)
+            | Some(Version2_6_1)
+            | Some(Version2_6_2)
+            | None
+    )
 }
 
 pub fn version_check() -> Result<(), VersionError> {
@@ -55,7 +56,7 @@ pub fn version_check() -> Result<(), VersionError> {
 }
 
 pub fn player_loaded_check() -> anyhow::Result<()> {
-    crate::mem::ensure_eldenring()?;
+    crate::mem::ensure_game()?;
     if is_player_loaded() {
         Ok(())
     } else {

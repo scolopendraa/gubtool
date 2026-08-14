@@ -1,20 +1,23 @@
-use crate::{
-    emevd, event,
-    mem::*,
-    offsets::{
-        ChainReadExt,
-        code_cave::CaveAddress,
-        menu_man,
-        module_offsets::{BasePointer, Function, Hook},
+use {
+    crate::{
+        emevd,
+        event,
+        mem::*,
+        offsets::{
+            ChainReadExt,
+            code_cave::CaveAddress,
+            menu_man,
+            module_offsets::{BasePointer, Function, Hook},
+        },
+        pointer_cache::ResolvedPtr,
+        resources::{ASM, bosses::Boss, graces::Grace},
+        utils::{dlc_check, player_loaded_check},
     },
-    pointer_cache::ResolvedPtr,
-    resources::{ASM, bosses::Boss, graces::Grace},
-    utils::{dlc_check, player_loaded_check},
+    gubtool_core::{address::Address, slice_ops::*, sys::ipc::CppValue},
+    std::time::Duration,
 };
-use gubtool_core::{address::Address, slice_ops::*, sys::error::ProcResult};
-use std::time::Duration;
 
-pub fn warp_to_grace(grace_id: i64) -> ProcResult {
+pub fn warp_to_grace(grace_id: i64) -> anyhow::Result<()> {
     let mut fun = ASM.get_function("warp_to_grace");
     let mut asm = fun.take_bytes();
 
@@ -22,29 +25,37 @@ pub fn warp_to_grace(grace_id: i64) -> ProcResult {
     write_to_slice::<i64>(&mut asm, fun.reloc("grace_id"), grace_id)?;
     write_addr_to_slice(&mut asm, fun.reloc("fn_grace_warp"), Function::GraceWarp)?;
 
-    spawn_thread_join(CaveAddress::GraceWarpAsm, asm)
+    run_custom_function(asm)
 }
 
-pub async fn warp_to_block_id(block_id: i32, coords: [f32; 3], angle: f32, is_night: bool) -> ProcResult {
-    let area: i32 = (block_id >> 24) & 0xFF;
-    let block: i32 = (block_id >> 16) & 0xFF;
-    let map: i32 = (block_id >> 8) & 0xFF;
-    let alt_no: i32 = block_id & 0xFF;
+pub async fn warp_to_block_id(
+    block_id: i32,
+    coords: [f32; 3],
+    angle: f32,
+    is_night: bool,
+) -> anyhow::Result<()> {
+    let area = (block_id >> 24) & 0xff;
+    let block = (block_id >> 16) & 0xff;
+    let map = (block_id >> 8) & 0xff;
+    let alt_no = block_id & 0xff;
 
-    let mut fun = ASM.get_function("warp_to_block_id");
-    let mut asm = fun.take_bytes();
+    let args = [
+        CppValue::int32_t(area),
+        CppValue::int32_t(block),
+        CppValue::int32_t(map),
+        CppValue::int32_t(alt_no),
+    ];
 
-    write_to_slice::<i32>(&mut asm, fun.reloc("area"), area)?;
-    write_to_slice::<i32>(&mut asm, fun.reloc("block"), block)?;
-    write_to_slice::<i32>(&mut asm, fun.reloc("map"), map)?;
-    write_to_slice::<i32>(&mut asm, fun.reloc("alt_no"), alt_no)?;
-    write_addr_to_slice(&mut asm, fun.reloc("fn_block_warp"), Function::BlockWarp)?;
+    run_game_function(Function::BlockWarp, &args)?;
 
-    spawn_thread_join(CaveAddress::BlockWarpAsm, asm)?;
     hook_warp_coord_writes(coords, angle, is_night).await
 }
 
-async fn hook_warp_coord_writes(coords: [f32; 3], angle: f32, is_night: bool) -> ProcResult {
+async fn hook_warp_coord_writes(
+    coords: [f32; 3],
+    angle: f32,
+    is_night: bool,
+) -> anyhow::Result<()> {
     let mut target_coords: [u8; 16] = [0; 16];
     write_to_slice::<f32>(&mut target_coords, 0, coords[0])?;
     write_to_slice::<f32>(&mut target_coords, 4, coords[1])?;
@@ -59,8 +70,14 @@ async fn hook_warp_coord_writes(coords: [f32; 3], angle: f32, is_night: bool) ->
 
     let code_loc = CaveAddress::WarpCoordsHook;
     write_rel_i32(&mut asm, code_loc, fun.reloc("new_val"), CaveAddress::WarpCoords, 4)?;
-    write_to_slice::<i32>(&mut asm, fun.reloc("property_offset"), 0xAA0)?;
-    write_rel_i32(&mut asm, code_loc, fun.reloc("hook_loc"), Hook::WarpCoordWrite.add_offset(7), 4)?;
+    write_to_slice::<i32>(&mut asm, fun.reloc("property_offset"), 0xaa0)?;
+    write_rel_i32(
+        &mut asm,
+        code_loc,
+        fun.reloc("hook_loc"),
+        Hook::WarpCoordWrite.add_offset(7),
+        4,
+    )?;
     install_hook(&asm, code_loc, Hook::WarpCoordWrite, 7)?;
 
     let mut fun = ASM.get_function("warp_coord_angle_hook");
@@ -68,17 +85,24 @@ async fn hook_warp_coord_writes(coords: [f32; 3], angle: f32, is_night: bool) ->
 
     let code_loc = CaveAddress::WarpAngleHook;
     write_rel_i32(&mut asm, code_loc, fun.reloc("new_val"), CaveAddress::WarpAngle, 4)?;
-    write_to_slice::<i32>(&mut asm, fun.reloc("property_offset"), 0xAB0)?;
-    write_rel_i32(&mut asm, code_loc, fun.reloc("hook_loc"), Hook::WarpAngleWrite.add_offset(7), 4)?;
+    write_to_slice::<i32>(&mut asm, fun.reloc("property_offset"), 0xab0)?;
+    write_rel_i32(
+        &mut asm,
+        code_loc,
+        fun.reloc("hook_loc"),
+        Hook::WarpAngleWrite.add_offset(7),
+        4,
+    )?;
     install_hook(&asm, code_loc, Hook::WarpAngleWrite, 7)?;
 
     wait_to_unhook_warp(is_night).await
 }
 
-const COORD_HOOK_ORIGINAL: [u8; 7] = [0x0F, 0x11, 0x80, 0xA0, 0x0A, 0x00, 0x00];
-const ANGLE_HOOK_ORIGINAL: [u8; 7] = [0x0F, 0x11, 0x80, 0xB0, 0x0A, 0x00, 0x00];
-async fn wait_to_unhook_warp(is_night: bool) -> ProcResult {
-    let is_faded_ptr = ResolvedPtr::MenuMan.get()
+const COORD_HOOK_ORIGINAL: [u8; 7] = [0x0f, 0x11, 0x80, 0xa0, 0x0a, 0x00, 0x00];
+const ANGLE_HOOK_ORIGINAL: [u8; 7] = [0x0f, 0x11, 0x80, 0xb0, 0x0a, 0x00, 0x00];
+async fn wait_to_unhook_warp(is_night: bool) -> anyhow::Result<()> {
+    let is_faded_ptr = ResolvedPtr::MenuMan
+        .get()
         .add_offset(menu_man::is_fading())?;
 
     while !is_bit_set(is_faded_ptr, menu_man::fade_bit_flags::IS_FADE_SCREEN)? {
@@ -88,11 +112,14 @@ async fn wait_to_unhook_warp(is_night: bool) -> ProcResult {
     while is_bit_set(is_faded_ptr, menu_man::fade_bit_flags::IS_FADE_SCREEN)? {
         tokio::time::sleep(Duration::from_millis(20)).await;
     }
+
     if is_night {
         emevd::set_night()?;
     }
+
     write_bytes(Hook::WarpCoordWrite, &COORD_HOOK_ORIGINAL)?;
-    write_bytes(Hook::WarpAngleWrite, &ANGLE_HOOK_ORIGINAL)
+    write_bytes(Hook::WarpAngleWrite, &ANGLE_HOOK_ORIGINAL)?;
+    Ok(())
 }
 
 impl Boss {
@@ -116,7 +143,6 @@ impl Grace {
         if self.dlc {
             dlc_check()?;
         }
-        warp_to_grace(self.grace_entity_id)?;
-        Ok(())
+        warp_to_grace(self.grace_entity_id)
     }
 }

@@ -1,14 +1,15 @@
-use crate::{
-    attached::{self, parse::ParseError},
-    game_version::GameVersion,
-};
-use std::path::PathBuf;
-use thiserror::Error;
-
 #[cfg(windows)]
 use windows::Win32::{
     Foundation::{HANDLE, STILL_ACTIVE},
     System::Threading::GetExitCodeProcess,
+};
+use {
+    crate::{
+        attached::{self, parse::ParseError},
+        game_version::GameVersion,
+    },
+    std::path::PathBuf,
+    thiserror::Error,
 };
 
 #[derive(Debug, Error)]
@@ -19,15 +20,16 @@ pub struct AttachError {
 
 #[derive(Debug, Clone)]
 pub struct GameProcess {
-    pub pid: crate::sys::Pid,
+    pub pid:          crate::sys::Pid,
     pub game_version: GameVersion,
-    pub comm: String,
-    pub exe_path: PathBuf,
-    pub module_base: u64,
+    pub comm:         String,
+    pub exe_path:     PathBuf,
+    pub module_base:  u64,
     pub address_size: AddressSize,
-    pub parse_state: ParseState,
+    pub parse_state:  ParseState,
+    pub port:         Option<u16>,
     #[cfg(windows)]
-    pub handle: HANDLE,
+    pub handle:       HANDLE,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -54,7 +56,9 @@ impl GameProcess {
                 for err in errors {
                     let _ = crate::appdata::log_error(&err);
                 }
-                Err(AttachError { error_count: len })
+                Err(AttachError {
+                    error_count: len,
+                })
             }
         }
     }
@@ -74,14 +78,17 @@ impl GameProcess {
 
     #[cfg(unix)]
     pub fn exists(&self) -> bool {
-        use std::{fs, path::Path};
-        use crate::attached::parse::VALID_COMMS;
+        use {
+            crate::attached::parse::VALID_COMMS,
+            std::{fs, path::Path},
+        };
 
         let pid_path = Path::new("/proc").join(format!("{}", self.pid));
         let comm_path = Path::new(&pid_path).join("comm");
         if Path::exists(&pid_path)
             && let Ok(comm) = fs::read_to_string(comm_path)
-            && VALID_COMMS.iter().any(|(name, _)| &comm.trim() == name) {
+            && VALID_COMMS.iter().any(|(name, _)| &comm.trim() == name)
+        {
             return true;
         }
         false
@@ -90,7 +97,7 @@ impl GameProcess {
     #[cfg(windows)]
     pub fn exists(&self) -> bool {
         if self.handle.is_invalid() || self.handle.0.is_null() {
-            return false
+            return false;
         }
         unsafe {
             let mut exit_code: u32 = 0;

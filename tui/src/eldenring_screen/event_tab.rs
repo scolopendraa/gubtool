@@ -1,17 +1,19 @@
-use crate::{
-    common::event_log_table::draw_logging_enabled_line,
-    event::KeyContext,
-    impl_tablecontroller_for_commands,
-    panes::{PaneManager, TablePane},
-    screen::Screen,
+use {
+    crate::{
+        common::event_log_table::draw_logging_enabled_line,
+        event::KeyContext,
+        impl_tablecontroller_for_commands,
+        panes::{PaneManager, TablePane},
+        screen::Screen,
+    },
+    crossterm::event::KeyCode,
+    eldenring::event::{self, ErEventLogger},
+    ratatui::{
+        Frame,
+        layout::{Constraint, Direction, Layout, Rect},
+    },
+    shared::command::{Command, ToggleCommand},
 };
-use crossterm::event::KeyCode;
-use eldenring::event::{self, ErEventLogger};
-use ratatui::{
-    Frame,
-    layout::{Constraint, Direction, Layout, Rect},
-};
-use shared::command::{Command, ToggleCommand};
 
 pub(super) struct EventTab {
     pub pane_manager: PaneManager,
@@ -23,7 +25,7 @@ impl EventTab {
             pane_manager: PaneManager::new(vec![
                 TablePane::new_static(&Commands).boxed(),
                 TablePane::event_logs(ErEventLogger::default()).boxed(),
-            ])
+            ]),
         }
     }
 }
@@ -32,10 +34,7 @@ impl Screen for EventTab {
     fn draw(&mut self, frame: &mut Frame, rect: Rect) {
         let layout = Layout::default()
             .direction(Direction::Horizontal)
-            .constraints(vec![
-                Constraint::Percentage(40),
-                Constraint::Percentage(60),
-            ])
+            .constraints(vec![Constraint::Percentage(40), Constraint::Percentage(60)])
             .split(rect);
 
         self.pane_manager.draw(frame, &layout);

@@ -1,15 +1,17 @@
-use crate::{
-    address::Address,
-    attached,
-    sys::error::{AccessType, ProcResult, ProcessError, WriteType},
-};
-use pelite::Pod;
-use std::{any::type_name, mem::MaybeUninit, time::Duration};
-use windows::Win32::{
-    Foundation::{CloseHandle, HANDLE, WAIT_OBJECT_0},
-    System::{
-        Diagnostics::Debug::{ReadProcessMemory, WriteProcessMemory},
-        Threading::{CreateRemoteThread, LPTHREAD_START_ROUTINE, WaitForSingleObject},
+use {
+    crate::{
+        address::Address,
+        attached,
+        sys::sys_error::{AccessType, ProcResult, ProcessError, WriteType},
+    },
+    pelite::Pod,
+    std::{any::type_name, mem::MaybeUninit, time::Duration},
+    windows::Win32::{
+        Foundation::{CloseHandle, WAIT_OBJECT_0},
+        System::{
+            Diagnostics::Debug::{ReadProcessMemory, WriteProcessMemory},
+            Threading::{CreateRemoteThread, LPTHREAD_START_ROUTINE, WaitForSingleObject},
+        },
     },
 };
 
@@ -21,7 +23,7 @@ pub fn read_unsafe<T: Pod>(address: impl Address) -> ProcResult<T> {
         let mut nread = 0;
 
         let result = ReadProcessMemory(
-            handle()?,
+            attached::handle()?,
             address.addr() as *const _,
             value.as_mut_ptr() as *mut _,
             size,
@@ -55,7 +57,7 @@ pub fn write_unsafe<T: Pod>(address: impl Address, value: T) -> ProcResult {
         let mut nwritten = 0;
 
         let result = WriteProcessMemory(
-            handle()?,
+            attached::handle()?,
             address.addr() as *mut _,
             &value as *const T as *const _,
             size,
@@ -88,7 +90,7 @@ pub fn write_bytes_unsafe(address: impl Address, data: &[u8]) -> ProcResult {
         let mut nwritten = 0;
 
         let result = WriteProcessMemory(
-            handle()?,
+            attached::handle()?,
             address.addr() as *mut _,
             data.as_ptr() as *const _,
             size,
@@ -121,22 +123,27 @@ pub fn spawn_thread_release(
     unsafe {
         write_bytes_unsafe(thread_start_address, &thread_code)?;
         let start: LPTHREAD_START_ROUTINE = Some(std::mem::transmute(thread_start_address.addr()));
-        let thread_handle = CreateRemoteThread(handle()?, None, 0, start, None, 0, None)
-            .map_err(|err| ProcessError::RemoteThreadCreate { os_error: err.code().0 })?;
+        let thread_handle = CreateRemoteThread(attached::handle()?, None, 0, start, None, 0, None)
+            .map_err(|err| {
+                ProcessError::RemoteThreadCreate {
+                    os_error: err.code().0,
+                }
+            })?;
         let _ = CloseHandle(thread_handle);
         Ok(())
     }
 }
 
-pub fn spawn_thread_join(
-    thread_start_address: impl Address,
-    thread_code: Vec<u8>,
-) -> ProcResult {
+pub fn spawn_thread_join(thread_start_address: impl Address, thread_code: Vec<u8>) -> ProcResult {
     unsafe {
         write_bytes_unsafe(thread_start_address, &thread_code)?;
         let start: LPTHREAD_START_ROUTINE = Some(std::mem::transmute(thread_start_address.addr()));
-        let thread_handle = CreateRemoteThread(handle()?, None, 0, start, None, 0, None)
-            .map_err(|err| ProcessError::RemoteThreadCreate { os_error: err.code().0 })?;
+        let thread_handle = CreateRemoteThread(attached::handle()?, None, 0, start, None, 0, None)
+            .map_err(|err| {
+                ProcessError::RemoteThreadCreate {
+                    os_error: err.code().0,
+                }
+            })?;
 
         let timeout = 50;
         let wait_result = WaitForSingleObject(thread_handle, 50);
@@ -145,14 +152,11 @@ pub fn spawn_thread_join(
 
         match wait_result {
             WAIT_OBJECT_0 => Ok(()),
-            _ => Err(ProcessError::RemoteThreadReturn { timeout: Duration::from_millis(timeout as u64) }),
+            _ => {
+                Err(ProcessError::RemoteThreadReturn {
+                    timeout: Duration::from_millis(timeout as u64),
+                })
+            }
         }
-    }
-}
-
-fn handle() -> ProcResult<HANDLE> {
-    match attached::handle() {
-        Some(handle) => Ok(handle),
-        None => Err(ProcessError::NotAttached)
     }
 }

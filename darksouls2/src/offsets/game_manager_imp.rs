@@ -1,5 +1,7 @@
-use crate::offsets::{Offset, module_offsets::BasePointer};
-use gubtool_core::{address::Address, attached::is_32};
+use {
+    crate::offsets::{Offset, module_offsets::BasePointer},
+    gubtool_core::{address::Address, attached::is_32},
+};
 
 pub const CHARACTER_MANAGER: Offset = Offset {
     vanilla: 0,
@@ -58,32 +60,32 @@ pub const SIGN_MANAGER: Offset = Offset {
 
 pub const STATE_ACT_MANAGER: Offset = Offset {
     vanilla: 0,
-    scholar: 0xA0,
+    scholar: 0xa0,
 };
 
 pub const GAME_DATA_MANAGER: Offset = Offset {
     vanilla: 0x60,
-    scholar: 0xA8,
+    scholar: 0xa8,
 };
 
 pub const SAVE_LOAD_SYSTEM: Offset = Offset {
     vanilla: 0,
-    scholar: 0xB8,
+    scholar: 0xb8,
 };
 
 pub const APP_DLC_CONTENTS_INFO_ACCESSOR: Offset = Offset {
     vanilla: 0,
-    scholar: 0xC8,
+    scholar: 0xc8,
 };
 
 pub const PLAYER_CTRL: Offset = Offset {
     vanilla: 0x74,
-    scholar: 0xD0,
+    scholar: 0xd0,
 };
 
 pub const LOADING_FLAG: Offset = Offset {
-    vanilla: 0xDFC,
-    scholar: 0x24BC,
+    vanilla: 0xdfc,
+    scholar: 0x24bc,
 };
 
 pub mod event_manager_offsets {
@@ -100,18 +102,18 @@ pub mod event_manager_offsets {
     };
 
     pub const EVENT_BONFIRE_MANAGER: Offset = Offset {
-        vanilla: 0x2C,
+        vanilla: 0x2c,
         scholar: 0x58,
     };
 
     pub const RESPAWN_MAP: Offset = Offset {
-        vanilla: 0xB4,
-        scholar: 0x164 ,
+        vanilla: 0xb4,
+        scholar: 0x164,
     };
 
     pub const RESPAWN_BONFIRE: Offset = Offset {
-        vanilla: 0xBC,
-        scholar: 0x16C ,
+        vanilla: 0xbc,
+        scholar: 0x16c,
     };
 
     pub const EVENT_WINDOW_MANAGER: Offset = Offset {
@@ -134,8 +136,8 @@ pub mod event_manager_offsets {
 }
 
 pub const QUITOUT: Offset = Offset {
-    vanilla: 0xDF1,
-    scholar: 0x24B1,
+    vanilla: 0xdf1,
+    scholar: 0x24b1,
 };
 
 pub const PX_WORLD: Offset = Offset {
@@ -145,34 +147,74 @@ pub const PX_WORLD: Offset = Offset {
 
 pub fn player_coords_chain() -> [u64; 7] {
     match is_32() {
-        true => [BasePointer::GameManagerImp.addr(), PX_WORLD.resolve(), 0xC, 0x168, 0xC, 0x4, 0x120],
-        false => [BasePointer::GameManagerImp.addr(), PX_WORLD.resolve(), 0x18, 0x1F8, 0x18, 0x8, 0x1A0],
+        true => {
+            [
+                BasePointer::GameManagerImp.addr(),
+                PX_WORLD.resolve(),
+                0xc,
+                0x168,
+                0xc,
+                0x4,
+                0x120,
+            ]
+        }
+        false => {
+            [
+                BasePointer::GameManagerImp.addr(),
+                PX_WORLD.resolve(),
+                0x18,
+                0x1f8,
+                0x18,
+                0x8,
+                0x1a0,
+            ]
+        }
     }
 }
 
 pub const DL_BACK_ALLOCATOR: Offset = Offset {
-    vanilla: 0xCC4,
-    scholar: 0x22E0,
+    vanilla: 0xcc4,
+    scholar: 0x22e0,
 };
 
 pub mod dl_back_allocator_offsets {
     use crate::offsets::Offset;
 
     pub const UNK_FLAG: Offset = Offset {
-        vanilla: 0x1A3,
-        scholar: 0x30F,
+        vanilla: 0x1a3,
+        scholar: 0x30f,
     };
 
     pub const REF_COUNT: Offset = Offset {
-        vanilla: 0x1B0,
-        scholar: 0x31C,
+        vanilla: 0x1b0,
+        scholar: 0x31c,
     };
 }
 
 pub fn fe_item_select_menu_chain() -> [u64; 7] {
     match is_32() {
-        true => [BasePointer::GameManagerImp.addr(), DL_BACK_ALLOCATOR.resolve(), 0x88, 0x8, 0x1C, 0x18, 0x18],
-        false => [BasePointer::GameManagerImp.addr(), DL_BACK_ALLOCATOR.resolve(), 0x110, 0x10, 0x38, 0x30, 0x30],
+        true => {
+            [
+                BasePointer::GameManagerImp.addr(),
+                DL_BACK_ALLOCATOR.resolve(),
+                0x88,
+                0x8,
+                0x1c,
+                0x18,
+                0x18,
+            ]
+        }
+        false => {
+            [
+                BasePointer::GameManagerImp.addr(),
+                DL_BACK_ALLOCATOR.resolve(),
+                0x110,
+                0x10,
+                0x38,
+                0x30,
+                0x30,
+            ]
+        }
     }
 }
 
@@ -181,7 +223,7 @@ pub mod fe_item_select_menu_offsets {
 
     pub const OPEN_FLAG: Offset = Offset {
         vanilla: 0x12,
-        scholar: 0x1E,
+        scholar: 0x1e,
     };
 }
 
@@ -189,8 +231,8 @@ pub mod player_ctrl_offsets {
     use crate::offsets::Offset;
 
     pub const PLAYER_OPERATOR: Offset = Offset {
-        vanilla: 0xAC,
-        scholar: 0xE8,
+        vanilla: 0xac,
+        scholar: 0xe8,
     };
 }
 
@@ -199,7 +241,7 @@ pub mod game_data_manager_offsets {
 
     pub const CLEARCOUNT_PTR: Offset = Offset {
         vanilla: 0x60,
-        scholar: 0xC0,
+        scholar: 0xc0,
     };
 
     pub mod clearcount_ptr_offsets {

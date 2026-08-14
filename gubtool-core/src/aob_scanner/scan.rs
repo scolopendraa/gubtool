@@ -1,5 +1,7 @@
-use crate::aob_scanner::{AobScanner, ScanLocation, scan_error::ScanError};
-use std::sync::atomic::{AtomicU64, Ordering};
+use {
+    crate::aob_scanner::{AobScanner, ScanLocation, scan_error::ScanError},
+    std::sync::atomic::{AtomicU64, Ordering},
+};
 
 const CHUNK_SIZE: usize = 0x5000;
 
@@ -42,24 +44,25 @@ impl AobScanner {
         let found = self.scan_all()?;
 
         match found.as_slice() {
-            [] => Err(ScanError::NotFound {
-                scan_name: self.scan.name
-            }),
+            [] => {
+                Err(ScanError::NotFound {
+                    scan_name: self.scan.name,
+                })
+            }
             [single] => Ok(*single),
-            _ => Err(ScanError::FoundDuplicates {
-                scan_name: self.scan.name,
-                locations: found
-            }),
+            _ => {
+                Err(ScanError::FoundDuplicates {
+                    scan_name: self.scan.name,
+                    locations: found,
+                })
+            }
         }
     }
 
     pub fn scan_first(&self) -> Result<u64, ScanError> {
         let found = AtomicU64::new(u64::MAX);
 
-        let (left, right) = rayon::join(
-            || self.scan_left(&found),
-            || self.scan_right(&found),
-        );
+        let (left, right) = rayon::join(|| self.scan_left(&found), || self.scan_right(&found));
 
         left?;
         right?;
@@ -68,16 +71,16 @@ impl AobScanner {
         if found != u64::MAX {
             self.resolve_address(found)
         } else {
-            Err(ScanError::NotFound { scan_name: self.scan.name })
+            Err(ScanError::NotFound {
+                scan_name: self.scan.name,
+            })
         }
     }
 
     fn scan_left(&self, found: &AtomicU64) -> Result<(), ScanError> {
         let mut offset = self.constraints.origin;
 
-        while found.load(Ordering::Relaxed) == u64::MAX
-            && offset > self.constraints.start
-        {
+        while found.load(Ordering::Relaxed) == u64::MAX && offset > self.constraints.start {
             let next_offset = offset
                 .saturating_sub((CHUNK_SIZE - self.pattern.len()) as u64)
                 .max(self.constraints.start);
@@ -101,9 +104,7 @@ impl AobScanner {
         let step = (CHUNK_SIZE - self.pattern.len() + 1) as u64;
         let max_offset = self.constraints.end.saturating_sub(CHUNK_SIZE as u64);
 
-        while found.load(Ordering::Relaxed) == u64::MAX
-            && offset < self.constraints.end
-        {
+        while found.load(Ordering::Relaxed) == u64::MAX && offset < self.constraints.end {
             let current = offset.min(max_offset);
             let bytes = self.read_block::<CHUNK_SIZE>(current)?;
 
@@ -123,9 +124,10 @@ impl AobScanner {
     }
 
     fn matches_pattern(&self, slice: &[u8]) -> bool {
-        slice.iter().zip(&self.pattern).all(|(&slice_byte, &pattern_byte)| {
-            pattern_byte.map_or(true, |pattern_byte| pattern_byte == slice_byte)
-        })
+        slice
+            .iter()
+            .zip(&self.pattern)
+            .all(|(&slice_byte, &pattern_byte)| pattern_byte.is_none_or(|b| b == slice_byte))
     }
 
     pub(crate) fn read_block<const N: usize>(&self, offset: u64) -> Result<[u8; N], ScanError> {

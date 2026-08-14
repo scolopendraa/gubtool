@@ -57,5 +57,6 @@ pub const OFFSETS_2_0_1: ModuleOffsets = ModuleOffsets {
     external_fn_ptrs: ExternalFunctionPointers {
         kernel32_create_thread: 0x495F6C4,
         kernel32_close_handle: 0x495F58C,
+        kernel32_load_library_w: 0x495F704,
     },
 };

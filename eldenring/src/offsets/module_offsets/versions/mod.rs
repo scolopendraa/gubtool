@@ -26,5 +26,11 @@ include!("2_6_1.rs");
 include!("2_6_2.rs");
 
 use crate::offsets::module_offsets::structs::{
-    BasePointers, Data, ExternalFunctionPointers, Functions, Hooks, ModuleOffsets, Patches,
+    BasePointers,
+    Data,
+    ExternalFunctionPointers,
+    Functions,
+    Hooks,
+    ModuleOffsets,
+    Patches,
 };

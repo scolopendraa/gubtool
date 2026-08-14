@@ -1,18 +1,21 @@
-use crate::{
-    mem::{read, write},
-    offsets::{
-        self, ChainReadExt,
-        chr_ctrl::{boss_operator_offsets, chr_ai_manipulator_offsets},
-        code_cave::CaveAddress,
+use {
+    crate::{
+        mem::{read, write},
+        offsets::{
+            self,
+            ChainReadExt,
+            chr_ctrl::{boss_operator_offsets, chr_ai_manipulator_offsets},
+            code_cave::CaveAddress,
+        },
+        target::act_logger,
     },
-    target::act_logger,
+    anyhow::ensure,
+    gubtool_core::{address::Address, sys::sys_error::ProcResult},
+    std::collections::HashMap,
 };
-use anyhow::ensure;
-use gubtool_core::{address::Address, sys::error::ProcResult};
-use std::collections::HashMap;
 
+#[derive(Debug)]
 pub struct ChrCtrl {
-    pointer_loc: Option<u64>,
     pub resolved_pointers: HashMap<ResolvedChrPtr, u64>,
 }
 
@@ -44,7 +47,7 @@ impl ChrCtrl {
         let current = self.get_hp()?;
         let max = self.max_hp()?;
         if max == 0 {
-            return Ok(0.0)
+            return Ok(0.0);
         }
         Ok((current as f32 / max as f32) * 100.0)
     }
@@ -75,13 +78,15 @@ impl ChrCtrl {
     }
 
     pub fn is_no_death(&mut self) -> bool {
-        self.get_min_hp()
-            .map(|val| val == 1)
-            .unwrap_or_default()
+        self.get_min_hp().map(|val| val == 1).unwrap_or_default()
     }
 
     pub fn set_no_death(&mut self, state: bool) -> ProcResult {
-        let val = if state { 1 } else { -99999 };
+        let val = if state {
+            1
+        } else {
+            -99999
+        };
         self.set_min_hp(val)
     }
 
@@ -94,11 +99,10 @@ impl ChrCtrl {
     pub fn get_distance(&mut self, other: &mut ChrCtrl) -> ProcResult<f32> {
         let self_pos = self.coords()?;
         let other_pos = other.coords()?;
-        Ok((
-            (other_pos[0] - self_pos[0]).powi(2) +
-            (other_pos[1] - self_pos[1]).powi(2) +
-            (other_pos[2] - self_pos[2]).powi(2))
-            .sqrt())
+        Ok(((other_pos[0] - self_pos[0]).powi(2)
+            + (other_pos[1] - self_pos[1]).powi(2)
+            + (other_pos[2] - self_pos[2]).powi(2))
+        .sqrt())
     }
 
     pub fn chr_id(&mut self) -> ProcResult<i32> {
@@ -132,8 +136,8 @@ impl ChrCtrl {
     }
 
     pub fn rot_quaternion(&mut self) -> ProcResult<[f32; 4]> {
-        let [m00, m01, m02, _, m10, m11, m12, _, m20, m21, m22, _] =
-            self.get_ptr(ResolvedChrPtr::ChrCtrl)
+        let [m00, m01, m02, _, m10, m11, m12, _, m20, m21, m22, _] = self
+            .get_ptr(ResolvedChrPtr::ChrCtrl)
             .add_offset(offsets::chr_ctrl::ROTATION)
             .read::<[f32; 12]>()?;
 
@@ -158,7 +162,7 @@ impl ChrCtrl {
         act_logger().get(chr_ai)
     }
 
-    pub fn repeat_action(&mut self, act_id: i32) -> ProcResult<> {
+    pub fn repeat_action(&mut self, act_id: i32) -> ProcResult {
         let chr_ai = self.get_ptr(ResolvedChrPtr::ChrAi)?;
         write::<u64>(CaveAddress::ForceActChrAi, chr_ai)?;
         write::<i32>(CaveAddress::ForceActId, act_id)?;
@@ -178,20 +182,19 @@ impl ChrCtrl {
 
     pub fn is_action_repeating(&mut self) -> ProcResult<bool> {
         let chr_ai = self.get_ptr(ResolvedChrPtr::ChrAi)?;
-        Ok(
-            read::<u8>(CaveAddress::ForceActFlag)
-                .map(|val| val == 0x1)?
-            && read::<u64>(CaveAddress::ForceActChrAi)
-                .map(|chr| chr == chr_ai)?
-        )
+        Ok(read::<u8>(CaveAddress::ForceActFlag).map(|val| val == 0x1)?
+            && read::<u64>(CaveAddress::ForceActChrAi).map(|chr| chr == chr_ai)?)
     }
 }
 
 impl ChrCtrl {
     pub fn new(pointer: impl Address) -> Self {
         let resolved_pointers = HashMap::new();
-        let mut s = Self { pointer_loc: None, resolved_pointers };
-        s.resolved_pointers.insert(ResolvedChrPtr::ChrCtrl, pointer.addr());
+        let mut s = Self {
+            resolved_pointers,
+        };
+        s.resolved_pointers
+            .insert(ResolvedChrPtr::ChrCtrl, pointer.addr());
         s
     }
 
@@ -199,7 +202,7 @@ impl ChrCtrl {
         if let Ok(ptr) = self.get_ptr(ResolvedChrPtr::ChrCtrl)
             && ptr == 0x0
         {
-            return Ok(false)
+            return Ok(false);
         }
         let health = self.get_hp()?;
         let max_health = self.max_hp()?;

@@ -1,25 +1,31 @@
 pub mod error;
 pub use error::ParseError;
-
-use crate::{
-    attached::{GameProcess, parse::parse_pe_for_version_and_address_size},
-    game_version::Game,
-    sys::Pid,
-};
-use std::{ffi::OsString, os::windows::ffi::OsStringExt, path::PathBuf};
-use windows::{
-    Win32::{
-        Foundation::{HANDLE, HMODULE},
-        System::{
-            ProcessStatus::{K32EnumProcessModulesEx, LIST_MODULES_ALL},
-            Threading::{
-                OpenProcess, PROCESS_NAME_FORMAT, PROCESS_QUERY_INFORMATION, PROCESS_TERMINATE,
-                PROCESS_VM_OPERATION, PROCESS_VM_READ, PROCESS_VM_WRITE,
-                QueryFullProcessImageNameW,
+use {
+    crate::{
+        attached::{GameProcess, parse::parse_pe_for_version_and_address_size},
+        game_version::Game,
+        sys::Pid,
+    },
+    std::{ffi::OsString, os::windows::ffi::OsStringExt, path::PathBuf},
+    windows::{
+        Win32::{
+            Foundation::{HANDLE, HMODULE},
+            System::{
+                ProcessStatus::{K32EnumProcessModulesEx, LIST_MODULES_ALL},
+                Threading::{
+                    OpenProcess,
+                    PROCESS_NAME_FORMAT,
+                    PROCESS_QUERY_INFORMATION,
+                    PROCESS_TERMINATE,
+                    PROCESS_VM_OPERATION,
+                    PROCESS_VM_READ,
+                    PROCESS_VM_WRITE,
+                    QueryFullProcessImageNameW,
+                },
             },
         },
+        core::PWSTR,
     },
-    core::PWSTR,
 };
 
 pub(crate) fn parse_process(game: &Game, pid: Pid, comm: String) -> GameProcess {
@@ -43,7 +49,17 @@ pub(crate) fn parse_process(game: &Game, pid: Pid, comm: String) -> GameProcess 
     let (address_size, game_version, parse_state) =
         parse_pe_for_version_and_address_size(game, &exe_path, parse_errors);
 
-    GameProcess { pid, game_version, comm, exe_path, module_base, address_size, parse_state, handle}
+    GameProcess {
+        pid,
+        game_version,
+        comm,
+        exe_path,
+        module_base,
+        address_size,
+        parse_state,
+        handle,
+        port: None,
+    }
 }
 
 fn get_handle(pid: Pid) -> Result<HANDLE, ParseError> {
@@ -54,8 +70,11 @@ fn get_handle(pid: Pid) -> Result<HANDLE, ParseError> {
         | PROCESS_TERMINATE;
 
     unsafe {
-        OpenProcess(flags, false, pid.as_u32())
-            .map_err(|err| ParseError::OpenProcess { err })
+        OpenProcess(flags, false, pid.as_u32()).map_err(|err| {
+            ParseError::OpenProcess {
+                err,
+            }
+        })
     }
 }
 
@@ -72,7 +91,11 @@ fn get_module_base(handle: HANDLE) -> Result<u64, ParseError> {
             LIST_MODULES_ALL.0,
         )
         .ok()
-        .map_err(|err| ParseError::ModuleBase { err })?;
+        .map_err(|err| {
+            ParseError::ModuleBase {
+                err,
+            }
+        })?;
     }
     Ok(module_base.0 as u64)
 }
@@ -82,11 +105,18 @@ fn get_exe_path(handle: HANDLE) -> Result<PathBuf, ParseError> {
     let mut size = path_buf.len() as u32;
 
     unsafe {
-        QueryFullProcessImageNameW(handle, PROCESS_NAME_FORMAT(0), PWSTR(path_buf.as_mut_ptr()), &mut size)
-            .map_err(|err|  ParseError::PathNotFound { err })?;
+        QueryFullProcessImageNameW(
+            handle,
+            PROCESS_NAME_FORMAT(0),
+            PWSTR(path_buf.as_mut_ptr()),
+            &mut size,
+        )
+        .map_err(|err| {
+            ParseError::PathNotFound {
+                err,
+            }
+        })?;
     }
 
-    Ok(PathBuf::from(
-        OsString::from_wide(&path_buf[..size as usize]),
-    ))
+    Ok(PathBuf::from(OsString::from_wide(&path_buf[..size as usize])))
 }

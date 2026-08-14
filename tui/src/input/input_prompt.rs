@@ -1,28 +1,29 @@
-use crate::{
-    common::helpers::bordered_block,
-    event::KeyContext,
-    input::input::Input,
-    popup::{Popup, PopupState},
-    screen::Screen,
-    theme::theme,
+use {
+    crate::{
+        common::helpers::bordered_block,
+        event::KeyContext,
+        input::input::Input,
+        popup::{Popup, PopupState},
+        screen::Screen,
+        theme::theme,
+    },
+    crossterm::event::KeyCode,
+    ratatui::{
+        Frame,
+        layout::{Constraint, Direction, Layout, Rect},
+        style::Stylize,
+        text::Line,
+        widgets::Paragraph,
+    },
+    std::any::TypeId,
 };
-use crossterm::event::KeyCode;
-use ratatui::{
-    Frame,
-    layout::{Constraint, Direction, Layout, Rect},
-    style::Stylize,
-    text::Line,
-    widgets::Paragraph,
-};
-use std::any::TypeId;
-
 
 #[derive(Default)]
 pub struct InputPrompt {
-    input: Input,
-    prompt: &'static str,
+    input:       Input,
+    prompt:      &'static str,
     prompt_type: Option<TypeId>,
-    sender: Option<tokio::sync::oneshot::Sender<String>>,
+    sender:      Option<tokio::sync::oneshot::Sender<String>>,
     popup_state: PopupState,
 }
 
@@ -70,14 +71,14 @@ impl Screen for InputPrompt {
             theme().error
         };
 
-        let block = bordered_block(None).style(block_theme)
+        let block = bordered_block(None)
+            .style(block_theme)
             .title(Line::from(self.prompt).style(block_theme))
             .bg(theme().bg);
         let inner = block.inner(rect);
 
         self.input.update_width(inner.width);
-        let input = Paragraph::new(self.input.to_string())
-            .style(theme().fg);
+        let input = Paragraph::new(self.input.to_string()).style(theme().fg);
 
         self.input.set_cursor(frame, inner);
 

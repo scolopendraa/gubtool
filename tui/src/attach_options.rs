@@ -1,28 +1,30 @@
-use crate::{
-    common::helpers::bordered_block,
-    event::KeyContext,
-    impl_tablecontroller_for_commands,
-    panes::{TabPane, TablePane},
-    popup::{Popup, PopupState, centered_popup},
-    screen::Screen,
-    theme::theme,
+use {
+    crate::{
+        common::helpers::bordered_block,
+        event::KeyContext,
+        impl_tablecontroller_for_commands,
+        panes::{TabPane, TablePane},
+        popup::{Popup, PopupState, centered_popup},
+        screen::Screen,
+        theme::theme,
+    },
+    crossterm::event::KeyCode,
+    gubtool_core::game_version::Game,
+    ratatui::{
+        Frame,
+        layout::{Constraint, Direction, Layout, Rect},
+        text::{Line, Span},
+        widgets::{Paragraph, Wrap},
+    },
+    shared::command::{Command, OptCmd},
+    std::{cell::RefCell, rc::Rc},
 };
-use crossterm::event::KeyCode;
-use gubtool_core::game_version::Game;
-use ratatui::{
-    Frame,
-    layout::{Constraint, Direction, Layout, Rect},
-    text::{Line, Span},
-    widgets::{Paragraph, Wrap},
-};
-use shared::command::{Command, OptCmd};
-use std::{cell::RefCell, rc::Rc};
 
 pub struct AttachOptions {
     game_screen: Rc<RefCell<Game>>,
     popup_state: PopupState,
-    ds2_tabs: TabPane,
-    er_tabs: TabPane,
+    ds2_tabs:    TabPane,
+    er_tabs:     TabPane,
 }
 
 impl AttachOptions {
@@ -30,32 +32,27 @@ impl AttachOptions {
         Self {
             game_screen,
             popup_state: PopupState::default(),
-            ds2_tabs: TabPane::new(
-                &["Player", "Utility"],
-                vec![
-                    TablePane::new_static(&Ds2Player),
-                    TablePane::new_static(&Ds2Utility),
-                ]
-            ),
-            er_tabs: TabPane::new(
-                &["Player", "Utility"],
-                vec![
-                    TablePane::new_static(&ErPlayer),
-                    TablePane::new_static(&ErUtility),
-                ]
-            ),
+            ds2_tabs: TabPane::new(&["Player", "Utility"], vec![
+                TablePane::new_static(&Ds2Player),
+                TablePane::new_static(&Ds2Utility),
+            ]),
+            er_tabs: TabPane::new(&["Player", "Utility"], vec![
+                TablePane::new_static(&ErPlayer),
+                TablePane::new_static(&ErUtility),
+            ]),
         }
     }
 
     fn paragraph(&self) -> Paragraph<'static> {
-        const INFO: &'static str = "These options will \
-            be automatically applied when gubtool attaches to ";
+        const INFO: &str = "These options will be automatically applied when gubtool attaches to ";
 
         Paragraph::new(Line::from(vec![
             Span::raw(INFO),
             Span::raw(self.game_screen.borrow().to_string()),
         ]))
-        .wrap(Wrap { trim: true })
+        .wrap(Wrap {
+            trim: true,
+        })
         .style(theme().muted)
         .block(bordered_block(Some("Attach Options")))
     }
@@ -80,10 +77,7 @@ impl Screen for AttachOptions {
 
         let [info, tabs] = Layout::default()
             .direction(Direction::Vertical)
-            .constraints([
-                Constraint::Length(lines as u16),
-                Constraint::Fill(1),
-            ])
+            .constraints([Constraint::Length(lines as u16), Constraint::Fill(1)])
             .areas(area);
 
         frame.render_widget(paragraph, info);

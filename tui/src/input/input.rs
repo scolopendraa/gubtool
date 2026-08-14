@@ -1,27 +1,29 @@
-use crate::event::KeyContext;
-use crossterm::event::{KeyCode, KeyModifiers};
-use ratatui::{Frame, layout::Rect};
-use std::{fmt::Display, ops::RangeBounds};
-use unicode_segmentation::UnicodeSegmentation;
-use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
+use {
+    crate::event::KeyContext,
+    crossterm::event::{KeyCode, KeyModifiers},
+    ratatui::{Frame, layout::Rect},
+    std::{fmt::Display, ops::RangeBounds},
+    unicode_segmentation::UnicodeSegmentation,
+    unicode_width::{UnicodeWidthChar, UnicodeWidthStr},
+};
 
 pub struct Input {
-    pub text: String,
-    idx: usize,
-    offset: usize,
-    cursor_position: u16,
+    pub text:          String,
+    idx:               usize,
+    offset:            usize,
+    cursor_position:   u16,
     pub cursor_offset: u16,
-    available_width: usize,
+    available_width:   usize,
 }
 
 impl Default for Input {
     fn default() -> Self {
         Self {
-            text: String::new(),
-            idx: 0,
-            offset: 0,
+            text:            String::new(),
+            idx:             0,
+            offset:          0,
             cursor_position: 0,
-            cursor_offset: 0,
+            cursor_offset:   0,
             available_width: usize::MAX,
         }
     }
@@ -46,8 +48,7 @@ impl Input {
     }
 
     fn clear_range<R: RangeBounds<usize>>(&mut self, range: R) {
-        if self.text.drain(range).next().is_some() {
-        }
+        if self.text.drain(range).next().is_some() {}
     }
 
     fn insert_key(&mut self, ch: char) {

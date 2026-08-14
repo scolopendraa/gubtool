@@ -1,22 +1,28 @@
-use crate::{
-    emevd,
-    mem::*,
-    offsets::{
-        self, ChainReadExt,
-        chr_ins::*,
-        code_cave::CaveAddress,
-        field_area,
-        module_offsets::{BasePointer, Function},
-        world_chr_man,
+use {
+    crate::{
+        emevd,
+        mem::*,
+        offsets::{
+            self,
+            ChainReadExt,
+            chr_ins::*,
+            code_cave::CaveAddress,
+            field_area,
+            module_offsets::{BasePointer, Function},
+            world_chr_man,
+        },
+        pointer_cache::ResolvedPtr,
+        resources::{ASM, chr_names::CHR_NAMES},
+        target::Target,
     },
-    phase_transition,
-    pointer_cache::ResolvedPtr,
-    resources::{ASM, chr_names::CHR_NAMES},
-    target::target,
+    anyhow::{bail, ensure},
+    gubtool_core::{
+        address::Address,
+        slice_ops::*,
+        sys::{ipc::CppValue, sys_error::ProcResult},
+    },
+    std::{collections::HashMap, sync::MutexGuard, time::Duration},
 };
-use anyhow::{bail, ensure};
-use gubtool_core::{address::Address, slice_ops::*, sys::error::ProcResult};
-use std::{collections::HashMap, time::Duration};
 
 #[derive(Debug, Clone)]
 pub struct ChrIns {
@@ -63,7 +69,7 @@ impl ChrIns {
         let current = self.get_current_hp()?;
         let max = self.get_max_hp()?;
         if max == 0 {
-            return Ok(0.0)
+            return Ok(0.0);
         }
         Ok((current as f32 / max as f32) * 100.0)
     }
@@ -130,7 +136,11 @@ impl ChrIns {
     }
 
     pub fn set_repeat_last_act(&mut self, state: bool) -> ProcResult {
-        let val = if state { self.get_last_act()? } else { 0x0 };
+        let val = if state {
+            self.get_last_act()?
+        } else {
+            0x0
+        };
         self.get_ptr(ResolvedChrPtr::AiThink)
             .add_offset(ai_think_offsets::force_act())
             .write::<u8>(val)
@@ -194,17 +204,17 @@ impl ChrIns {
     pub fn get_distance(&mut self, other: &mut ChrIns) -> ProcResult<f32> {
         let self_pos = self.local_coords()?;
         let other_pos = other.local_coords()?;
-        let distance = (
-            (other_pos[0] - self_pos[0]).powi(2) +
-            (other_pos[1] - self_pos[1]).powi(2) +
-            (other_pos[2] - self_pos[2]).powi(2))
-            .sqrt();
+        let distance = ((other_pos[0] - self_pos[0]).powi(2)
+            + (other_pos[1] - self_pos[1]).powi(2)
+            + (other_pos[2] - self_pos[2]).powi(2))
+        .sqrt();
         Ok(distance - self.hurtbox_radius()? - other.hurtbox_radius()?)
     }
 
     pub fn block_id(&mut self) -> ProcResult<u32> {
         self.get_ptr(ResolvedChrPtr::ChrIns)
-            .add_offset(offsets::chr_ins::BLOCK_ID).read::<u32>()
+            .add_offset(offsets::chr_ins::BLOCK_ID)
+            .read::<u32>()
     }
 
     pub fn map_coords(&mut self) -> anyhow::Result<[f32; 3]> {
@@ -218,30 +228,28 @@ impl ChrIns {
         ])
     }
 
-    pub fn set_speffect(&mut self, speffect_id: u32) -> ProcResult {
-        let mut fun = ASM.get_function("set_speffect");
-        let mut asm = fun.take_bytes();
+    pub fn set_speffect(&mut self, speffect_id: u32) -> anyhow::Result<()> {
+        let args = [
+            CppValue::uintptr_t(self.get_ptr(ResolvedChrPtr::ChrIns)?),
+            CppValue::uint32_t(speffect_id),
+        ];
 
-        write_addr_to_slice(&mut asm, fun.reloc("chr_ins_ptr"), self.get_ptr(ResolvedChrPtr::ChrIns)?)?;
-        write_to_slice::<i64>(&mut asm, fun.reloc("speffect_id"), speffect_id)?;
-        write_addr_to_slice(&mut asm, fun.reloc("fn_set_speffect"), Function::SetSpeffect)?;
-
-        spawn_thread_join(CaveAddress::SetSpeffectAsm, asm)
+        run_game_function(Function::SetSpeffect, &args)
     }
 
-    pub fn remove_speffect(&mut self, speffect_id: u32) -> ProcResult {
-        let mut fun = ASM.get_function("remove_speffect");
-        let mut asm = fun.take_bytes();
+    pub fn remove_speffect(&mut self, speffect_id: u32) -> anyhow::Result<()> {
+        let speffect_ptr = self.get_ptr(ResolvedChrPtr::SpecialEffect)?;
+        let args = [
+            CppValue::uintptr_t(speffect_ptr),
+            CppValue::uint32_t(speffect_id),
+        ];
 
-        write_addr_to_slice(&mut asm, fun.reloc("speffect_ptr"), self.get_ptr(ResolvedChrPtr::SpecialEffect)?)?;
-        write_to_slice::<i64>(&mut asm, fun.reloc("speffect_id"), speffect_id)?;
-        write_addr_to_slice(&mut asm, fun.reloc("fn_remove_speffect"), Function::RemoveSpeffect)?;
-
-        spawn_thread_join(CaveAddress::RemoveSpeffectAsm, asm)
+        run_game_function(Function::RemoveSpeffect, &args)
     }
 
     pub fn has_speffect(&mut self, speffect_id: u32) -> ProcResult<bool> {
-        let mut current = self.get_ptr(ResolvedChrPtr::SpecialEffect)
+        let mut current = self
+            .get_ptr(ResolvedChrPtr::SpecialEffect)
             .read_offset(speffect_offsets::HEAD)?;
         while current != 0x0 {
             if read::<u32>(current.saturating_add(speffect_entry::ID))? == speffect_id {
@@ -262,7 +270,7 @@ impl ChrIns {
         should_loop: bool,
         should_wait_for_completion: bool,
         ignore_wait_for_transition: bool,
-    ) -> ProcResult {
+    ) -> anyhow::Result<()> {
         emevd::force_animation_playback(
             self.entity_id()?,
             animation_id,
@@ -272,19 +280,15 @@ impl ChrIns {
         )
     }
 
-    pub fn next_phase(&mut self) -> anyhow::Result<()> {
-        phase_transition::next_phase(self)
-    }
-
     pub fn get_lua_timers(&mut self) -> ProcResult<[f32; 16]> {
         self.get_ptr(ResolvedChrPtr::AiThink)
             .add_offset(ai_think_offsets::LUA_TIMERS_ARRAY)
             .read::<[f32; 16]>()
     }
 
-    pub fn set_as_target(mut self) -> ProcResult {
+    pub fn set_as_target(mut self, target_guard: &mut MutexGuard<'static, Target>) -> ProcResult {
         write::<u64>(CaveAddress::SavedTargetPointer, self.get_ptr(ResolvedChrPtr::ChrIns)?)?;
-        target().set(self);
+        target_guard.set(self);
         Ok(())
     }
 
@@ -313,33 +317,42 @@ impl ChrIns {
 
     pub fn name_from_chr_id(&mut self) -> &'static str {
         let chr_id = self.chr_id().unwrap_or_default();
-        CHR_NAMES
-            .get(&chr_id)
-            .map_or("", |v| *v)
+        CHR_NAMES.get(&chr_id).map_or("", |v| *v)
     }
-
 }
 
 impl ChrIns {
     pub fn new(pointer: impl Address) -> Self {
         let resolved_pointers = HashMap::new();
-        let mut s = Self { resolved_pointers };
-        s.resolved_pointers.insert(ResolvedChrPtr::ChrIns, pointer.addr());
+        let mut s = Self {
+            resolved_pointers,
+        };
+        s.resolved_pointers
+            .insert(ResolvedChrPtr::ChrIns, pointer.addr());
         s
     }
 
-    pub fn from_handle(handle: u64) -> Self {
-        let pool_index = (handle >> 20) & 0xFF;
-        let slot_index = handle & 0xFFFFF;
-        let pointer = ResolvedPtr::WorldChrMan.get()
+    pub fn from_handle(handle: u64) -> Option<Self> {
+        if handle == 0 {
+            return None;
+        }
+
+        let pool_index = (handle >> 20) & 0xff;
+        let slot_index = handle & 0xfffff;
+        let pointer = ResolvedPtr::WorldChrMan
+            .get()
             .read_offset(world_chr_man::chr_set_pool() + pool_index * 8)
             .read_offset(world_chr_man::chr_set_offsets::CHR_SET_ENTRIES)
             .read_offset(slot_index * 16)
             .unwrap_or_default();
-        Self::new(pointer)
+        if pointer != 0 {
+            Some(Self::new(pointer))
+        } else {
+            None
+        }
     }
 
-    pub fn from_entity_id(entity_id: u32) -> ProcResult<Self> {
+    pub fn from_entity_id(entity_id: u32) -> anyhow::Result<Self> {
         let mut fun = ASM.get_function("chr_ins_from_entity_id");
         let mut asm = fun.take_bytes();
 
@@ -348,7 +361,7 @@ impl ChrIns {
         write_addr_to_slice(&mut asm, fun.reloc("fn_chr_ins"), Function::GetChrInsByEntityId)?;
         write_addr_to_slice(&mut asm, fun.reloc("looked_up"), CaveAddress::LookedUpEntityId)?;
 
-        spawn_thread_join(CaveAddress::ChrInsFromEntityIdAsm, asm)?;
+        run_custom_function(asm)?;
         let pointer = read::<u64>(CaveAddress::LookedUpEntityId)?;
         Ok(Self::new(pointer))
     }
@@ -407,7 +420,7 @@ impl ChrIns {
             }
             ResolvedChrPtr::AiThink => {
                 self.get_ptr(ResolvedChrPtr::ComManipulator)
-                    .read_offset(0xC0)
+                    .read_offset(0xc0)
             }
             ResolvedChrPtr::ChrCtrl => {
                 self.get_ptr(ResolvedChrPtr::ChrIns)
@@ -415,7 +428,7 @@ impl ChrIns {
             }
             ResolvedChrPtr::CtrlFlags => {
                 self.get_ptr(ResolvedChrPtr::ChrCtrl)
-                    .read_offset(0xC8)
+                    .read_offset(0xc8)
                     .add_offset(0x24)
             }
         }?;
@@ -428,21 +441,24 @@ impl ChrIns {
 }
 
 fn world_block_info_from_block_id(block_id: u32) -> anyhow::Result<u64> {
-    let target_area = (block_id >> 24) & 0xFF;
+    let target_area = (block_id >> 24) & 0xff;
     let world_info_owner = read::<u64>(BasePointer::FieldArea)
         .and_then(|addr| read::<u64>(addr + field_area::WORLD_INFO_OWNER))?;
-    let area_count = read::<i32>(world_info_owner + field_area::world_info_owner_offsets::AREA_COUNT)?;
+    let area_count =
+        read::<i32>(world_info_owner + field_area::world_info_owner_offsets::AREA_COUNT)?;
 
     for i in 0..area_count as u64 {
-        let area_ptr = read::<u64>(world_info_owner + field_area::world_info_owner_offsets::AREA_ARRAY_BASE + (i * 8))?;
-        let area_id = read::<u32>(area_ptr + 0xC)?;
+        let area_ptr = read::<u64>(
+            world_info_owner + field_area::world_info_owner_offsets::AREA_ARRAY_BASE + (i * 8),
+        )?;
+        let area_id = read::<u32>(area_ptr + 0xc)?;
 
         if area_id == target_area {
             let block_count = read::<i32>(area_ptr + 0x40)?;
             let blocks_ptr = read::<u64>(area_ptr + 0x48)?;
 
             for j in 0..block_count as u64 {
-                let block_info_ptr = blocks_ptr + (j * 0xE0);
+                let block_info_ptr = blocks_ptr + (j * 0xe0);
                 let stored_block_id = read::<u32>(block_info_ptr + 0x8)?;
 
                 if stored_block_id == block_id {

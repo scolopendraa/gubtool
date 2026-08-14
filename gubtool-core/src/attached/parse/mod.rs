@@ -1,10 +1,11 @@
-use crate::{
-    attached::{AddressSize, ParseState},
-    game_version::{DarkSouls2Version, EldenRingVersion, Game, GameVersion},
-    pe::PeParser,
+use {
+    crate::{
+        attached::{AddressSize, ParseState},
+        game_version::{DarkSouls2Version, EldenRingVersion, Game, GameVersion},
+        pe::PeParser,
+    },
+    std::path::PathBuf,
 };
-use std::path::PathBuf;
-
 
 #[cfg(unix)]
 mod unix;
@@ -27,7 +28,6 @@ fn parse_pe_for_version_and_address_size(
     exe_path: &PathBuf,
     mut parse_errors: Vec<ParseError>,
 ) -> (AddressSize, GameVersion, ParseState) {
-
     let mut address_size = AddressSize::Bits64;
     let mut version_info = (0, 0, 0);
 
@@ -41,25 +41,29 @@ fn parse_pe_for_version_and_address_size(
                 Ok(info) => version_info = info,
                 Err(err) => parse_errors.push(err.into()),
             }
-        },
+        }
         Err(err) => parse_errors.push(err.into()),
     }
 
     let game_version = match game {
         Game::DarkSouls2 => {
             let version = match address_size {
-                AddressSize::Bits32 => match match_vanilla(version_info) {
-                    Ok(v) => v,
-                    Err(err) => {
-                        parse_errors.push(err);
-                        DarkSouls2Version::VanillaUnknown
+                AddressSize::Bits32 => {
+                    match match_vanilla(version_info) {
+                        Ok(v) => v,
+                        Err(err) => {
+                            parse_errors.push(err);
+                            DarkSouls2Version::VanillaUnknown
+                        }
                     }
                 }
-                AddressSize::Bits64 => match match_scholar(version_info) {
-                    Ok(v) => v,
-                    Err(err) => {
-                        parse_errors.push(err);
-                        DarkSouls2Version::ScholarUnknown
+                AddressSize::Bits64 => {
+                    match match_scholar(version_info) {
+                        Ok(v) => v,
+                        Err(err) => {
+                            parse_errors.push(err);
+                            DarkSouls2Version::ScholarUnknown
+                        }
                     }
                 }
             };
@@ -86,9 +90,7 @@ fn parse_pe_for_version_and_address_size(
     (address_size, game_version, parse_state)
 }
 
-fn match_vanilla(
-    (major, minor, patch): (u16, u16, u16),
-) -> Result<DarkSouls2Version, ParseError> {
+fn match_vanilla((major, minor, patch): (u16, u16, u16)) -> Result<DarkSouls2Version, ParseError> {
     Ok(match (major, minor, patch) {
         // (1, 0, 3) => DarkSouls2Version::Vanilla1_0_3,
         // (1, 0, 4) => DarkSouls2Version::Vanilla1_0_4,
@@ -106,9 +108,7 @@ fn match_vanilla(
     })
 }
 
-fn match_scholar(
-    (major, minor, patch): (u16, u16, u16),
-) -> Result<DarkSouls2Version, ParseError> {
+fn match_scholar((major, minor, patch): (u16, u16, u16)) -> Result<DarkSouls2Version, ParseError> {
     Ok(match (major, minor, patch) {
         (1, 0, 1) => DarkSouls2Version::Scholar1_0_1,
         (1, 0, 2) => DarkSouls2Version::Scholar1_0_2,

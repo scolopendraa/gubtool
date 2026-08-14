@@ -43,167 +43,167 @@ pub static UPGRADE_MATERIALS: [Item; 39] = [
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x4000277A,
+        id: 0x4000277a,
         name: "Smithing Stone [7]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x4000277B,
+        id: 0x4000277b,
         name: "Smithing Stone [8]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x4000279C,
+        id: 0x4000279c,
         name: "Ancient Dragon Smithing Stone",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x400027B0,
+        id: 0x400027b0,
         name: "Somber Smithing Stone [1]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x400027B1,
+        id: 0x400027b1,
         name: "Somber Smithing Stone [2]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x400027B2,
+        id: 0x400027b2,
         name: "Somber Smithing Stone [3]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x400027B3,
+        id: 0x400027b3,
         name: "Somber Smithing Stone [4]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x400027B4,
+        id: 0x400027b4,
         name: "Somber Smithing Stone [5]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x400027B5,
+        id: 0x400027b5,
         name: "Somber Smithing Stone [6]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x400027B6,
+        id: 0x400027b6,
         name: "Somber Smithing Stone [7]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x400027B7,
+        id: 0x400027b7,
         name: "Somber Smithing Stone [8]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x400027D8,
+        id: 0x400027d8,
         name: "Somber Smithing Stone [9]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x400027B8,
+        id: 0x400027b8,
         name: "Somber Ancient Dragon Smithing Stone",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x40002A94,
+        id: 0x40002a94,
         name: "Grave Glovewort [1]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x40002A95,
+        id: 0x40002a95,
         name: "Grave Glovewort [2]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x40002A96,
+        id: 0x40002a96,
         name: "Grave Glovewort [3]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x40002A97,
+        id: 0x40002a97,
         name: "Grave Glovewort [4]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x40002A98,
+        id: 0x40002a98,
         name: "Grave Glovewort [5]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x40002A99,
+        id: 0x40002a99,
         name: "Grave Glovewort [6]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x40002A9A,
+        id: 0x40002a9a,
         name: "Grave Glovewort [7]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x40002A9B,
+        id: 0x40002a9b,
         name: "Grave Glovewort [8]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x40002A9C,
+        id: 0x40002a9c,
         name: "Grave Glovewort [9]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x40002A9D,
+        id: 0x40002a9d,
         name: "Great Grave Glovewort",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x40002A9E,
+        id: 0x40002a9e,
         name: "Ghost Glovewort [1]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x40002A9F,
+        id: 0x40002a9f,
         name: "Ghost Glovewort [2]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x40002AA0,
+        id: 0x40002aa0,
         name: "Ghost Glovewort [3]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x40002AA1,
+        id: 0x40002aa1,
         name: "Ghost Glovewort [4]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x40002AA2,
+        id: 0x40002aa2,
         name: "Ghost Glovewort [5]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x40002AA3,
+        id: 0x40002aa3,
         name: "Ghost Glovewort [6]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x40002AA4,
+        id: 0x40002aa4,
         name: "Ghost Glovewort [7]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x40002AA5,
+        id: 0x40002aa5,
         name: "Ghost Glovewort [8]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x40002AA6,
+        id: 0x40002aa6,
         name: "Ghost Glovewort [9]",
         ..Item::default_upgrade_materials()
     },
     Item {
-        id: 0x40002AA7,
+        id: 0x40002aa7,
         name: "Great Ghost Glovewort",
         ..Item::default_upgrade_materials()
     },

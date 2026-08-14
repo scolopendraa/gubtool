@@ -1,12 +1,14 @@
 pub mod error;
 
-use crate::{attached::AddressSize, pe::error::ParsePeError};
-use pelite::{
-    FileMap,
-    pe32::Pe as Pe32,
-    pe64::{Pe as Pe64, headers::SectionHeaders},
+use {
+    crate::{attached::AddressSize, pe::error::ParsePeError},
+    pelite::{
+        FileMap,
+        pe32::Pe as Pe32,
+        pe64::{Pe as Pe64, headers::SectionHeaders},
+    },
+    std::path::PathBuf,
 };
-use std::path::PathBuf;
 
 pub struct PeParser {
     file_map: FileMap,
@@ -19,12 +21,13 @@ pub enum PeFile<'a> {
 
 impl PeParser {
     pub fn new<T>(path: T) -> Result<Self, ParsePeError>
-    where T: Into<PathBuf>
-    {
+    where T: Into<PathBuf> {
         let path = path.into();
         let file_map = FileMap::open(&path)?;
 
-        Ok(Self { file_map })
+        Ok(Self {
+            file_map,
+        })
     }
 
     fn pe_file(&self) -> Result<PeFile<'_>, ParsePeError> {
@@ -43,10 +46,7 @@ impl PeParser {
             PeFile::Pe64(pe) => pe.resources()?.version_info()?,
         };
 
-        let version = version_info
-            .fixed()
-            .unwrap()
-            .dwProductVersion;
+        let version = version_info.fixed().unwrap().dwProductVersion;
 
         Ok((version.Major, version.Minor, version.Patch))
     }
@@ -74,6 +74,6 @@ impl PeParser {
             PeFile::Pe32(pe) => pe.section_headers(),
             PeFile::Pe64(pe) => pe.section_headers(),
         };
-        Ok(&headers)
+        Ok(headers)
     }
 }

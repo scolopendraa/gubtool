@@ -2,13 +2,12 @@ mod pane_manager;
 mod tab;
 mod table;
 
-pub use pane_manager::*;
-pub use tab::*;
-pub use table::*;
-
-use crate::{event::KeyContext, screen::Screen};
-use ratatui::{Frame, layout::Rect};
-use shared::command::Command;
+use {
+    crate::{event::KeyContext, screen::Screen},
+    ratatui::{Frame, layout::Rect},
+    shared::command::Command,
+};
+pub use {pane_manager::*, tab::*, table::*};
 
 pub trait Pane: Screen {
     fn select(&mut self, index: usize);
