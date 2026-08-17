@@ -1,5 +1,8 @@
+use strum::Display;
+
 #[repr(u32)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, Display)]
+#[strum(serialize_all = "title_case")]
 pub enum MapId {
     ThingsBetwixed          = 0xa020000,  // m10_02_00_00
     Majula                  = 0xa040000,  // m10_04_00_00

@@ -12,7 +12,7 @@ use {
         resources::scan_patterns::*,
     },
     gubtool_core::{
-        aob_scanner::{AobScanner, ScanStrategy, pattern::AobScan, scan_error::ScanError},
+        aob_scanner::{ScanStrategy, scan_error::ScanError},
         parallel_scan,
     },
     std::path::PathBuf,
@@ -171,26 +171,4 @@ pub fn scan_disk_exhaustive<T>(path: T) -> Result<ModuleOffsets, ScanError>
 where T: Into<PathBuf> {
     let strategy = ScanStrategy::DiskExhaustive(&path.into());
     scan(strategy)
-}
-
-pub fn scan_pattern_all_versions<T>(exe_folder_path: T, pattern: &'static AobScan)
-where T: Into<PathBuf> + Send + Copy + Sync {
-    let exes = [
-        "120", "121", "122", "123", "130", "131", "132", "140", "141", "150", "160", "170", "180",
-        "181", "190", "191", "200", "201", "220", "223", "230", "240", "250", "260", "261", "262",
-    ];
-
-    rayon::scope(|scope| {
-        for exe in exes {
-            let path = exe_folder_path.into().join(format!("{exe}.exe"));
-            scope.spawn(move |_| {
-                let strategy = ScanStrategy::DiskExhaustive(&path);
-                let result = AobScanner::from_strategy(pattern, strategy)
-                    .and_then(|scanner| scanner.scan())
-                    .unwrap();
-
-                println!("{}: {:#X?}", exe, result);
-            });
-        }
-    });
 }

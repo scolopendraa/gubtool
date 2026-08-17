@@ -19,7 +19,7 @@ use {
     gubtool_core::{
         address::Address,
         slice_ops::*,
-        sys::{ipc::CppValue, sys_error::ProcResult},
+        sys::{ipc::FfiValue, sys_error::ProcResult},
     },
     std::{collections::HashMap, sync::MutexGuard, time::Duration},
 };
@@ -230,8 +230,8 @@ impl ChrIns {
 
     pub fn set_speffect(&mut self, speffect_id: u32) -> anyhow::Result<()> {
         let args = [
-            CppValue::uintptr_t(self.get_ptr(ResolvedChrPtr::ChrIns)?),
-            CppValue::uint32_t(speffect_id),
+            FfiValue::pointer(self.get_ptr(ResolvedChrPtr::ChrIns)?),
+            FfiValue::uint32(speffect_id),
         ];
 
         run_game_function(Function::SetSpeffect, &args)
@@ -240,8 +240,8 @@ impl ChrIns {
     pub fn remove_speffect(&mut self, speffect_id: u32) -> anyhow::Result<()> {
         let speffect_ptr = self.get_ptr(ResolvedChrPtr::SpecialEffect)?;
         let args = [
-            CppValue::uintptr_t(speffect_ptr),
-            CppValue::uint32_t(speffect_id),
+            FfiValue::pointer(speffect_ptr),
+            FfiValue::uint32(speffect_id),
         ];
 
         run_game_function(Function::RemoveSpeffect, &args)

@@ -45,33 +45,35 @@ void CallNullaryFunction(char *buffer)
     function();
 }
 
-ffi_type *FfiFromFunctionArg(FunctionArg arg)
+ffi_type *FfiTypeFromProtocolCode(std::uint8_t code)
 {
-    switch (arg)
+    switch (code)
     {
-    case FunctionArg::uintptr_t:
+    case 0:
         return &ffi_type_pointer;
-    case FunctionArg::uint8_t:
+    case 1:
         return &ffi_type_uint8;
-    case FunctionArg::uint16_t:
+    case 2:
         return &ffi_type_uint16;
-    case FunctionArg::uint32_t:
+    case 3:
         return &ffi_type_uint32;
-    case FunctionArg::uint64_t:
+    case 4:
         return &ffi_type_uint64;
-    case FunctionArg::int8_t:
+    case 5:
         return &ffi_type_sint8;
-    case FunctionArg::int16_t:
+    case 6:
         return &ffi_type_sint16;
-    case FunctionArg::int32_t:
+    case 7:
         return &ffi_type_sint32;
-    case FunctionArg::int64_t:
+    case 8:
         return &ffi_type_sint64;
-    case FunctionArg::float_t:
+    case 9:
         return &ffi_type_float;
-    case FunctionArg::double_t:
+    case 10:
         return &ffi_type_double;
     }
+
+    std::abort();
 }
 
 #if !defined(_WIN64)
@@ -106,9 +108,8 @@ void CallParameterizedFunction(char *buffer)
     for (int i = 0; i < length; i++)
     {
         int arg_base_index = 10 * (i + 1);
-        std::uint8_t type = buffer[arg_base_index];
-        FunctionArg arg = static_cast<FunctionArg>(type);
-        types.push_back(FfiFromFunctionArg(arg));
+        std::uint8_t code = buffer[arg_base_index];
+        types.push_back(FfiTypeFromProtocolCode(code));
         args.push_back(&buffer[arg_base_index + 2]);
     }
 

@@ -78,11 +78,7 @@ impl GameState {
         POINTER_CACHE.reset_pointers();
         player::player().update();
         player::torrent().update();
-
-        let handle = read::<u64>(CaveAddress::LookedUpHandle).unwrap_or_default();
-        if let Some(chr_ins) = ChrIns::from_handle(handle) {
-            let _ = chr_ins.set_as_target(&mut target());
-        }
+        let _ = restore_target();
     }
 
     fn on_load_delayed(&self) {
@@ -93,11 +89,7 @@ impl GameState {
         POINTER_CACHE.reset_pointers();
         player::player().update();
         player::torrent().update();
-
-        if let Ok(chr_ins) = target().chr_ins() {
-            let handle = chr_ins.handle().unwrap_or_default();
-            let _ = write::<u64>(CaveAddress::LookedUpHandle, handle);
-        }
+        let _ = save_target();
     }
 
     fn on_new_game(&self) {}
@@ -153,6 +145,19 @@ pub fn is_flag(flag_offset: StateFlag) -> bool {
 
 pub fn set_flag(flag_offset: StateFlag, state: bool) -> ProcResult {
     write::<u8>(CaveAddress::StateHandlerFlags.add_offset(flag_offset as u64), state as u8)
+}
+
+fn save_target() -> ProcResult {
+    let handle = target().chr_ins()?.handle()?;
+    write::<u64>(CaveAddress::SavedHandle, handle)
+}
+
+fn restore_target() -> anyhow::Result<()> {
+    let handle = read::<u64>(CaveAddress::SavedHandle)?;
+    if let Some(chr_ins) = ChrIns::from_handle(handle) {
+        chr_ins.set_as_target(&mut target())?;
+    }
+    Ok(())
 }
 
 #[repr(u64)]

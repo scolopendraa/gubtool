@@ -1,11 +1,13 @@
 use {
     crate::{
+        event::get_obj_state_act_ctrl,
         mem::read_address,
         offsets::{
             ChainReadExt,
             game_manager_imp::{self, event_manager_offsets, game_data_manager_offsets},
             module_offsets::BasePointer,
         },
+        resources::map_ids::MapId,
     },
     gubtool_core::sys::sys_error::ProcResult,
     std::{
@@ -32,6 +34,7 @@ pub(crate) enum ResolvedPtr {
     BonfireManager,
     WindowManager,
     DlBackAllocator,
+    BelfryGateStateActCtrl,
 }
 
 impl PointerCache {
@@ -77,12 +80,15 @@ impl PointerCache {
                 self.lookup(ResolvedPtr::GameManagerImp)
                     .read_offset(game_manager_imp::DL_BACK_ALLOCATOR)
             }
+            ResolvedPtr::BelfryGateStateActCtrl => {
+                Ok(get_obj_state_act_ctrl(MapId::TheLostBastille, 10161051).unwrap_or_default())
+            }
         }?;
 
         let mut cache = self.map.lock().unwrap();
-        if resolved_pointer != 0x0 {
-            cache.insert(pointer, resolved_pointer);
-        }
+        // if resolved_pointer != 0x0 {
+        cache.insert(pointer, resolved_pointer);
+        // }
         Ok(resolved_pointer)
     }
 

@@ -22,7 +22,7 @@ pub enum Function {
     ShowItemDialogue,
     CurrentItemQuantityCheck,
     SetEvent,
-    GetMapEntityWithAreaIdAndObjId,
+    MapEntityFromMapIdAndObjId,
     GetStateActComponent,
     MakeSound,
     BonfireRest,
@@ -32,6 +32,8 @@ pub enum Function {
     LevelUp,
     LevelLookup,
     ChrSetAction,
+    EzStateExternalEventCtor,
+    EzStateExecuteEvent,
 }
 
 #[derive(Clone, Copy)]
@@ -96,7 +98,7 @@ impl Address for Function {
             Self::ShowItemDialogue => f.show_item_dialogue,
             Self::CurrentItemQuantityCheck => f.current_item_quantity_check,
             Self::SetEvent => f.set_event,
-            Self::GetMapEntityWithAreaIdAndObjId => f.get_map_entity_with_area_id_and_obj_id,
+            Self::MapEntityFromMapIdAndObjId => f.map_entity_from_map_id_and_obj_id,
             Self::GetStateActComponent => f.get_state_act_component,
             Self::MakeSound => f.make_sound,
             Self::BonfireRest => f.bonfire_rest,
@@ -106,6 +108,8 @@ impl Address for Function {
             Self::LevelUp => f.level_up,
             Self::LevelLookup => f.level_lookup,
             Self::ChrSetAction => f.chr_set_action,
+            Self::EzStateExternalEventCtor => f.ez_state_external_event_ctor,
+            Self::EzStateExecuteEvent => f.ez_state_execute_event,
         };
         module_base() + offset
     }

@@ -8,7 +8,7 @@ use {
     },
     gubtool_core::{
         address::Address,
-        sys::ipc::{CppValue, X86CallingConvention},
+        sys::ipc::{FfiValue, X86CallingConvention},
     },
 };
 
@@ -111,8 +111,8 @@ fn warp(request: WarpRequest) -> anyhow::Result<()> {
     write_bytes(CaveAddress::WarpRequestStruct, &request.to_array())?;
 
     let args = [
-        CppValue::uintptr_t(ResolvedPtr::WarpManager.get()?),
-        CppValue::uintptr_t(CaveAddress::WarpRequestStruct.addr()),
+        FfiValue::pointer(ResolvedPtr::WarpManager.get()?),
+        FfiValue::pointer(CaveAddress::WarpRequestStruct.addr()),
     ];
 
     run_game_function(Function::Warp, &args, X86CallingConvention::__thiscall)

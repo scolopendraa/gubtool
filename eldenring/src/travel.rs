@@ -13,7 +13,7 @@ use {
         resources::{ASM, bosses::Boss, graces::Grace},
         utils::{dlc_check, player_loaded_check},
     },
-    gubtool_core::{address::Address, slice_ops::*, sys::ipc::CppValue},
+    gubtool_core::{address::Address, slice_ops::*, sys::ipc::FfiValue},
     std::time::Duration,
 };
 
@@ -40,10 +40,10 @@ pub async fn warp_to_block_id(
     let alt_no = block_id & 0xff;
 
     let args = [
-        CppValue::int32_t(area),
-        CppValue::int32_t(block),
-        CppValue::int32_t(map),
-        CppValue::int32_t(alt_no),
+        FfiValue::sint32(area),
+        FfiValue::sint32(block),
+        FfiValue::sint32(map),
+        FfiValue::sint32(alt_no),
     ];
 
     run_game_function(Function::BlockWarp, &args)?;

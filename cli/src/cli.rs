@@ -95,6 +95,8 @@ pub fn run() -> anyhow::Result<()> {
         }
         #[cfg(debug_assertions)]
         CliCommand::AobScan => {}
+        #[cfg(debug_assertions)]
+        CliCommand::Test => {}
         _ => (),
     }
     Ok(())

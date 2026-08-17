@@ -63,9 +63,7 @@ impl PointerCache {
         }?;
 
         let mut cache = self.map.lock().unwrap();
-        if resolved_pointer != 0x0 {
-            cache.insert(pointer, resolved_pointer);
-        }
+        cache.insert(pointer, resolved_pointer);
         Ok(resolved_pointer)
     }
 

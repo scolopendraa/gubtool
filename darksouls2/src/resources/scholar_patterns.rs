@@ -84,8 +84,8 @@ pub const SET_EVENT: AobScan = AobScan {
     scan_mode:   AddressingMode::Absolute,
 };
 
-pub const GET_MAP_ENTITY_WITH_AREA_ID_AND_OBJ_ID: AobScan = AobScan {
-    name:        "GetMapEntityWithAreaIdAndObjId()",
+pub const MAP_ENTITY_FROM_MAP_ID_AND_OBJ_ID: AobScan = AobScan {
+    name:        "MapEntityFromAreaIdAndObjId()",
     pattern:     "40 57 48 83 ec 20 48 8b 05 ? ? ? ? 8b fa 4c 8b 40 38 4d 85 c0 75 ?",
     scan_origin: 0x3c1b90,
     offset:      0,
@@ -170,6 +170,24 @@ pub const CHR_SET_ACTION: AobScan = AobScan {
     scan_mode:   AddressingMode::VfTableRelative {
         table_offset: 0x80,
     },
+};
+
+pub const EZ_STATE_EXTERNAL_EVENT_CTOR: AobScan = AobScan {
+    name:        "EzStateExternalEventCtor()",
+    pattern:     "48 8d 05 ? ? ? ? 48 89 01 c7 41 10 02 00 00 00 89 51 08 48 c7 81 00 02 00 00 00 \
+                  00 00 00 48 8b c1 c3",
+    scan_origin: 0x9951b0,
+    offset:      0,
+    scan_mode:   AddressingMode::Absolute,
+};
+
+pub const EZ_STATE_EXECUTE_EVENT: AobScan = AobScan {
+    name:        "EzStateExecuteEvent()",
+    pattern:     "48 89 5c 24 20 55 56 57 41 54 41 55 41 56 41 57 48 8d ac 24 d0 f0 ff ff b8 30 \
+                  10 00 00",
+    scan_origin: 0x461f20,
+    offset:      0,
+    scan_mode:   AddressingMode::Absolute,
 };
 
 pub const SET_SHARED_FLAG: AobScan = AobScan {

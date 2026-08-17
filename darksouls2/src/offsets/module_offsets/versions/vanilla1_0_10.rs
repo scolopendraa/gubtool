@@ -11,7 +11,7 @@ pub const VANILLA_1_0_10: ModuleOffsets = ModuleOffsets {
         show_item_dialogue: 0x5037C0,
         current_item_quantity_check: 0x23EF60,
         set_event: 0x488900,
-        get_map_entity_with_area_id_and_obj_id: 0x3F0760,
+        map_entity_from_map_id_and_obj_id: 0x3F0760,
         get_state_act_component: 0x253470,
         make_sound: 0x1B1630,
         bonfire_rest: 0x2166D0,
@@ -21,6 +21,8 @@ pub const VANILLA_1_0_10: ModuleOffsets = ModuleOffsets {
         level_up: 0x3BD600,
         level_lookup: 0x3BE0E0,
         chr_set_action: 0x440F50,
+        ez_state_external_event_ctor: 0x6307C0,
+        ez_state_execute_event: 0x478920,
     },
     hooks: Hooks {
         set_shared_flag: 0x4412CB,

@@ -11,7 +11,7 @@ pub const SCHOLAR_1_0_3: ModuleOffsets = ModuleOffsets {
         show_item_dialogue: 0x501080,
         current_item_quantity_check: 0x1B51B0,
         set_event: 0x4750B0,
-        get_map_entity_with_area_id_and_obj_id: 0x3C1B90,
+        map_entity_from_map_id_and_obj_id: 0x3C1B90,
         get_state_act_component: 0x1CA790,
         make_sound: 0x10E190,
         bonfire_rest: 0x17DC40,
@@ -21,6 +21,8 @@ pub const SCHOLAR_1_0_3: ModuleOffsets = ModuleOffsets {
         level_up: 0x38B1A0,
         level_lookup: 0x38D140,
         chr_set_action: 0x4264A0,
+        ez_state_external_event_ctor: 0x9951B0,
+        ez_state_execute_event: 0x461F20,
     },
     hooks: Hooks {
         set_shared_flag: 0x4265D2,

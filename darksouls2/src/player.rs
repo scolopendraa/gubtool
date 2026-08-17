@@ -21,7 +21,7 @@ use {
         game_version::DarkSouls2Version,
         slice_ops::*,
         sys::{
-            ipc::{CppValue, X86CallingConvention},
+            ipc::{FfiValue, X86CallingConvention},
             sys_error::{PointerType, ProcResult, ProcessError},
         },
     },
@@ -124,8 +124,8 @@ impl ValueCommand<u32> for Souls {
 impl Souls {
     fn give(amount: i32) -> anyhow::Result<()> {
         let args = [
-            CppValue::uintptr_t(player().chr_ctrl()?.get_ptr(ResolvedChrPtr::Stats)?),
-            CppValue::int32_t(amount),
+            FfiValue::pointer(player().chr_ctrl()?.get_ptr(ResolvedChrPtr::Stats)?),
+            FfiValue::sint32(amount),
         ];
 
         run_game_function(Function::GiveSouls, &args, X86CallingConvention::__fastcall)

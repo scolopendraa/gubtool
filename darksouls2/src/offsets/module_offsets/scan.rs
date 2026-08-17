@@ -32,7 +32,7 @@ macro_rules! patterns {
                 show_item_dialogue: SHOW_ITEM_DIALOGUE,
                 current_item_quantity_check: CURRENT_ITEM_QUANTITY_CHECK,
                 set_event: SET_EVENT,
-                get_map_entity_with_area_id_and_obj_id: GET_MAP_ENTITY_WITH_AREA_ID_AND_OBJ_ID,
+                map_entity_from_map_id_and_obj_id: MAP_ENTITY_FROM_MAP_ID_AND_OBJ_ID,
                 get_state_act_component: GET_STATE_ACT_COMPONENT,
                 make_sound: MAKE_SOUND,
                 bonfire_rest: BONFIRE_REST,
@@ -42,6 +42,8 @@ macro_rules! patterns {
                 level_up: LEVEL_UP,
                 level_lookup: LEVEL_LOOKUP,
                 chr_set_action: CHR_SET_ACTION,
+                ez_state_external_event_ctor: EZ_STATE_EXTERNAL_EVENT_CTOR,
+                ez_state_execute_event: EZ_STATE_EXECUTE_EVENT,
 
                 set_shared_flag: SET_SHARED_FLAG,
                 locked_target_pointer: LOCKED_TARGET_POINTER,
@@ -85,7 +87,7 @@ macro_rules! patterns {
         show_item_dialogue,
         current_item_quantity_check,
         set_event,
-        get_map_entity_with_area_id_and_obj_id,
+        map_entity_from_map_id_and_obj_id,
         get_state_act_component,
         make_sound,
         bonfire_rest,
@@ -95,6 +97,8 @@ macro_rules! patterns {
         level_up,
         level_lookup,
         chr_set_action,
+        ez_state_external_event_ctor,
+        ez_state_execute_event,
     };
     let hooks = Hooks {
         set_shared_flag,

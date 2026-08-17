@@ -7,16 +7,15 @@ use {
         },
         pointer_cache::ResolvedPtr,
         resources::{asm_function, bosses::Boss, map_ids::MapId},
-        utility,
-        utils::player_loaded_check,
+        utils::{area_check, player_loaded_check},
     },
-    anyhow::{anyhow, ensure},
+    anyhow::anyhow,
     gubtool_core::{
         address::Address,
         attached::is_32,
         slice_ops::*,
         sys::{
-            ipc::{CppValue, X86CallingConvention},
+            ipc::{FfiValue, X86CallingConvention},
             sys_error::ProcResult,
         },
     },
@@ -30,9 +29,9 @@ use {
 pub fn set_event_flag(flag_id: u32, state: bool) -> anyhow::Result<()> {
     let event_flag_manager = ResolvedPtr::EventFlagManager.get()?;
     let args = [
-        CppValue::uintptr_t(event_flag_manager),
-        CppValue::uint32_t(flag_id),
-        CppValue::uint8_t(state as u8),
+        FfiValue::pointer(event_flag_manager),
+        FfiValue::uint32(flag_id),
+        FfiValue::uint8(state as u8),
     ];
 
     run_game_function(Function::SetEvent, &args, X86CallingConvention::__thiscall)
@@ -144,19 +143,19 @@ impl EventLogger for Ds2EventLogger {
 declare_command!(
     EventLogHook,
     KingsRingAquired => "King's Ring Aquired",
-    UnlockNashandra,
-    UnlockAldia,
+    NashandraUnlocked,
+    AldiaUnlocked,
     DarkChasmLitShadedWoods => "Dark Chasm Lit (Shaded Woods)",
     DarkChasmLitDrangleicCastle => "Dark Chasm Lit (Drangleic Castle)",
     DarkChasmLitBlackGulch => "Dark Chasm Lit (Black Gulch)",
-    ActivateBrumeTower,
-    VisibleAava,
-    UndoAlsanasSeal => "Undo Alsana's Seal",
+    BrumeTowerActivated,
+    AavaVisible,
+    UndoAlsanasSeal => "Alsana's Seal Undone",
     SkipIvoryKingGauntlet,
     DisableLoyceKnights,
-    FreeLoyceKnightOuterWall => "Free Loyce Knight (Outer Wall)",
-    FreeLoyceKnightAbandonedDwelling => "Free Loyce Knight (Abandoned Dwelling)",
-    FreeLoyceKnightLowerGarrison => "Free Loyce Knight (Lower Garrison)",
+    FreeLoyceKnightOuterWall => "Loyce Knight Freed (Outer Wall)",
+    FreeLoyceKnightAbandonedDwelling => "Loyce Knight Freed (Abandoned Dwelling)",
+    FreeLoyceKnightLowerGarrison => "Loyce Knight Freed (Lower Garrison)",
 );
 
 const EVENT_LOG_HOOK_ORIGINAL: [u8; 5] = [0xb8, 0x59, 0x17, 0xb7, 0xd1];
@@ -209,7 +208,7 @@ impl ToggleCommand for SkipIvoryKingGauntlet {
             write_addr_to_slice(
                 &mut asm,
                 fun.reloc("fn_get_map_entity"),
-                Function::GetMapEntityWithAreaIdAndObjId,
+                Function::MapEntityFromMapIdAndObjId,
             )?;
             write_addr_to_slice(
                 &mut asm,
@@ -302,6 +301,7 @@ pub enum EventFlag {
     LoyceKnightOuterWall         = 537000020,
     LoyceKnightAbandonedDwelling = 537000021,
     LoyceKnightLowerGarrison     = 537000022,
+    EarthenPeakWindmillBurned    = 117000055,
 }
 
 impl EventFlag {
@@ -314,11 +314,7 @@ impl EventFlag {
     }
 
     pub fn set_area_conditional(&self, state: bool, area_id: MapId) -> anyhow::Result<()> {
-        player_loaded_check()?;
-        ensure!(
-            matches!(utility::get_area_id(), Ok(id) if id == area_id as u32),
-            "Must be in general area"
-        );
+        area_check(area_id)?;
         set_event_flag(*self as u32, state)
     }
 }
@@ -331,7 +327,7 @@ impl ToggleCommand for KingsRingAquired {
         EventFlag::KingsRingAcquired.set(state)
     }
 }
-impl ToggleCommand for UnlockNashandra {
+impl ToggleCommand for NashandraUnlocked {
     fn is(&self) -> ProcResult<bool> {
         EventFlag::GiantLordDefeated.get()
     }
@@ -339,7 +335,7 @@ impl ToggleCommand for UnlockNashandra {
         EventFlag::GiantLordDefeated.set(state)
     }
 }
-impl ToggleCommand for UnlockAldia {
+impl ToggleCommand for AldiaUnlocked {
     fn is(&self) -> ProcResult<bool> {
         Ok(EventFlag::VendrickDefeated.get()? && EventFlag::UnlockAldia.get()?)
     }
@@ -372,7 +368,7 @@ impl ToggleCommand for DarkChasmLitBlackGulch {
         EventFlag::BlackGulchChasmCleared.set_area_conditional(state, MapId::DarkChasmOfOld)
     }
 }
-impl ToggleCommand for ActivateBrumeTower {
+impl ToggleCommand for BrumeTowerActivated {
     fn is(&self) -> ProcResult<bool> {
         EventFlag::ActivateBrume.get()
     }
@@ -380,7 +376,7 @@ impl ToggleCommand for ActivateBrumeTower {
         EventFlag::ActivateBrume.set_area_conditional(state, MapId::BrumeTower)
     }
 }
-impl ToggleCommand for VisibleAava {
+impl ToggleCommand for AavaVisible {
     fn is(&self) -> ProcResult<bool> {
         EventFlag::VisibleAava.get()
     }
@@ -413,6 +409,7 @@ impl ToggleCommand for FreeLoyceKnightAbandonedDwelling {
         EventFlag::LoyceKnightAbandonedDwelling.set_area_conditional(state, MapId::FrozenEleumLoyce)
     }
 }
+
 impl ToggleCommand for FreeLoyceKnightLowerGarrison {
     fn is(&self) -> ProcResult<bool> {
         EventFlag::LoyceKnightLowerGarrison.get()

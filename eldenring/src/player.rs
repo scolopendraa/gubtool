@@ -23,7 +23,7 @@ use {
         game_version::EldenRingVersion::*,
         slice_ops::*,
         sys::{
-            ipc::CppValue,
+            ipc::FfiValue,
             sys_error::{PointerType, ProcResult, ProcessError},
         },
     },
@@ -274,8 +274,8 @@ impl Runes {
         player_loaded_check()?;
 
         let args = [
-            CppValue::uintptr_t(ResolvedPtr::PlayerGameData.get()?),
-            CppValue::int64_t(amount),
+            FfiValue::pointer(ResolvedPtr::PlayerGameData.get()?),
+            FfiValue::sint64(amount),
         ];
 
         run_game_function(Function::GiveRunes, &args)

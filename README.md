@@ -1,6 +1,6 @@
 # gubtool
 
-A tui practice tool for soulsborne games. At the moment, it supports all versions of Elden Ring and Dark Souls. Runs natively on both linux and windows.
+A tui practice tool for soulsborne games. At the moment, it supports all versions of Elden Ring and Dark Souls 2. Runs natively on both linux and windows.
 
 Certain terminal emulators, like KDE konsole, does not properly display the dimming effect of inactive lists.
 

@@ -16,7 +16,7 @@ use {
     gubtool_core::{
         address::Address,
         slice_ops::*,
-        sys::{ipc::CppValue, sys_error::ProcResult},
+        sys::{ipc::FfiValue, sys_error::ProcResult},
     },
     shared::{
         command::{ToggleCommand, UnitCommand},
@@ -39,9 +39,9 @@ pub fn set_event(event_id: u32, state: bool) -> anyhow::Result<()> {
     player_loaded_check()?;
 
     let args = [
-        CppValue::uintptr_t(ResolvedPtr::VirtualMemFlag.get()?),
-        CppValue::uint32_t(event_id),
-        CppValue::uint8_t(state as u8),
+        FfiValue::pointer(ResolvedPtr::VirtualMemFlag.get()?),
+        FfiValue::uint32(event_id),
+        FfiValue::uint8(state as u8),
     ];
 
     run_game_function(Function::SetEvent, &args)

@@ -13,7 +13,7 @@ use {
         attached::is_32,
         slice_ops::*,
         sys::{
-            ipc::{CppValue, X86CallingConvention},
+            ipc::{FfiValue, X86CallingConvention},
             sys_error::ProcResult,
         },
     },
@@ -59,9 +59,9 @@ fn light_bonfire(bonfire_id: u32) -> anyhow::Result<()> {
     let bonfire_manager = ResolvedPtr::BonfireManager.get()?;
 
     let args = [
-        CppValue::uintptr_t(bonfire_manager),
-        CppValue::uint16_t(bonfire_id as u16),
-        CppValue::uint8_t(0x1), // show popup
+        FfiValue::pointer(bonfire_manager),
+        FfiValue::uint16(bonfire_id as u16),
+        FfiValue::uint8(0x1), // show popup
     ];
 
     run_game_function(Function::BonfireUnlock, &args, X86CallingConvention::__thiscall)
@@ -111,8 +111,8 @@ fn rest_at_bonfire(bonfire: &Bonfire) -> anyhow::Result<()> {
         .add_offset(event_manager_offsets::RESPAWN_MAP)?;
 
     let args = [
-        CppValue::uintptr_t(bonfire_manager),
-        CppValue::uint32_t(bonfire.bonfire_id),
+        FfiValue::pointer(bonfire_manager),
+        FfiValue::uint32(bonfire.bonfire_id),
     ];
 
     let has_rested = 0x0;

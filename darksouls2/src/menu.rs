@@ -9,7 +9,7 @@ use {
     gubtool_core::{
         address::Address,
         attached::is_32,
-        sys::ipc::{CppValue, X86CallingConvention},
+        sys::ipc::{FfiValue, X86CallingConvention},
     },
     std::{thread, time::Duration},
 };
@@ -43,9 +43,9 @@ pub fn open_menu(menu_type: MenuType) -> anyhow::Result<()> {
     }
 
     let args = [
-        CppValue::uintptr_t(ResolvedPtr::WindowManager.get()?),
-        CppValue::uintptr_t(args_loc),
-        CppValue::uintptr_t(CaveAddress::NpcPos.addr()),
+        FfiValue::pointer(ResolvedPtr::WindowManager.get()?),
+        FfiValue::pointer(args_loc),
+        FfiValue::pointer(CaveAddress::NpcPos.addr()),
     ];
 
     set_menu_open_chr_state(true)?;
@@ -66,8 +66,8 @@ fn is_menu_open() -> bool {
 
 fn set_menu_open_chr_state(state: bool) -> anyhow::Result<()> {
     let args = [
-        CppValue::uintptr_t(ResolvedPtr::DlBackAllocator.get()?),
-        CppValue::uint8_t(state as u8),
+        FfiValue::pointer(ResolvedPtr::DlBackAllocator.get()?),
+        FfiValue::uint8(state as u8),
     ];
 
     run_game_function(Function::MenuChrState, &args, X86CallingConvention::__thiscall)

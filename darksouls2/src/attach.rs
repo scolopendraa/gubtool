@@ -11,6 +11,7 @@ use {
 
 pub async fn attach() -> anyhow::Result<()> {
     crate::init();
+    // let _ = crate::mem::write::<u8>(attached::module_base() + 0x160DE1A, 0x1);
 
     let time_to_wait = 6.0 - attached::uptime();
 

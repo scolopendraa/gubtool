@@ -33,6 +33,9 @@ pub enum CaveAddress {
     LevelUpBuffer         = 0x500, // 0x100
     NegativeFlag          = 0x600, // u8
 
+    EzStateParams         = 0x610, // [i32; 3]
+    LookedUpStateActCtrl  = 0x640,
+
     StateHandlerFlags     = 0xf00, // 0x100
     // Hooks
     PlayerNoDamageHook    = 0x1000, // 0x2C

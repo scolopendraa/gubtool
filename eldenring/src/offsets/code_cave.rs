@@ -9,7 +9,7 @@ pub enum CaveAddress {
     WorkerThreadPort     = 0x0, // u16
 
     SavedTargetPointer   = 0x10, // u64
-    LookedUpHandle       = 0x18, // u64
+    SavedHandle          = 0x18, // u64
     LookedUpEntityId     = 0x20, // u64
 
     ActArray             = 0x30, // 0x28

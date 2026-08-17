@@ -11,7 +11,7 @@ macro_rules! declare_mem_functions {
                 slice_ops::*,
                 sys::{
                     ipc::{
-                        CppValue,
+                        FfiValue,
                         X86CallingConvention,
                         ipc_error::IpcError,
                         request_nullary_function,
@@ -54,7 +54,7 @@ macro_rules! declare_mem_functions {
         }
 
         #[track_caller]
-        fn spawn_thread_join(
+        pub fn spawn_thread_join(
             thread_start_address: impl Address,
             thread_code: Vec<u8>,
         ) -> ProcResult {
@@ -221,7 +221,7 @@ macro_rules! declare_x86_specifics {
         #[track_caller]
         pub fn run_game_function(
             function_address: impl Address,
-            arguments: &[CppValue],
+            arguments: &[FfiValue],
             calling_convention: X86CallingConvention,
         ) -> anyhow::Result<()> {
             ensure_game()?;
@@ -244,7 +244,7 @@ macro_rules! declare_x64_specifics {
         #[track_caller]
         pub fn run_game_function(
             function_address: impl Address,
-            arguments: &[CppValue],
+            arguments: &[FfiValue],
         ) -> anyhow::Result<()> {
             ensure_game()?;
             let attached_port = resolve_attached_port()?;

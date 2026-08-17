@@ -47,18 +47,21 @@ impl Screen for EventTab {
     }
 }
 
-const COMMANDS: [Command; 14] = [
+const COMMANDS: [Command; 17] = [
     Command::Toggle(&event::KingsRingAquired),
-    Command::Toggle(&event::UnlockNashandra),
-    Command::Toggle(&event::UnlockAldia),
-    Command::Toggle(&event::DarkChasmLitShadedWoods),
-    Command::Toggle(&event::DarkChasmLitDrangleicCastle),
-    Command::Toggle(&event::DarkChasmLitBlackGulch),
-    Command::Toggle(&event::ActivateBrumeTower),
-    Command::Toggle(&event::VisibleAava),
+    Command::Toggle(&event::NashandraUnlocked),
+    Command::Toggle(&event::AldiaUnlocked),
+    Command::Toggle(&event::FlexileShipDocked),
+    Command::Toggle(&event::BelfryGargoylesGateOpen),
+    Command::Toggle(&event::MythaPoisonDrained),
+    Command::Toggle(&event::BrumeTowerActivated),
+    Command::Toggle(&event::AavaVisible),
     Command::Toggle(&event::UndoAlsanasSeal),
     Command::Toggle(&event::SkipIvoryKingGauntlet),
     Command::Toggle(&event::DisableLoyceKnights),
+    Command::Toggle(&event::DarkChasmLitShadedWoods),
+    Command::Toggle(&event::DarkChasmLitDrangleicCastle),
+    Command::Toggle(&event::DarkChasmLitBlackGulch),
     Command::Toggle(&event::FreeLoyceKnightOuterWall),
     Command::Toggle(&event::FreeLoyceKnightAbandonedDwelling),
     Command::Toggle(&event::FreeLoyceKnightLowerGarrison),
