@@ -50,6 +50,16 @@ pub const MENU_MAN: AobScan = AobScan {
     },
 };
 
+pub const WORLD_AREA_TIME_IMPL: AobScan = AobScan {
+    name:        "WorldAreaTimeImpl",
+    pattern:     "48 83 ec 18 48 c7 04 24 fe ff ff ff 80 39 00 74 ? 48 8b 15 ? ? ? ? 48 85 d2 74 ?",
+    scan_origin: 0x5ff8f0,
+    offset:      20,
+    scan_mode:   AddressingMode::Relative {
+        bytes_to_next_instr: 4,
+    },
+};
+
 pub const CHR_DBG_FLAGS: AobScan = AobScan {
     name:        "ChrDbgFlags",
     pattern:     "80 3d ? ? ? ? 00 0f 85 6c",
@@ -146,6 +156,17 @@ pub const WORLD_CHR_MAN_DBG: AobScan = AobScan {
     pattern:     "80 78 67 00 0f 84 6b 02 00 00 f6 87 c8 01 00 00 01 75 10 48 8b cf",
     scan_origin: 0x6d016f,
     offset:      -19,
+    scan_mode:   AddressingMode::Relative {
+        bytes_to_next_instr: 4,
+    },
+};
+
+pub const LOCK_TGT_MAN_IMP: AobScan = AobScan {
+    name:        "LockTgtManImp",
+    pattern:     "48 8b c8 e8 ? ? ? ? 45 32 ff 48 8b 0d ? ? ? ? 48 85 c9 75 ? 48 8d 0d ? ? ? ? e8 \
+                  ? ? ? ? 4c 8b c8 4c 8d 05 ? ? ? ?",
+    scan_origin: 0x3925a9,
+    offset:      14,
     scan_mode:   AddressingMode::Relative {
         bytes_to_next_instr: 4,
     },
@@ -280,6 +301,15 @@ pub const EXECUTE_TALK_COMMAND: AobScan = AobScan {
     scan_mode:   AddressingMode::Absolute,
 };
 
+pub const ADD_COOL_TIME: AobScan = AobScan {
+    name:        "AddCoolTime()",
+    pattern:     "48 89 5c 24 08 57 48 83 ec 20 48 8b d9 33 c0 48 8b 09 8b fa 48 85 c9 74 ? 48 8b \
+                  01",
+    scan_origin: 0x2c6390,
+    offset:      0,
+    scan_mode:   AddressingMode::Absolute,
+};
+
 pub const LOCKED_TARGET_POINTER: AobScan = AobScan {
     name:        "LockedTargetPointer",
     pattern:     "74 17 48 8b 8f 88",
@@ -341,6 +371,14 @@ pub const SET_REQUESTED_ACTION: AobScan = AobScan {
     pattern:     "74 05 49 09 41 10",
     scan_origin: 0x4050c0,
     offset:      2,
+    scan_mode:   AddressingMode::Absolute,
+};
+
+pub const NO_TIME_PASS_ON_DEATH: AobScan = AobScan {
+    name:        "NoTimePassOnDeath",
+    pattern:     "4c 8b 74 24 70 48 8b 6c 24 78 4d 39 6f 08",
+    scan_origin: 0x5fc3ff,
+    offset:      0,
     scan_mode:   AddressingMode::Absolute,
 };
 
@@ -413,6 +451,15 @@ pub const CAN_FAST_TRAVEL: AobScan = AobScan {
     pattern:     "74 14 ba 16",
     scan_origin: 0x7b3494,
     offset:      12,
+    scan_mode:   AddressingMode::Absolute,
+};
+
+pub const NO_RUNE_LOSS_ON_DEATH: AobScan = AobScan {
+    name:        "NoRuneLossOnDeath",
+    pattern:     "48 89 6C 24 78 41 8B F5 44 89 6C 24 28 45 0F B6 E0 4C 89 74 24 70 48 8B FA 4C \
+                  8B F9",
+    scan_origin: 0x5fc135,
+    offset:      0x43,
     scan_mode:   AddressingMode::Absolute,
 };
 

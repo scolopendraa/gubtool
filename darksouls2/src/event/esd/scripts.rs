@@ -63,6 +63,21 @@ const MOVE_FLEXILE_SHIP: EsdEventScript = EsdEventScript {
     ],
 };
 
+const MOVE_FLEXILE_SHIP_BACK: EsdEventScript = EsdEventScript {
+    map_id:    MapId::NoMansWharf,
+    functions: &[
+        SetEventFlag(118000010, 0),
+        InitializeObj(10182002),
+        SetMapPartDisplay(1, 0),
+        SetHitEnabled(4, 0),
+        SetHitEnabled(3, 0),
+        InitializeObj(10182000),
+        SetPointLightEnabled(10180030, 0, 0),
+        SetPointLightEnabled(10180040, 0, 0),
+        AddNavimeshAttribute(100000, 2),
+    ],
+};
+
 const OPEN_BELFRY_GATE: EsdEventScript = EsdEventScript {
     map_id:    MapId::TheLostBastille,
     functions: &[
@@ -81,25 +96,10 @@ const CLOSE_BELFRY_GATE: EsdEventScript = EsdEventScript {
     ],
 };
 
-const MOVE_FLEXILE_SHIP_BACK: EsdEventScript = EsdEventScript {
-    map_id:    MapId::NoMansWharf,
-    functions: &[
-        SetEventFlag(118000010, 0),
-        InitializeObj(10182002),
-        SetMapPartDisplay(1, 0),
-        SetHitEnabled(4, 0),
-        SetHitEnabled(3, 0),
-        InitializeObj(10182000),
-        SetPointLightEnabled(10180030, 0, 0),
-        SetPointLightEnabled(10180040, 0, 0),
-        AddNavimeshAttribute(100000, 2),
-    ],
-};
-
 declare_command!(MythaPoisonDrained, FlexileShipDocked, BelfryGargoylesGateOpen);
 
 impl ToggleCommand for FlexileShipDocked {
-    fn is(&self) -> gubtool_core::sys::sys_error::ProcResult<bool> {
+    fn is(&self) -> gubtool_core::sys::sys_error::SysResult<bool> {
         get_event_flag(118000010)
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -112,7 +112,7 @@ impl ToggleCommand for FlexileShipDocked {
 }
 
 impl ToggleCommand for MythaPoisonDrained {
-    fn is(&self) -> gubtool_core::sys::sys_error::ProcResult<bool> {
+    fn is(&self) -> gubtool_core::sys::sys_error::SysResult<bool> {
         get_event_flag(117000055)
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -125,7 +125,7 @@ impl ToggleCommand for MythaPoisonDrained {
 }
 
 impl ToggleCommand for BelfryGargoylesGateOpen {
-    fn is(&self) -> gubtool_core::sys::sys_error::ProcResult<bool> {
+    fn is(&self) -> gubtool_core::sys::sys_error::SysResult<bool> {
         let state = ResolvedPtr::BelfryGateStateActCtrl.get()?;
         let obj_state = get_obj_state(state)?;
         Ok(obj_state == 20)

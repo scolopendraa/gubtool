@@ -4,6 +4,7 @@ fn_call_width = 80
 attr_fn_like_width = 80
 array_width = 60
 chain_width = 60
+single_line_if_else_max_width = 80
 
 binop_separator = "Front"
 brace_style = "SameLineWhere"

@@ -3,16 +3,16 @@ use {
         chr_ctrl::{ChrCtrl, ResolvedChrPtr},
         mem::*,
         offsets::{
-            code_cave::CaveAddress,
+            code_cave::CaveAddr,
             module_offsets::{Function, Hook},
         },
         resources::asm_function,
     },
     gubtool_core::{
-        address::Address,
+        address::{Address, POINTER},
         attached::is_32,
         slice_ops::*,
-        sys::sys_error::{PointerType, ProcResult, ProcessError},
+        sys::sys_error::{PointerType, SysError, SysResult},
     },
     shared::{
         command::{ToggleCommand, UnitCommand, ValueCommand},
@@ -45,7 +45,7 @@ impl Target {
     }
 
     pub fn update(&mut self) {
-        match read_address(CaveAddress::SavedTargetPointer) {
+        match read_address(CaveAddr::SavedTargetPointer) {
             Ok(new_target) => {
                 let same_target = self
                     .chr_ctrl
@@ -74,14 +74,14 @@ impl Target {
     }
 
     pub fn clear(&mut self) {
-        let _ = write::<u64>(CaveAddress::SavedTargetPointer, 0x0);
+        let _ = write::<u64>(CaveAddr::SavedTargetPointer, 0x0);
         self.chr_ctrl = None
     }
 
-    pub fn chr_ctrl(&mut self) -> ProcResult<&mut ChrCtrl> {
+    pub fn chr_ctrl(&mut self) -> SysResult<&mut ChrCtrl> {
         self.chr_ctrl
             .as_mut()
-            .ok_or(ProcessError::null_pointer(PointerType::Target))
+            .ok_or(SysError::null_pointer(PointerType::Target))
     }
 
     pub fn set(&mut self, chr_ctrl: ChrCtrl) {
@@ -109,8 +109,8 @@ pub struct ActLogger {
 }
 
 impl ActLogger {
-    pub fn update(&mut self) -> ProcResult {
-        let buffer = read::<[u8; 0x50]>(CaveAddress::SavedActBuffer)?;
+    pub fn update(&mut self) -> SysResult {
+        let buffer = read::<[u8; 0x50]>(CaveAddr::SavedActBuffer)?;
         let (write_idx, buffer) = buffer.split_at(4);
         let write_idx = read_from_slice::<i32>(write_idx, 0)?;
 
@@ -152,7 +152,7 @@ declare_command!(
 const SAVE_TARGET_ORIGINAL_VANILLA: [u8; 6] = [0x89, 0xb7, 0xb8, 0x00, 0x00, 0x00];
 const SAVE_TARGET_ORIGINAL_SCHOLAR: [u8; 7] = [0x48, 0x89, 0xbb, 0xc0, 0x00, 0x00, 0x00];
 impl ToggleCommand for SaveTargetHook {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         if is_32() {
             read::<[u8; 6]>(Hook::LockedTargetPointer)
                 .map(|val| val != SAVE_TARGET_ORIGINAL_VANILLA)
@@ -163,30 +163,20 @@ impl ToggleCommand for SaveTargetHook {
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
         if state {
-            let orig_instr_len = if is_32() {
-                6
-            } else {
-                7
-            };
+            let orig_instr_len = if is_32() { 6 } else { 7 };
 
             let mut fun = asm_function("save_target_hook");
-            let mut asm = fun.take_bytes();
 
-            write_addr_to_slice(
-                &mut asm,
-                fun.reloc("saved_ptr_loc"),
-                CaveAddress::SavedTargetPointer,
-            )?;
-            write_rel_i32(
-                &mut asm,
-                CaveAddress::SaveTargetHook,
-                fun.reloc("hook_loc"),
-                Hook::LockedTargetPointer.add_offset(orig_instr_len),
+            fun.patch::<POINTER>("saved_ptr_loc", CaveAddr::SavedTargetPointer);
+            fun.patch_rel32(
+                "hook_loc",
+                CaveAddr::SaveTargetHook,
+                Hook::LockedTargetPointer.add(orig_instr_len),
                 4,
-            )?;
+            );
             install_hook(
-                &asm,
-                CaveAddress::SaveTargetHook,
+                &fun.bytes,
+                CaveAddr::SaveTargetHook,
                 Hook::LockedTargetPointer,
                 orig_instr_len,
             )?;
@@ -204,7 +194,7 @@ impl ToggleCommand for SaveTargetHook {
 const SET_ACT_ORIGINAL_VANILLA: [u8; 7] = [0x55, 0x8b, 0xec, 0x8b, 0x45, 0x08, 0x83];
 const SET_ACT_ORIGINAL_SCHOLAR: [u8; 7] = [0x83, 0x89, 0x50, 0x03, 0x00, 0x00, 0x01];
 impl ToggleCommand for ActHook {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         if is_32() {
             read::<[u8; 7]>(Function::ChrSetAction).map(|val| val != SET_ACT_ORIGINAL_VANILLA)
         } else {
@@ -214,18 +204,13 @@ impl ToggleCommand for ActHook {
     fn set(&self, state: bool) -> anyhow::Result<()> {
         if state {
             let mut fun = asm_function("target_action_hook");
-            let mut asm = fun.take_bytes();
 
-            write_addr_to_slice(&mut asm, fun.reloc("force_act_flag"), CaveAddress::ForceActFlag)?;
-            write_addr_to_slice(
-                &mut asm,
-                fun.reloc("repeating_chr_ai"),
-                CaveAddress::ForceActChrAi,
-            )?;
-            write_addr_to_slice(&mut asm, fun.reloc("force_act_id"), CaveAddress::ForceActId)?;
-            write_addr_to_slice(&mut asm, fun.reloc("buffer"), CaveAddress::SavedActBuffer)?;
+            fun.patch::<POINTER>("force_act_flag", CaveAddr::ForceActFlag);
+            fun.patch::<POINTER>("repeating_chr_ai", CaveAddr::ForceActChrAi);
+            fun.patch::<POINTER>("force_act_id", CaveAddr::ForceActId);
+            fun.patch::<POINTER>("buffer", CaveAddr::SavedActBuffer);
 
-            install_hook(&asm, CaveAddress::TargetActHook, Function::ChrSetAction, 7)?;
+            install_hook(&fun.bytes, CaveAddr::TargetActHook, Function::ChrSetAction, 7)?;
         } else {
             let bytes: &[u8] = match is_32() {
                 true => &SET_ACT_ORIGINAL_VANILLA,
@@ -238,7 +223,7 @@ impl ToggleCommand for ActHook {
 }
 
 impl ValueCommand<i32> for Health {
-    fn get(&self) -> ProcResult<i32> {
+    fn get(&self) -> SysResult<i32> {
         target().chr_ctrl()?.get_hp()
     }
     fn set(&self, val: i32) -> anyhow::Result<()> {
@@ -248,7 +233,7 @@ impl ValueCommand<i32> for Health {
 }
 
 impl ValueCommand<f32> for HealthPercentage {
-    fn get(&self) -> ProcResult<f32> {
+    fn get(&self) -> SysResult<f32> {
         target().chr_ctrl()?.get_hp_pct()
     }
     fn set(&self, val: f32) -> anyhow::Result<()> {
@@ -271,13 +256,13 @@ impl ValueCommand<i32> for RepeatAction {
     fn can_get(&self) -> bool {
         false
     }
-    fn get(&self) -> ProcResult<i32> {
+    fn get(&self) -> SysResult<i32> {
         unreachable!("no getter for RepeatAction")
     }
 }
 
 impl ToggleCommand for RepeatLastAction {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         target().chr_ctrl()?.is_action_repeating()
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {

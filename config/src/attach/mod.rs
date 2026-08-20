@@ -99,16 +99,16 @@ pub trait AttachEntry {
 
 #[macro_export]
 macro_rules! impl_attach_field_bool {
-    ($struct_name:ident, $game:ident, $field:ident, $command_struct:path) => {
+    ($struct_name:ident, $module:ident, $game:ident) => {
         shared::declare_command!($struct_name);
 
         impl shared::command::ToggleCommand for $struct_name {
-            fn is(&self) -> gubtool_core::sys::sys_error::ProcResult<bool> {
-                Ok(config::attach::read_config().$game.$field)
+            fn is(&self) -> gubtool_core::sys::sys_error::SysResult<bool> {
+                Ok(config::attach::read_config().$game.$struct_name)
             }
             fn set(&self, state: bool) -> anyhow::Result<()> {
                 <config::attach::AttachConfig as config::Config>::update(|c| {
-                    c.$game.$field = state;
+                    c.$game.$struct_name = state;
                 })?;
                 Ok(())
             }
@@ -117,7 +117,7 @@ macro_rules! impl_attach_field_bool {
         impl config::attach::AttachEntry for $struct_name {
             fn apply(&self) -> anyhow::Result<()> {
                 if shared::command::ToggleCommand::is(self).unwrap() {
-                    shared::command::ToggleCommand::set(&$command_struct, true)
+                    shared::command::ToggleCommand::set(&$module::$struct_name, true)
                 } else {
                     Ok(())
                 }
@@ -128,16 +128,16 @@ macro_rules! impl_attach_field_bool {
 
 #[macro_export]
 macro_rules! impl_attach_field_f32 {
-    ($struct_name:ident, $game:ident, $field:ident, $command_struct:path) => {
+    ($struct_name:ident, $module:ident, $game:ident) => {
         shared::declare_command!($struct_name);
 
         impl shared::command::OptionCommand<f32> for $struct_name {
             fn get(&self) -> Option<f32> {
-                config::attach::read_config().$game.$field
+                config::attach::read_config().$game.$struct_name
             }
             fn set(&self, val: Option<f32>) -> anyhow::Result<()> {
                 <config::attach::AttachConfig as config::Config>::update(|c| {
-                    c.$game.$field = val;
+                    c.$game.$struct_name = val;
                 })?;
                 Ok(())
             }
@@ -146,7 +146,7 @@ macro_rules! impl_attach_field_f32 {
         impl config::attach::AttachEntry for $struct_name {
             fn apply(&self) -> anyhow::Result<()> {
                 if let Some(val) = shared::command::OptionCommand::get(self) {
-                    shared::command::ValueCommand::<f32>::set(&$command_struct, val)
+                    shared::command::ValueCommand::<f32>::set(&$module::$struct_name, val)
                 } else {
                     Ok(())
                 }

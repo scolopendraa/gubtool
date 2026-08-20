@@ -1,5 +1,6 @@
 #include "handle.h"
 #include "ffi.h"
+#include <Windows.h>
 #include <cstdint>
 #include <cstring>
 #include <libloaderapi.h>
@@ -19,6 +20,9 @@ bool HandleRequest(char *buffer, SOCKET sock, const sockaddr_in &sender, int sen
         return SendConfirmation(sock, sender, senderLen);
     case Request::ParameterizedFunction:
         CallParameterizedFunction(buffer);
+        return SendConfirmation(sock, sender, senderLen);
+    case Request::ThreadFunction:
+        CallFunctionNewThread(buffer);
         return SendConfirmation(sock, sender, senderLen);
     case Request::LoadLibrary:
         LoadLibrary(buffer);
@@ -43,6 +47,19 @@ void CallNullaryFunction(char *buffer)
     using Function = void (*)();
     auto function = reinterpret_cast<Function>(address);
     function();
+}
+
+DWORD WINAPI ThreadProc(LPVOID param)
+{
+    CallNullaryFunction(static_cast<char *>(param));
+    return 0;
+}
+
+void CallFunctionNewThread(char *buffer)
+{
+    HANDLE thread = CreateThread(nullptr, 0, ThreadProc, buffer, 0, nullptr);
+    WaitForSingleObject(thread, INFINITE);
+    CloseHandle(thread);
 }
 
 ffi_type *FfiTypeFromProtocolCode(std::uint8_t code)

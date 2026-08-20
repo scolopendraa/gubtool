@@ -96,6 +96,22 @@ pub mod ai_think_offsets {
             _ => 0xe9c1,
         }
     }
+
+    pub fn ai_attack_comp() -> u64 {
+        match version() {
+            Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) | Some(Version1_2_3)
+            | Some(Version1_3_0) | Some(Version1_3_1) | Some(Version1_3_2) | Some(Version1_4_0)
+            | Some(Version1_4_1) | Some(Version1_5_0) | Some(Version1_6_0) | Some(Version1_7_0) => {
+                0xdf00
+            }
+            _ => 0xdf10,
+        }
+    }
+
+    pub mod attack_comp_offsets {
+        pub const COOLDOWN_COUNT: u64 = 0x14;
+        pub const COOLDOWN_LIST: u64 = 0x18;
+    }
 }
 
 pub mod ride_offsets {

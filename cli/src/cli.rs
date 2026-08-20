@@ -96,7 +96,7 @@ pub fn run() -> anyhow::Result<()> {
         #[cfg(debug_assertions)]
         CliCommand::AobScan => {}
         #[cfg(debug_assertions)]
-        CliCommand::Test => {}
+        CliCommand::Test => eldenring::target::unlock()?,
         _ => (),
     }
     Ok(())

@@ -137,3 +137,9 @@ pub fn get_hook_bytes(
     write_rel_i32(&mut bytes, hook_location, 1, code_location, 4)?;
     Ok(bytes)
 }
+
+pub fn read_struct_from_slice<T>(bytes: &[u8]) -> T {
+    assert!(bytes.len() >= size_of::<T>());
+
+    unsafe { std::ptr::read_unaligned(bytes.as_ptr() as *const T) }
+}

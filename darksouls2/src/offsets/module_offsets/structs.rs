@@ -64,6 +64,7 @@ pub struct Patches {
     pub no_soul_loss:         u64,
     pub player_hidden:        u64,
     pub player_silent:        u64,
+    pub skip_logos:           u64,
     pub menu_transition:      u64,
     pub no_roll:              u64,
     pub no_backstep:          u64,

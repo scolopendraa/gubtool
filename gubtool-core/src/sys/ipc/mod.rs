@@ -4,9 +4,8 @@ pub mod ipc_error;
 pub use function_request::*;
 use {
     crate::{
-        address::Address,
+        address::{Address, POINTER},
         attached::{self, AddressSize},
-        slice_ops::write_addr_to_slice,
         sys::{ASM32, ASM64, dll::Dll, ipc::ipc_error::IpcError, write_bytes_unsafe},
     },
     std::{net::UdpSocket, time::Duration},
@@ -28,6 +27,7 @@ enum WorkerThreadRequest {
     Handshake,
     NullaryFunction,
     ParameterizedFunction,
+    ThreadFunction,
     LoadLibrary,
 }
 
@@ -37,7 +37,8 @@ impl WorkerThreadRequest {
             Self::Handshake => 0,
             Self::NullaryFunction => 1,
             Self::ParameterizedFunction => 2,
-            Self::LoadLibrary => 3,
+            Self::ThreadFunction => 3,
+            Self::LoadLibrary => 4,
         }
     }
 }
@@ -63,12 +64,10 @@ pub fn worker_thread_dll_load_code(
         AddressSize::Bits64 => ASM64.get_function("load_library"),
     };
 
-    let mut asm = fun.take_bytes();
+    fun.patch::<POINTER>("path_loc", path_loc.addr());
+    fun.patch::<POINTER>("load_library_w_loc", load_library_w_pointer_loc.addr());
 
-    write_addr_to_slice(&mut asm, fun.reloc("path_loc"), path_loc)?;
-    write_addr_to_slice(&mut asm, fun.reloc("load_library_w_loc"), load_library_w_pointer_loc)?;
-
-    Ok(asm)
+    Ok(fun.bytes)
 }
 
 fn send_request(

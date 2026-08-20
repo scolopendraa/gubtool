@@ -3,7 +3,6 @@ macro_rules! declare_mem_functions {
     ($game:path) => {
         use {
             crate::offsets,
-            pelite::Pod,
             $crate::{
                 address::Address,
                 attached,
@@ -16,19 +15,20 @@ macro_rules! declare_mem_functions {
                         ipc_error::IpcError,
                         request_nullary_function,
                         request_parameterized_function,
+                        request_thread_function,
                         worker_thread_dll_load_code,
                     },
-                    sys_error::{ProcResult, ProcessError},
+                    sys_error::{SysError, SysResult},
                     *,
                 },
             },
         };
 
-        pub(crate) fn ensure_game() -> ProcResult {
+        pub(crate) fn ensure_game() -> SysResult {
             match attached::game() {
                 Ok($game) => Ok(()),
                 _ => {
-                    Err(ProcessError::InvalidGame {
+                    Err(SysError::InvalidGame {
                         expected: $game,
                     })
                 }
@@ -36,19 +36,19 @@ macro_rules! declare_mem_functions {
         }
 
         #[track_caller]
-        pub fn read<T: Pod>(address: impl Address) -> ProcResult<T> {
+        pub fn read<T>(address: impl Address) -> SysResult<T> {
             ensure_game()?;
             read_unsafe(address)
         }
 
         #[track_caller]
-        pub fn write<T: Pod>(address: impl Address, value: T) -> ProcResult {
+        pub fn write<T>(address: impl Address, value: T) -> SysResult {
             ensure_game()?;
             write_unsafe(address, value)
         }
 
         #[track_caller]
-        pub fn write_bytes(address: impl Address, data: &[u8]) -> ProcResult {
+        pub fn write_bytes(address: impl Address, data: &[u8]) -> SysResult {
             ensure_game()?;
             write_bytes_unsafe(address, data)
         }
@@ -57,11 +57,11 @@ macro_rules! declare_mem_functions {
         pub fn spawn_thread_join(
             thread_start_address: impl Address,
             thread_code: Vec<u8>,
-        ) -> ProcResult {
+        ) -> SysResult {
             ensure_game()?;
             #[cfg(unix)]
             $crate::sys::spawn_thread_join(
-                offsets::code_cave::CaveAddress::RunThreadAsm,
+                offsets::code_cave::CaveAddr::RunThreadAsm,
                 thread_start_address,
                 thread_code,
                 offsets::module_offsets::ExternalFunctionPointer::Kernel32CreateThread,
@@ -76,11 +76,11 @@ macro_rules! declare_mem_functions {
         fn spawn_thread_release(
             thread_start_address: impl Address,
             thread_code: Vec<u8>,
-        ) -> ProcResult {
+        ) -> SysResult {
             ensure_game()?;
             #[cfg(unix)]
             $crate::sys::spawn_thread_release(
-                offsets::code_cave::CaveAddress::RunThreadAsm,
+                offsets::code_cave::CaveAddr::RunThreadAsm,
                 thread_start_address,
                 thread_code,
                 offsets::module_offsets::ExternalFunctionPointer::Kernel32CreateThread,
@@ -91,14 +91,27 @@ macro_rules! declare_mem_functions {
             Ok(())
         }
 
-        pub fn run_custom_function(function_code: Vec<u8>) -> anyhow::Result<()> {
+        pub fn run_custom_function(fun: assemble::asm_folder::AsmFunction) -> anyhow::Result<()> {
             ensure_game()?;
             let attached_port = resolve_attached_port()?;
 
-            let custom_function_address = offsets::code_cave::CaveAddress::CustomFunction;
+            let custom_function_address = offsets::code_cave::CaveAddr::CustomFunction;
 
-            write_bytes(custom_function_address, &function_code)?;
+            write_bytes(custom_function_address, &fun.bytes)?;
             request_nullary_function(attached_port, custom_function_address)?;
+            Ok(())
+        }
+
+        pub fn run_custom_function_in_thread(
+            fun: assemble::asm_folder::AsmFunction,
+        ) -> anyhow::Result<()> {
+            ensure_game()?;
+            let attached_port = resolve_attached_port()?;
+
+            let custom_function_address = offsets::code_cave::CaveAddr::CustomFunction;
+
+            write_bytes(custom_function_address, &fun.bytes)?;
+            request_thread_function(attached_port, custom_function_address)?;
             Ok(())
         }
 
@@ -116,10 +129,10 @@ macro_rules! declare_mem_functions {
             if attached_port.is_none() {
                 let dll_code = worker_thread_dll_load_code(
                     offsets::module_offsets::ExternalFunctionPointer::Kernel32LoadLibraryW,
-                    offsets::code_cave::CaveAddress::DllPath,
+                    offsets::code_cave::CaveAddr::DllPath,
                 )?;
 
-                spawn_thread_join(offsets::code_cave::CaveAddress::DllInjectCode, dll_code)?;
+                spawn_thread_join(offsets::code_cave::CaveAddr::DllInjectCode, dll_code)?;
 
                 let start = std::time::Instant::now();
                 let wait_for_port_timeout = std::time::Duration::from_millis(100);
@@ -142,22 +155,18 @@ macro_rules! declare_mem_functions {
             Ok(attached_port.unwrap())
         }
 
-        fn lookup_attached_port() -> ProcResult<Option<u16>> {
-            let port = read::<u16>(offsets::code_cave::CaveAddress::WorkerThreadPort)?;
-            if port != 0x0 {
-                Ok(Some(port))
-            } else {
-                Ok(None)
-            }
+        fn lookup_attached_port() -> SysResult<Option<u16>> {
+            let port = read::<u16>(offsets::code_cave::CaveAddr::WorkerThreadPort)?;
+            if port != 0x0 { Ok(Some(port)) } else { Ok(None) }
         }
 
         #[track_caller]
-        pub fn is_bit_set(address: impl Address, mask: u8) -> ProcResult<bool> {
+        pub fn is_bit_set(address: impl Address, mask: u8) -> SysResult<bool> {
             read::<u8>(address).map(|byte| byte & mask != 0)
         }
 
         #[track_caller]
-        pub fn set_bit(address: impl Address, mask: u8, value: bool) -> ProcResult {
+        pub fn set_bit(address: impl Address, mask: u8, value: bool) -> SysResult {
             let current_byte = read::<u8>(address)?;
             let new_byte = match value {
                 true => current_byte | mask,
@@ -172,7 +181,7 @@ macro_rules! declare_mem_functions {
             code_location: impl Address,
             hook_location: impl Address,
             original_instruction_size: u64,
-        ) -> ProcResult {
+        ) -> SysResult {
             let hookbytes =
                 get_hook_bytes(code_location, hook_location, original_instruction_size)?;
             write_bytes(code_location, &code)?;
@@ -184,20 +193,20 @@ macro_rules! declare_mem_functions {
             code_location: impl Address,
             hook_location: impl Address,
             original_instruction_size: u64,
-        ) -> ProcResult {
+        ) -> SysResult {
             let hookbytes =
                 get_hook_bytes(code_location, hook_location, original_instruction_size)?;
             write_bytes(hook_location, &hookbytes)
         }
 
         #[track_caller]
-        pub fn read_address(address: impl Address) -> ProcResult<u64> {
+        pub fn read_address(address: impl Address) -> SysResult<u64> {
             ensure_game()?;
             read_address_unsafe(address)
         }
 
         #[track_caller]
-        pub fn follow_pointers(pointers: &[u64], read_final: bool) -> ProcResult<u64> {
+        pub fn follow_pointers(pointers: &[u64], read_final: bool) -> SysResult<u64> {
             let mut pointer = 0u64;
             let (last, rest) = pointers.split_last().unwrap();
             for offset in rest {

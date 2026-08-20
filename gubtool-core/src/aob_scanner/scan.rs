@@ -7,11 +7,7 @@ const CHUNK_SIZE: usize = 0x5000;
 
 impl AobScanner {
     pub fn scan(&self) -> Result<u64, ScanError> {
-        if self.exhaustive {
-            self.scan_ensure_unique()
-        } else {
-            self.scan_first()
-        }
+        if self.exhaustive { self.scan_ensure_unique() } else { self.scan_first() }
     }
 
     pub fn scan_all(&self) -> Result<Vec<u64>, ScanError> {

@@ -20,6 +20,7 @@ pub struct BasePointers {
     pub game_man:                   u64,
     pub game_data_man:              u64,
     pub menu_man:                   u64,
+    pub world_area_time_impl:       u64,
     pub cs_emk_system:              u64,
     pub virtual_mem_flag:           u64,
     pub damage_manager:             u64,
@@ -27,6 +28,7 @@ pub struct BasePointers {
     pub dl_user_input_manager_impl: u64,
     pub cs_flipper_imp:             u64,
     pub cs_dlc_imp:                 u64,
+    pub lock_tgt_man_imp:           u64,
 }
 
 #[derive(Debug)]
@@ -45,6 +47,7 @@ pub struct Functions {
     pub emk_event_ins_ctor:             u64,
     pub external_event_temp_ctor:       u64,
     pub execute_talk_command:           u64,
+    pub add_cool_time:                  u64,
 }
 
 #[derive(Debug)]
@@ -57,6 +60,7 @@ pub struct Hooks {
     pub warp_angle_write:      u64,
     pub get_force_act_idx:     u64,
     pub set_requested_action:  u64,
+    pub no_time_pass_on_death: u64,
 }
 
 #[derive(Debug)]
@@ -70,6 +74,7 @@ pub struct Patches {
     pub open_map:                    u64,
     pub close_map:                   u64,
     pub can_fast_travel:             u64,
+    pub no_rune_loss_on_death:       u64,
 }
 
 #[derive(Debug)]

@@ -1,7 +1,7 @@
 use {
     crate::{
         mem::*,
-        offsets::{code_cave::CaveAddress, module_offsets::Function},
+        offsets::{code_cave::CaveAddr, module_offsets::Function},
         pointer_cache::ResolvedPtr,
         resources::{bonfires::Bonfire, bosses::Boss},
         utils::player_loaded_check,
@@ -66,12 +66,6 @@ impl Default for WarpRequest {
     }
 }
 
-impl WarpRequest {
-    fn to_array(&self) -> [u8; std::mem::size_of::<Self>()] {
-        unsafe { std::mem::transmute_copy(self) }
-    }
-}
-
 impl Boss {
     pub fn warp(&self) -> anyhow::Result<()> {
         player_loaded_check()?;
@@ -108,11 +102,11 @@ impl Bonfire {
 }
 
 fn warp(request: WarpRequest) -> anyhow::Result<()> {
-    write_bytes(CaveAddress::WarpRequestStruct, &request.to_array())?;
+    write::<WarpRequest>(CaveAddr::WarpRequestStruct, request)?;
 
     let args = [
         FfiValue::pointer(ResolvedPtr::WarpManager.get()?),
-        FfiValue::pointer(CaveAddress::WarpRequestStruct.addr()),
+        FfiValue::pointer(CaveAddr::WarpRequestStruct.addr()),
     ];
 
     run_game_function(Function::Warp, &args, X86CallingConvention::__thiscall)

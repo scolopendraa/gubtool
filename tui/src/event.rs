@@ -5,7 +5,7 @@ use {
     gubtool_core::{
         appdata::{AppDataError, log_error},
         attached::AttachError,
-        sys::{ipc::ipc_error::IpcError, sys_error::ProcessError},
+        sys::{ipc::ipc_error::IpcError, sys_error::SysError},
     },
     std::{
         sync::{OnceLock, mpsc},
@@ -171,12 +171,12 @@ impl<T> AnyhowExt<T> for Result<T, anyhow::Error> {
 fn handle_error(err: &(dyn std::error::Error + 'static)) -> (String, InfoType) {
     let mut info_type = InfoType::GameError;
 
-    if let Some(proc_error) = err.downcast_ref::<ProcessError>() {
+    if let Some(proc_error) = err.downcast_ref::<SysError>() {
         match proc_error {
-            ProcessError::InvalidGame {
+            SysError::InvalidGame {
                 ..
             }
-            | ProcessError::NullPointer {
+            | SysError::NullPointer {
                 ..
             } => (),
             _ => {

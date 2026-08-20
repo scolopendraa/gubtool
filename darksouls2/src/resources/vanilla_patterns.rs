@@ -211,6 +211,14 @@ pub const CREDITS_SKIP: AobScan = AobScan {
     scan_mode:   AddressingMode::Absolute,
 };
 
+pub const SKIP_LOGOS: AobScan = AobScan {
+    name:        "SkipLogos",
+    pattern:     "33 c0 38 05 ? ? ? ? c6 05 ? ? ? ? 01 0f 95 c0 89 41 0c",
+    scan_origin: 0x193960,
+    offset:      4,
+    scan_mode:   AddressingMode::Direct32,
+};
+
 pub const FASTER_MENU: AobScan = AobScan {
     name:        "FasterMenu",
     pattern:     "33 c5 89 45 ? 56 8b f1 83 7e ? 00 7e ? 57 e8 ? ? ? ? 8b f8 85 ff 74 ?",

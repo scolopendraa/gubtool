@@ -4,10 +4,10 @@ use {
     strum::Display,
 };
 
-pub type ProcResult<T = ()> = Result<T, ProcessError>;
+pub type SysResult<T = ()> = Result<T, SysError>;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub enum ProcessError {
+pub enum SysError {
     Io {
         access_type: AccessType,
         address:     u64,
@@ -76,7 +76,7 @@ pub enum PtraceAction {
     SetRegs,
 }
 
-impl ProcessError {
+impl SysError {
     pub fn error_kind(&self) -> Option<std::io::ErrorKind> {
         match self {
             Self::Io {
@@ -155,7 +155,7 @@ impl ProcessError {
     }
 }
 
-impl Display for ProcessError {
+impl Display for SysError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if self.error_kind() == Some(ErrorKind::PermissionDenied) {
             return match self {
@@ -274,7 +274,7 @@ impl Display for ProcessError {
     }
 }
 
-impl std::error::Error for ProcessError {}
+impl std::error::Error for SysError {}
 
 impl Display for PtraceAction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -290,7 +290,7 @@ impl Display for PtraceAction {
     }
 }
 
-impl From<SliceError> for ProcessError {
+impl From<SliceError> for SysError {
     fn from(slice_error: SliceError) -> Self {
         Self::Slice {
             slice_error,

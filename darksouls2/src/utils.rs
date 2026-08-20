@@ -23,20 +23,12 @@ pub struct AreaError {
 
 pub fn player_loaded_check() -> anyhow::Result<()> {
     crate::mem::ensure_game()?;
-    if is_player_loaded() {
-        Ok(())
-    } else {
-        Err(LoadedError)
-    }?;
+    if is_player_loaded() { Ok(()) } else { Err(LoadedError) }?;
     Ok(())
 }
 
 pub fn scholar_check() -> Result<(), ScholarError> {
-    if is_32() {
-        Err(ScholarError)
-    } else {
-        Ok(())
-    }
+    if is_32() { Err(ScholarError) } else { Ok(()) }
 }
 
 pub fn area_check(map_id: MapId) -> anyhow::Result<()> {

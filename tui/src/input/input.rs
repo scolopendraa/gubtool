@@ -36,11 +36,7 @@ impl Input {
     }
 
     pub fn set_idx(&mut self, idx: usize) {
-        self.idx = if idx > self.text.len() {
-            self.text.len()
-        } else {
-            idx
-        };
+        self.idx = if idx > self.text.len() { self.text.len() } else { idx };
 
         self.cursor_position = self.text[..self.idx].width() as u16;
         self.check_lower_bound();

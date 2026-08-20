@@ -29,11 +29,7 @@ pub fn bordered_block<'a>(title: Option<&'a str>) -> Block<'a> {
 }
 
 pub fn line_gauge(label: String, current: f64, max: f64) -> LineGauge<'static> {
-    let ratio = if max > 0.0 {
-        (current / max).clamp(0.0, 1.0)
-    } else {
-        0.0
-    };
+    let ratio = if max > 0.0 { (current / max).clamp(0.0, 1.0) } else { 0.0 };
 
     let theme = theme();
 

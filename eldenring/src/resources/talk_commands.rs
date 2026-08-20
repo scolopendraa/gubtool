@@ -1,11 +1,11 @@
-use {crate::player, gubtool_core::sys::sys_error::ProcResult};
+use {crate::player, gubtool_core::sys::sys_error::SysResult};
 
 #[derive(Clone, Copy)]
 pub struct TalkCommand {
     pub name:       &'static str,
     pub command_id: i32,
     pub params:     &'static [i32],
-    pub handle:     Option<fn() -> ProcResult<u64>>,
+    pub handle:     Option<fn() -> SysResult<u64>>,
     pub dlc:        bool,
 }
 

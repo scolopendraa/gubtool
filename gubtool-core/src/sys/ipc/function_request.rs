@@ -56,6 +56,14 @@ pub fn request_nullary_function(port: u16, function_address: impl Address) -> Re
     )
 }
 
+pub fn request_thread_function(port: u16, function_address: impl Address) -> Result<(), IpcError> {
+    send_request(
+        port,
+        WorkerThreadRequest::ThreadFunction,
+        Some(&function_address.addr().to_le_bytes()),
+    )
+}
+
 fn zero_extend<const N: usize>(value: [u8; N]) -> [u8; 8] {
     let mut bytes = [0u8; 8];
     bytes[..N].copy_from_slice(&value);

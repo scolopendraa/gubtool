@@ -1,6 +1,7 @@
 use {
     crate::offsets::Offset,
-    gubtool_core::{address::Address, attached::module_base},
+    gubtool_core::{address::Address, attached::module_base, impl_address_patch},
+    strum::{EnumIter, IntoEnumIterator},
 };
 
 pub const SIZE: usize = 0x5000;
@@ -11,8 +12,8 @@ pub const BASE: Offset = Offset {
 };
 
 #[repr(u64)]
-#[derive(Clone, Copy)]
-pub enum CaveAddress {
+#[derive(Clone, Copy, Debug, EnumIter)]
+pub enum CaveAddr {
     WorkerThreadPort      = 0x0, // u16
 
     SavedTargetPointer    = 0x10, // u64
@@ -58,7 +59,7 @@ pub enum CaveAddress {
     EventLogBuffer        = 0x3754, // 0x1000
 }
 
-impl Address for CaveAddress {
+impl Address for CaveAddr {
     fn addr(&self) -> u64 {
         module_base()
             .saturating_add(BASE.resolve())
@@ -66,18 +67,10 @@ impl Address for CaveAddress {
     }
 }
 
-pub mod item_args_offsets {
-    pub const ADJUST_QUANTITY_FLAG: u64 = 0x2; // u8
-    pub const MAX_QUANTITY: u64 = 0x3; // i32
-    pub const ITEM_COUNT: u64 = 0x7; // i32
-    pub const CURRENT_QUANTITY: u64 = 0xb; // i32
-    pub const STACK_COUNT: u64 = 0xf; // i32
-    pub const ITEM_STRUCT: u64 = 0x13; // 0x16
-}
-pub mod item_struct_offsets {
-    pub const ITEM_ID: u64 = 0x4; // i32
-    pub const DURABILITY: u64 = 0x8; // f32
-    pub const QUANTITY: u64 = 0xc; // i16
-    pub const UPGRADE: u64 = 0xe; // u8
-    pub const INFUSION: u64 = 0xf; // u8
+impl_address_patch!(CaveAddr);
+
+pub fn pointers() -> Vec<(String, u64)> {
+    CaveAddr::iter()
+        .map(|addr| (format!("{:?}", addr), addr.addr()))
+        .collect()
 }

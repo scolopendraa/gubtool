@@ -2,7 +2,7 @@ use {
     crate::{
         attached::{AddressSize, GameProcess},
         game_version::{Game, GameVersion, Version},
-        sys::sys_error::{ProcResult, ProcessError},
+        sys::sys_error::{SysError, SysResult},
     },
     std::path::PathBuf,
 };
@@ -15,39 +15,39 @@ fn attached_process() -> &'static Option<GameProcess> {
     unsafe { &ATTACHED_PROCESS }
 }
 
-pub fn pid() -> ProcResult<crate::sys::Pid> {
+pub fn pid() -> SysResult<crate::sys::Pid> {
     attached_process()
         .as_ref()
         .map(|process| process.pid)
-        .ok_or(ProcessError::NotAttached)
+        .ok_or(SysError::NotAttached)
 }
 
-pub fn game_version() -> ProcResult<GameVersion> {
+pub fn game_version() -> SysResult<GameVersion> {
     attached_process()
         .as_ref()
         .map(|process| process.game_version)
-        .ok_or(ProcessError::NotAttached)
+        .ok_or(SysError::NotAttached)
 }
 
-pub fn game() -> ProcResult<Game> {
+pub fn game() -> SysResult<Game> {
     attached_process()
         .as_ref()
         .map(|process| process.game_version.game())
-        .ok_or(ProcessError::NotAttached)
+        .ok_or(SysError::NotAttached)
 }
 
-pub fn comm() -> ProcResult<&'static str> {
+pub fn comm() -> SysResult<&'static str> {
     attached_process()
         .as_ref()
         .map(|process| process.comm.as_str())
-        .ok_or(ProcessError::NotAttached)
+        .ok_or(SysError::NotAttached)
 }
 
-pub fn path() -> ProcResult<&'static PathBuf> {
+pub fn path() -> SysResult<&'static PathBuf> {
     attached_process()
         .as_ref()
         .map(|process| &process.exe_path)
-        .ok_or(ProcessError::NotAttached)
+        .ok_or(SysError::NotAttached)
 }
 
 pub fn module_base() -> u64 {
@@ -57,11 +57,11 @@ pub fn module_base() -> u64 {
         .unwrap_or(0x0)
 }
 
-pub fn address_size() -> ProcResult<AddressSize> {
+pub fn address_size() -> SysResult<AddressSize> {
     attached_process()
         .as_ref()
         .map(|process| process.address_size)
-        .ok_or(ProcessError::NotAttached)
+        .ok_or(SysError::NotAttached)
 }
 
 pub fn version<T: Version>() -> Option<T> {
@@ -77,19 +77,19 @@ pub fn is_32() -> bool {
         .unwrap_or(false)
 }
 
-pub fn port() -> ProcResult<Option<u16>> {
+pub fn port() -> SysResult<Option<u16>> {
     attached_process()
         .as_ref()
         .map(|process| process.port)
-        .ok_or(ProcessError::NotAttached)
+        .ok_or(SysError::NotAttached)
 }
 
 #[cfg(windows)]
-pub(crate) fn handle() -> ProcResult<windows::Win32::Foundation::HANDLE> {
+pub(crate) fn handle() -> SysResult<windows::Win32::Foundation::HANDLE> {
     attached_process()
         .as_ref()
         .map(|process| process.handle)
-        .ok_or(ProcessError::NotAttached)
+        .ok_or(SysError::NotAttached)
 }
 
 pub fn uptime() -> f64 {
@@ -120,11 +120,11 @@ pub fn is_attached() -> bool {
     attached_process().as_ref().is_some()
 }
 
-fn process_exists() -> ProcResult<bool> {
+fn process_exists() -> SysResult<bool> {
     attached_process()
         .as_ref()
         .map(|process| process.exists())
-        .ok_or(ProcessError::NotAttached)
+        .ok_or(SysError::NotAttached)
 }
 
 pub fn detach_if_invalid() {

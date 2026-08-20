@@ -100,7 +100,7 @@ pub const BONFIRES: &[Bonfire; 77] = &[
     },
     Bonfire {
         name:       "The Saltfort",
-        main_area:  "Sinners' Rise",
+        main_area:  "Sinner's Rise",
         bonfire_id: 16685,
         map_id:     MapId::TheLostBastille,
     },

@@ -1,14 +1,15 @@
 use {
     crate::{
-        address::Address,
+        address::{Address, POINTER},
         attached,
         slice_ops::{SliceError, write_to_slice},
         sys::{
             ASM32,
             ASM64,
-            sys_error::{AccessType, ProcResult, ProcessError, PtraceAction, WriteType},
+            sys_error::{AccessType, PtraceAction, SysError, SysResult, WriteType},
         },
     },
+    assemble::patch::QWORD,
     libc::{NT_PRSTATUS, PTRACE_GETREGSET, PTRACE_SETREGSET},
     nix::sys::{
         ptrace::{
@@ -18,7 +19,6 @@ use {
         uio::{RemoteIoVec, process_vm_readv, process_vm_writev},
         wait::waitpid,
     },
-    pelite::Pod,
     std::{
         any::type_name,
         io::{IoSlice, IoSliceMut},
@@ -34,7 +34,7 @@ use {
 static PTRACE_MUTEX: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
 
 #[track_caller]
-pub fn read_unsafe<T: Pod>(address: impl Address) -> ProcResult<T> {
+pub fn read_unsafe<T>(address: impl Address) -> SysResult<T> {
     unsafe {
         let pid = pid()?;
         let mut value = std::mem::zeroed::<T>();
@@ -49,7 +49,7 @@ pub fn read_unsafe<T: Pod>(address: impl Address) -> ProcResult<T> {
         let nread = match process_vm_readv(pid, &mut [local_iov], &[remote_iov]) {
             Ok(n) => n,
             Err(err) => {
-                return Err(ProcessError::io(
+                return Err(SysError::io(
                     AccessType::Read(type_name::<T>()),
                     address.addr(),
                     std::io::Error::from(err),
@@ -57,7 +57,7 @@ pub fn read_unsafe<T: Pod>(address: impl Address) -> ProcResult<T> {
             }
         };
         if nread != size {
-            return Err(ProcessError::partial_access(
+            return Err(SysError::partial_access(
                 AccessType::Read(type_name::<T>()),
                 nread,
                 address.addr(),
@@ -68,7 +68,7 @@ pub fn read_unsafe<T: Pod>(address: impl Address) -> ProcResult<T> {
 }
 
 #[track_caller]
-pub fn write_unsafe<T: Pod>(address: impl Address, value: T) -> ProcResult {
+pub fn write_unsafe<T>(address: impl Address, value: T) -> SysResult {
     unsafe {
         let pid = pid()?;
         let size = std::mem::size_of::<T>();
@@ -81,7 +81,7 @@ pub fn write_unsafe<T: Pod>(address: impl Address, value: T) -> ProcResult {
         let nwritten = match process_vm_writev(pid, &[local_iov], &[remote_iov]) {
             Ok(n) => n,
             Err(err) => {
-                return Err(ProcessError::io(
+                return Err(SysError::io(
                     AccessType::Write(WriteType::Type(type_name::<T>())),
                     address.addr(),
                     std::io::Error::from(err),
@@ -89,7 +89,7 @@ pub fn write_unsafe<T: Pod>(address: impl Address, value: T) -> ProcResult {
             }
         };
         if nwritten != size {
-            return Err(ProcessError::partial_access(
+            return Err(SysError::partial_access(
                 AccessType::Write(WriteType::Type(type_name::<T>())),
                 nwritten,
                 address.addr(),
@@ -100,7 +100,7 @@ pub fn write_unsafe<T: Pod>(address: impl Address, value: T) -> ProcResult {
 }
 
 #[track_caller]
-pub fn write_bytes_unsafe(address: impl Address, data: &[u8]) -> ProcResult {
+pub fn write_bytes_unsafe(address: impl Address, data: &[u8]) -> SysResult {
     let pid = pid()?;
     let size = data.len();
     let local_iov = IoSlice::new(data);
@@ -112,7 +112,7 @@ pub fn write_bytes_unsafe(address: impl Address, data: &[u8]) -> ProcResult {
     let nwritten = match process_vm_writev(pid, &[local_iov], &[remote_iov]) {
         Ok(n) => n,
         Err(err) => {
-            return Err(ProcessError::io(
+            return Err(SysError::io(
                 AccessType::Write(WriteType::Bytes(size)),
                 address.addr(),
                 std::io::Error::from(err),
@@ -120,7 +120,7 @@ pub fn write_bytes_unsafe(address: impl Address, data: &[u8]) -> ProcResult {
         }
     };
     if nwritten != size {
-        return Err(ProcessError::partial_access(
+        return Err(SysError::partial_access(
             AccessType::Write(WriteType::Bytes(size)),
             nwritten,
             address.addr(),
@@ -135,7 +135,7 @@ pub fn spawn_thread_release(
     thread_code: Vec<u8>,
     create_thread_ptr_loc: impl Address,
     close_handle_ptr_loc: impl Address,
-) -> ProcResult {
+) -> SysResult {
     write_bytes_unsafe(thread_start_address, &thread_code)?;
     if attached::is_32() {
         run_win32_thread(
@@ -160,7 +160,7 @@ pub fn spawn_thread_join(
     mut thread_code: Vec<u8>,
     create_thread_ptr_loc: impl Address,
     close_handle_ptr_loc: impl Address,
-) -> ProcResult {
+) -> SysResult {
     let running_flag = thread_start_address.addr().saturating_sub(1);
     write_unsafe::<u8>(running_flag, 0x1)?;
 
@@ -191,7 +191,7 @@ pub fn spawn_thread_join(
             return Ok(());
         }
         if start.elapsed() > timeout {
-            return Err(ProcessError::RemoteThreadReturn {
+            return Err(SysError::RemoteThreadReturn {
                 timeout,
             });
         }
@@ -204,29 +204,29 @@ fn run_win64_thread(
     thread_start_address: impl Address,
     create_thread_ptr_loc: impl Address,
     close_handle_ptr_loc: impl Address,
-) -> ProcResult {
+) -> SysResult {
     let pid = pid()?;
     let start = Instant::now();
     let timeout = Duration::from_millis(50);
 
     loop {
         if start.elapsed() > timeout {
-            return Err(ProcessError::RemoteThreadCreate {
+            return Err(SysError::RemoteThreadCreate {
                 os_error: libc::ETIMEDOUT,
             });
         }
 
         let handle = PTRACE_MUTEX.lock().unwrap();
-        ptrace::attach(pid).map_err(|e| ProcessError::ptrace(PtraceAction::Attach, e))?;
-        waitpid(pid, None).map_err(|e| ProcessError::ptrace(PtraceAction::Wait, e))?;
+        ptrace::attach(pid).map_err(|e| SysError::ptrace(PtraceAction::Attach, e))?;
+        waitpid(pid, None).map_err(|e| SysError::ptrace(PtraceAction::Wait, e))?;
 
         let start = attached::module_base();
         let original_regs = ptrace::getregset::<NT_PRSTATUS>(pid)
-            .map_err(|e| ProcessError::ptrace(PtraceAction::GetRegs, e))?;
+            .map_err(|e| SysError::ptrace(PtraceAction::GetRegs, e))?;
 
         if start < original_regs.rip && original_regs.rip < start + 0x5e03000 {
             let original_fp_regs = ptrace::getregset::<NT_PRFPREG>(pid)
-                .map_err(|e| ProcessError::ptrace(PtraceAction::GetRegs, e))?;
+                .map_err(|e| SysError::ptrace(PtraceAction::GetRegs, e))?;
 
             let mut regs = original_regs;
 
@@ -236,43 +236,30 @@ fn run_win64_thread(
             let flag_loc = spawn_code_address.addr().strict_sub(1);
 
             let mut fun = ASM64.get_function("run_thread");
-            let mut asm = fun.take_bytes();
 
-            write_to_slice::<u64>(
-                &mut asm,
-                fun.reloc("code_address"),
-                thread_start_address.addr(),
-            )?;
-            write_to_slice::<u64>(
-                &mut asm,
-                fun.reloc("create_thread"),
-                create_thread_ptr_loc.addr(),
-            )?;
-            write_to_slice::<u64>(
-                &mut asm,
-                fun.reloc("close_handle"),
-                close_handle_ptr_loc.addr(),
-            )?;
-            write_to_slice::<u64>(&mut asm, fun.reloc("flag_loc"), flag_loc)?;
+            fun.patch::<QWORD>("code_address", thread_start_address.addr());
+            fun.patch::<QWORD>("create_thread", create_thread_ptr_loc.addr());
+            fun.patch::<QWORD>("close_handle", close_handle_ptr_loc.addr());
+            fun.patch::<QWORD>("flag_loc", flag_loc);
 
             write_unsafe::<u8>(flag_loc, 0x0)?;
-            write_bytes_unsafe(spawn_code_address, &asm)?;
+            write_bytes_unsafe(spawn_code_address, &fun.bytes)?;
 
             ptrace::setregset::<NT_PRSTATUS>(pid, regs)
-                .map_err(|e| ProcessError::ptrace(PtraceAction::SetRegs, e))?;
+                .map_err(|e| SysError::ptrace(PtraceAction::SetRegs, e))?;
 
-            ptrace::cont(pid, None).map_err(|e| ProcessError::ptrace(PtraceAction::Cont, e))?;
-            waitpid(pid, None).map_err(|e| ProcessError::ptrace(PtraceAction::Wait, e))?;
+            ptrace::cont(pid, None).map_err(|e| SysError::ptrace(PtraceAction::Cont, e))?;
+            waitpid(pid, None).map_err(|e| SysError::ptrace(PtraceAction::Wait, e))?;
 
             ptrace::setregset::<NT_PRSTATUS>(pid, original_regs)
-                .map_err(|e| ProcessError::ptrace(PtraceAction::SetRegs, e))?;
+                .map_err(|e| SysError::ptrace(PtraceAction::SetRegs, e))?;
             ptrace::setregset::<NT_PRFPREG>(pid, original_fp_regs)
-                .map_err(|e| ProcessError::ptrace(PtraceAction::SetRegs, e))?;
-            ptrace::detach(pid, None).map_err(|e| ProcessError::ptrace(PtraceAction::Detach, e))?;
+                .map_err(|e| SysError::ptrace(PtraceAction::SetRegs, e))?;
+            ptrace::detach(pid, None).map_err(|e| SysError::ptrace(PtraceAction::Detach, e))?;
 
             return check_success_flag(flag_loc);
         } else {
-            ptrace::detach(pid, None).map_err(|e| ProcessError::ptrace(PtraceAction::Detach, e))?;
+            ptrace::detach(pid, None).map_err(|e| SysError::ptrace(PtraceAction::Detach, e))?;
             drop(handle);
             thread::sleep(Duration::from_micros(10));
         }
@@ -312,14 +299,14 @@ fn run_win32_thread(
     thread_start_address: impl Address,
     create_thread_ptr_loc: impl Address,
     close_handle_ptr_loc: impl Address,
-) -> Result<(), ProcessError> {
+) -> Result<(), SysError> {
     let pid = pid()?;
     let start = Instant::now();
     let timeout = Duration::from_millis(50);
 
     loop {
         if start.elapsed() > timeout {
-            return Err(ProcessError::RemoteThreadCreate {
+            return Err(SysError::RemoteThreadCreate {
                 os_error: libc::ETIMEDOUT,
             });
         }
@@ -327,8 +314,8 @@ fn run_win32_thread(
         let handle = PTRACE_MUTEX.lock().unwrap();
 
         unsafe {
-            ptrace::attach(pid).map_err(|e| ProcessError::ptrace(PtraceAction::Attach, e))?;
-            waitpid(pid, None).map_err(|e| ProcessError::ptrace(PtraceAction::Wait, e))?;
+            ptrace::attach(pid).map_err(|e| SysError::ptrace(PtraceAction::Attach, e))?;
+            waitpid(pid, None).map_err(|e| SysError::ptrace(PtraceAction::Wait, e))?;
 
             let mut regs_buf: [u8; size_of::<i386Regs>()] = zeroed();
             let mut iov = libc::iovec {
@@ -354,27 +341,14 @@ fn run_win32_thread(
                 let flag_loc = spawn_code_address.addr().saturating_sub(1);
 
                 let mut fun = ASM32.get_function("run_thread");
-                let mut asm = fun.take_bytes();
 
-                write_to_slice::<u32>(
-                    &mut asm,
-                    fun.reloc("code_address"),
-                    thread_start_address.addr(),
-                )?;
-                write_to_slice::<u32>(
-                    &mut asm,
-                    fun.reloc("create_thread"),
-                    create_thread_ptr_loc.addr(),
-                )?;
-                write_to_slice::<u32>(
-                    &mut asm,
-                    fun.reloc("close_handle"),
-                    close_handle_ptr_loc.addr(),
-                )?;
-                write_to_slice::<u32>(&mut asm, fun.reloc("flag_loc"), flag_loc)?;
+                fun.patch::<POINTER>("code_address", thread_start_address.addr());
+                fun.patch::<POINTER>("create_thread", create_thread_ptr_loc.addr());
+                fun.patch::<POINTER>("close_handle", close_handle_ptr_loc.addr());
+                fun.patch::<POINTER>("flag_loc", flag_loc);
 
                 write_unsafe::<u8>(flag_loc, 0x0)?;
-                write_bytes_unsafe(spawn_code_address, &asm)?;
+                write_bytes_unsafe(spawn_code_address, &fun.bytes)?;
 
                 regs.eip = spawn_code_address.addr() as u32;
 
@@ -387,19 +361,17 @@ fn run_win32_thread(
                     &mut iov as *mut _ as *mut libc::c_void,
                 );
 
-                ptrace::cont(pid, None).map_err(|e| ProcessError::ptrace(PtraceAction::Cont, e))?;
-                waitpid(pid, None).map_err(|e| ProcessError::ptrace(PtraceAction::Wait, e))?;
+                ptrace::cont(pid, None).map_err(|e| SysError::ptrace(PtraceAction::Cont, e))?;
+                waitpid(pid, None).map_err(|e| SysError::ptrace(PtraceAction::Wait, e))?;
 
                 ptr::write_unaligned(regs_ptr, original_regs);
 
                 libc::ptrace(PTRACE_SETREGSET, pid, 1, &mut iov as *mut _ as *mut libc::c_void);
-                ptrace::detach(pid, None)
-                    .map_err(|e| ProcessError::ptrace(PtraceAction::Detach, e))?;
+                ptrace::detach(pid, None).map_err(|e| SysError::ptrace(PtraceAction::Detach, e))?;
 
                 return check_success_flag(flag_loc);
             } else {
-                ptrace::detach(pid, None)
-                    .map_err(|e| ProcessError::ptrace(PtraceAction::Detach, e))?;
+                ptrace::detach(pid, None).map_err(|e| SysError::ptrace(PtraceAction::Detach, e))?;
                 drop(handle);
                 thread::sleep(Duration::from_micros(10));
             }
@@ -407,13 +379,13 @@ fn run_win32_thread(
     }
 }
 
-fn check_success_flag(flag_loc: u64) -> ProcResult {
+fn check_success_flag(flag_loc: u64) -> SysResult {
     let flag = read_unsafe::<u8>(flag_loc)?;
     if flag != 0x0 {
         Ok(())
     } else {
         // check CreateThread error code todo
-        Err(ProcessError::RemoteThreadCreate {
+        Err(SysError::RemoteThreadCreate {
             os_error: 0,
         })
     }
@@ -447,6 +419,6 @@ fn append_32bit_flag_setter(location: u64, asm_head: &mut Vec<u8>) -> Result<(),
     Ok(())
 }
 
-fn pid() -> ProcResult<nix::unistd::Pid> {
+fn pid() -> SysResult<nix::unistd::Pid> {
     Ok(attached::pid()?.as_nix())
 }

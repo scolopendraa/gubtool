@@ -4,7 +4,7 @@ mod versions;
 
 use {
     crate::offsets::module_offsets::structs::module_offsets,
-    gubtool_core::{address::Address, attached::module_base},
+    gubtool_core::{address::Address, attached::module_base, impl_address_patch},
 };
 
 #[derive(Clone, Copy)]
@@ -17,10 +17,12 @@ pub enum BasePointer {
     CsEmkSystem,
     VirtualMemFlag,
     DamageManager,
+    WorldAreaTimeImpl,
     MapItemManImpl,
     DlUserInputManagerImpl,
     CsFlipperImp,
     CsDlcImp,
+    LockTgtManImp,
 }
 
 #[derive(Clone, Copy)]
@@ -39,18 +41,20 @@ pub enum Function {
     EmkEventInsCtor,
     ExternalEventTempCtor,
     ExecuteTalkCommand,
+    AddCoolTime,
 }
 
 #[derive(Clone, Copy)]
 pub enum Hook {
-    LockedTargetPointer,
-    TargetNoStagger,
+    SaveTarget,
+    TargetStagger,
     PlayerNoGrab,
     PlayerInfinitePoise,
     WarpCoordWrite,
     WarpAngleWrite,
     GetForceActIdx,
     SetRequestedAction,
+    NoTimePassOnDeath,
 }
 
 #[derive(Clone, Copy)]
@@ -64,6 +68,7 @@ pub enum Patch {
     OpenMap,
     CloseMap,
     CanFastTravel,
+    NoRuneLossOnDeath,
 }
 
 #[derive(Clone, Copy)]
@@ -88,6 +93,7 @@ impl Address for BasePointer {
             Self::GameMan => f.game_man,
             Self::GameDataMan => f.game_data_man,
             Self::MenuMan => f.menu_man,
+            Self::WorldAreaTimeImpl => f.world_area_time_impl,
             Self::CsEmkSystem => f.cs_emk_system,
             Self::VirtualMemFlag => f.virtual_mem_flag,
             Self::DamageManager => f.damage_manager,
@@ -95,6 +101,7 @@ impl Address for BasePointer {
             Self::DlUserInputManagerImpl => f.dl_user_input_manager_impl,
             Self::CsFlipperImp => f.cs_flipper_imp,
             Self::CsDlcImp => f.cs_dlc_imp,
+            Self::LockTgtManImp => f.lock_tgt_man_imp,
         };
         module_base() + offset
     }
@@ -118,6 +125,7 @@ impl Address for Function {
             Self::EmkEventInsCtor => f.emk_event_ins_ctor,
             Self::ExternalEventTempCtor => f.external_event_temp_ctor,
             Self::ExecuteTalkCommand => f.execute_talk_command,
+            Self::AddCoolTime => f.add_cool_time,
         };
         module_base() + offset
     }
@@ -127,14 +135,15 @@ impl Address for Hook {
     fn addr(&self) -> u64 {
         let f = &module_offsets().hooks;
         let offset = match self {
-            Self::LockedTargetPointer => f.locked_target_pointer,
-            Self::TargetNoStagger => f.target_no_stagger,
+            Self::SaveTarget => f.locked_target_pointer,
+            Self::TargetStagger => f.target_no_stagger,
             Self::PlayerNoGrab => f.player_no_grab,
             Self::PlayerInfinitePoise => f.player_infinite_poise,
             Self::WarpCoordWrite => f.warp_coord_write,
             Self::WarpAngleWrite => f.warp_angle_write,
             Self::GetForceActIdx => f.get_force_act_idx,
             Self::SetRequestedAction => f.set_requested_action,
+            Self::NoTimePassOnDeath => f.no_time_pass_on_death,
         };
         module_base() + offset
     }
@@ -153,6 +162,7 @@ impl Address for Patch {
             Self::OpenMap => f.open_map,
             Self::CloseMap => f.close_map,
             Self::CanFastTravel => f.can_fast_travel,
+            Self::NoRuneLossOnDeath => f.no_rune_loss_on_death,
         };
         module_base() + offset
     }
@@ -180,3 +190,5 @@ impl Address for ExternalFunctionPointer {
         module_base() + offset
     }
 }
+
+impl_address_patch!(BasePointer, Function, Hook, Patch, Data, ExternalFunctionPointer);

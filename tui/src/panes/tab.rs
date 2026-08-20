@@ -1,6 +1,9 @@
 use {
     crate::{
-        common::tabs::TabSelector,
+        common::{
+            controls::{Control, draw_controls},
+            tabs::TabSelector,
+        },
         event::KeyContext,
         panes::{Pane, TablePane},
         screen::Screen,
@@ -11,14 +14,21 @@ use {
 pub struct TabPane {
     lists:    Vec<TablePane>,
     selector: TabSelector,
+    controls: Option<&'static [Control]>,
 }
 
 impl TabPane {
     pub fn new(names: &'static [&'static str], lists: Vec<TablePane>) -> Self {
         Self {
             lists,
+            controls: None,
             selector: TabSelector::new(names),
         }
+    }
+
+    pub fn with_controls(mut self, controls: &'static [Control]) -> Self {
+        self.controls = Some(controls);
+        self
     }
 
     fn current_list(&self) -> &TablePane {
@@ -43,6 +53,10 @@ impl Pane for TabPane {
     fn draw_pane(&mut self, frame: &mut Frame, rect: Rect, active: bool) {
         self.lists[self.selector.current_tab as usize].draw_pane(frame, rect, active);
         self.selector.draw_thin(frame, rect);
+
+        if let Some(controls) = self.controls {
+            draw_controls(frame, rect, controls);
+        }
     }
 }
 

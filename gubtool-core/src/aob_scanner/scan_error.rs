@@ -1,5 +1,5 @@
 use {
-    crate::{pe::error::ParsePeError, sys::sys_error::ProcessError},
+    crate::{pe::error::ParsePeError, sys::sys_error::SysError},
     thiserror::Error,
 };
 
@@ -23,7 +23,7 @@ pub enum ScanError {
     },
     #[error("{err}")]
     ProcessError {
-        err: ProcessError,
+        err: SysError,
     },
     #[error("IO error: {error_kind}")]
     Io {
@@ -40,8 +40,8 @@ pub enum ScanError {
     },
 }
 
-impl From<ProcessError> for ScanError {
-    fn from(err: ProcessError) -> Self {
+impl From<SysError> for ScanError {
+    fn from(err: SysError) -> Self {
         Self::ProcessError {
             err,
         }

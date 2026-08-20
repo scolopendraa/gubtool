@@ -4,14 +4,12 @@ pub use scripts::*;
 use {
     crate::{
         mem::{read, read_address, run_custom_function, write},
-        offsets::{Offset, code_cave::CaveAddress, module_offsets::Function},
+        offsets::{Offset, code_cave::CaveAddr, module_offsets::Function},
         resources::{asm_function, map_ids::MapId},
         utils::{area_check, player_loaded_check},
     },
-    gubtool_core::{
-        slice_ops::{write_addr_to_slice, write_to_slice},
-        sys::sys_error::ProcResult,
-    },
+    assemble::patch::DWORD,
+    gubtool_core::{address::POINTER, sys::sys_error::SysResult},
 };
 
 struct EsdEventScript {
@@ -28,19 +26,18 @@ struct EventCommand {
 fn execute_esd_event(event: &EventCommand, map_id: MapId) -> anyhow::Result<()> {
     area_check(map_id)?;
 
-    write::<[i32; 3]>(CaveAddress::EzStateParams, event.params)?;
+    write::<[i32; 3]>(CaveAddr::EzStateParams, event.params)?;
 
     let mut fun = asm_function("ezstate_execute_event");
-    let mut asm = fun.take_bytes();
 
-    write_to_slice::<u32>(&mut asm, fun.reloc("event_id"), event.event_id)?;
-    write_addr_to_slice(&mut asm, fun.reloc("fn_event_ctor"), Function::EzStateExternalEventCtor)?;
-    write_to_slice::<u32>(&mut asm, fun.reloc("map_id"), map_id as u32)?;
-    write_to_slice::<u32>(&mut asm, fun.reloc("params_len"), event.params_len)?;
-    write_addr_to_slice(&mut asm, fun.reloc("params_loc"), CaveAddress::EzStateParams)?;
-    write_addr_to_slice(&mut asm, fun.reloc("fn_execute_event"), Function::EzStateExecuteEvent)?;
+    fun.patch::<DWORD>("event_id", event.event_id);
+    fun.patch::<POINTER>("fn_event_ctor", Function::EzStateExternalEventCtor);
+    fun.patch::<DWORD>("map_id", map_id as u32);
+    fun.patch::<DWORD>("params_len", event.params_len);
+    fun.patch::<POINTER>("params_loc", CaveAddr::EzStateParams);
+    fun.patch::<POINTER>("fn_execute_event", Function::EzStateExecuteEvent);
 
-    run_custom_function(asm)
+    run_custom_function(fun)
 }
 
 impl EsdEventScript {
@@ -92,24 +89,15 @@ pub fn get_obj_state_act_ctrl(map_id: MapId, obj_id: u32) -> anyhow::Result<u64>
     area_check(map_id)?;
 
     let mut fun = asm_function("state_act_ctrl");
-    let mut asm = fun.take_bytes();
 
-    write_to_slice::<u32>(&mut asm, fun.reloc("obj_id"), obj_id)?;
-    write_to_slice::<u32>(&mut asm, fun.reloc("map_id"), map_id as u32)?;
-    write_addr_to_slice(
-        &mut asm,
-        fun.reloc("fn_map_entity"),
-        Function::MapEntityFromMapIdAndObjId,
-    )?;
-    write_addr_to_slice(
-        &mut asm,
-        fun.reloc("saved_state_act_ctrl"),
-        CaveAddress::LookedUpStateActCtrl,
-    )?;
+    fun.patch::<DWORD>("obj_id", obj_id);
+    fun.patch::<DWORD>("map_id", map_id as u32);
+    fun.patch::<POINTER>("fn_map_entity", Function::MapEntityFromMapIdAndObjId);
+    fun.patch::<POINTER>("saved_state_act_ctrl", CaveAddr::LookedUpStateActCtrl);
 
-    run_custom_function(asm)?;
+    run_custom_function(fun)?;
 
-    let state_act_ctrl = read_address(CaveAddress::LookedUpStateActCtrl)?;
+    let state_act_ctrl = read_address(CaveAddr::LookedUpStateActCtrl)?;
     Ok(state_act_ctrl)
 }
 
@@ -118,6 +106,6 @@ const STATE_ID: Offset = Offset {
     scholar: 0x1e,
 };
 
-pub fn get_obj_state(state_act_ctrl: u64) -> ProcResult<u8> {
+pub fn get_obj_state(state_act_ctrl: u64) -> SysResult<u8> {
     read::<u8>(state_act_ctrl + STATE_ID.resolve())
 }

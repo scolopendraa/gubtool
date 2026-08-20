@@ -1,7 +1,7 @@
 use {
     crate::{
         mem::*,
-        offsets::{code_cave::CaveAddress, game_manager_imp, module_offsets::Function},
+        offsets::{code_cave::CaveAddr, game_manager_imp, module_offsets::Function},
         pointer_cache::ResolvedPtr,
         resources::menus::{MenuType, Shop, Trade},
         utils::player_loaded_check,
@@ -15,22 +15,22 @@ use {
 };
 
 pub fn open_shop(shop: Shop) -> anyhow::Result<()> {
-    write::<u32>(CaveAddress::NpcTalkArgs.add_offset(0x4), shop as u32)?;
-    write::<u32>(CaveAddress::NpcTalkArgs.add_offset(0x8), shop as u32 + 999)?;
+    write::<u32>(CaveAddr::NpcTalkArgs.add(0x4), shop as u32)?;
+    write::<u32>(CaveAddr::NpcTalkArgs.add(0x8), shop as u32 + 999)?;
     open_menu(MenuType::Shop)
 }
 
 pub fn open_trade(trade: Trade) -> anyhow::Result<()> {
-    write::<u32>(CaveAddress::NpcTalkArgs.add_offset(0x14), trade as u32)?;
-    write::<u32>(CaveAddress::NpcTalkArgs.add_offset(0x2c), trade as u32 + 999)?;
+    write::<u32>(CaveAddr::NpcTalkArgs.add(0x14), trade as u32)?;
+    write::<u32>(CaveAddr::NpcTalkArgs.add(0x2c), trade as u32 + 999)?;
     open_menu(MenuType::Trading)
 }
 
 pub fn open_menu(menu_type: MenuType) -> anyhow::Result<()> {
     player_loaded_check()?;
 
-    let args_loc = CaveAddress::OpenMenuArgs.addr();
-    let npc_args_loc = CaveAddress::NpcTalkArgs.addr();
+    let args_loc = CaveAddr::OpenMenuArgs.addr();
+    let npc_args_loc = CaveAddr::NpcTalkArgs.addr();
 
     if is_32() {
         write::<u32>(args_loc, npc_args_loc as u32)?;
@@ -45,7 +45,7 @@ pub fn open_menu(menu_type: MenuType) -> anyhow::Result<()> {
     let args = [
         FfiValue::pointer(ResolvedPtr::WindowManager.get()?),
         FfiValue::pointer(args_loc),
-        FfiValue::pointer(CaveAddress::NpcPos.addr()),
+        FfiValue::pointer(CaveAddr::NpcPos.addr()),
     ];
 
     set_menu_open_chr_state(true)?;

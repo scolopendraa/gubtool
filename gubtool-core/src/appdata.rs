@@ -28,11 +28,7 @@ pub fn log_error(err: &impl Display) -> Result<(), AppDataError> {
     let msg = err.to_string();
     let log_path = app_data_dir()?.join("errors.log");
 
-    let contents = if log_path.exists() {
-        fs::read_to_string(&log_path)?
-    } else {
-        String::new()
-    };
+    let contents = if log_path.exists() { fs::read_to_string(&log_path)? } else { String::new() };
 
     let mut lines: Vec<&str> = contents.lines().collect();
 

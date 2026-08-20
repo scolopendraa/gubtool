@@ -27,6 +27,7 @@ fn scan(strategy: ScanStrategy) -> Result<ModuleOffsets, ScanError> {
             game_man: GAME_MAN,
             game_data_man: GAME_DATA_MAN,
             menu_man: MENU_MAN,
+            world_area_time_impl: WORLD_AREA_TIME_IMPL,
             cs_emk_system: CS_EMK_SYSTEM,
             virtual_mem_flag: VIRTUAL_MEMORY_FLAG,
             damage_manager: DAMAGE_MANAGER,
@@ -34,6 +35,7 @@ fn scan(strategy: ScanStrategy) -> Result<ModuleOffsets, ScanError> {
             dl_user_input_manager_impl: DL_USER_INPUT_MANAGER_IMPL,
             cs_flipper_imp: CS_FLIPPER_IMP,
             cs_dlc_imp: CS_DLC_IMP,
+            lock_tgt_man_imp: LOCK_TGT_MAN_IMP,
 
             grace_warp: GRACE_WARP,
             block_warp: BLOCK_WARP,
@@ -49,6 +51,7 @@ fn scan(strategy: ScanStrategy) -> Result<ModuleOffsets, ScanError> {
             emk_event_ins_ctor: EMK_EVENT_INS_CTOR,
             external_event_temp_ctor: EXTERNAL_EVENT_TEMP_CTOR,
             execute_talk_command: EXECUTE_TALK_COMMAND,
+            add_cool_time: ADD_COOL_TIME,
 
             locked_target_pointer: LOCKED_TARGET_POINTER,
             target_no_stagger: TARGET_NO_STAGGER,
@@ -58,6 +61,7 @@ fn scan(strategy: ScanStrategy) -> Result<ModuleOffsets, ScanError> {
             warp_angle_write: WARP_ANGLE_WRITE,
             get_force_act_idx: GET_FORCE_ACT_IDX,
             set_requested_action: SET_REQUESTED_ACTION,
+            no_time_pass_on_death: NO_TIME_PASS_ON_DEATH,
 
             no_logo: NO_LOGO,
             fps_cap: FPS_CAP,
@@ -68,6 +72,7 @@ fn scan(strategy: ScanStrategy) -> Result<ModuleOffsets, ScanError> {
             open_map: OPEN_MAP,
             close_map: CLOSE_MAP,
             can_fast_travel: CAN_FAST_TRAVEL,
+            no_rune_loss_on_death: NO_RUNE_LOSS_ON_DEATH,
 
             chr_dbg_flags: CHR_DBG_FLAGS,
             map_dbg_flags: MAP_DBG_FLAGS,
@@ -84,6 +89,7 @@ fn scan(strategy: ScanStrategy) -> Result<ModuleOffsets, ScanError> {
         game_man,
         game_data_man,
         menu_man,
+        world_area_time_impl,
         cs_emk_system,
         virtual_mem_flag,
         damage_manager,
@@ -91,6 +97,7 @@ fn scan(strategy: ScanStrategy) -> Result<ModuleOffsets, ScanError> {
         dl_user_input_manager_impl,
         cs_flipper_imp,
         cs_dlc_imp,
+        lock_tgt_man_imp,
     };
     let functions = Functions {
         grace_warp,
@@ -107,6 +114,7 @@ fn scan(strategy: ScanStrategy) -> Result<ModuleOffsets, ScanError> {
         emk_event_ins_ctor,
         external_event_temp_ctor,
         execute_talk_command,
+        add_cool_time,
     };
     let hooks = Hooks {
         locked_target_pointer,
@@ -117,6 +125,7 @@ fn scan(strategy: ScanStrategy) -> Result<ModuleOffsets, ScanError> {
         warp_angle_write,
         get_force_act_idx,
         set_requested_action,
+        no_time_pass_on_death,
     };
     let patches = Patches {
         no_logo,
@@ -128,6 +137,7 @@ fn scan(strategy: ScanStrategy) -> Result<ModuleOffsets, ScanError> {
         open_map,
         close_map,
         can_fast_travel,
+        no_rune_loss_on_death,
     };
     let data = Data {
         chr_dbg_flags,

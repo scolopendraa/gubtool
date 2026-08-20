@@ -3,16 +3,17 @@ use {
     crate::{
         chr_ins::{ChrIns, ResolvedChrPtr},
         mem::*,
-        offsets::{code_cave::CaveAddress, module_offsets::Hook},
+        offsets::{ChainReadExt, code_cave::CaveAddr, lock_tgt_man_imp, module_offsets::Hook},
         phase_transition,
+        pointer_cache::ResolvedPtr,
         resources::ASM,
     },
+    assemble::patch::DWORD,
     gubtool_core::{
-        address::Address,
+        address::{Address, POINTER},
         attached::version,
         game_version::EldenRingVersion::*,
-        slice_ops::*,
-        sys::sys_error::{PointerType, ProcResult, ProcessError},
+        sys::sys_error::{PointerType, SysError, SysResult},
     },
     shared::{
         act_array::ActArray,
@@ -43,7 +44,7 @@ impl Target {
     }
 
     pub fn update(&mut self) {
-        match read::<u64>(CaveAddress::SavedTargetPointer) {
+        match read::<u64>(CaveAddr::SavedTargetPointer) {
             Ok(new_target) => {
                 let same_target = self
                     .chr_ins
@@ -65,10 +66,10 @@ impl Target {
         }
     }
 
-    pub fn chr_ins(&mut self) -> ProcResult<&mut ChrIns> {
+    pub fn chr_ins(&mut self) -> SysResult<&mut ChrIns> {
         self.chr_ins
             .as_mut()
-            .ok_or(ProcessError::null_pointer(PointerType::Target))
+            .ok_or(SysError::null_pointer(PointerType::Target))
     }
 
     pub fn set(&mut self, chr_ins: ChrIns) {
@@ -81,6 +82,13 @@ impl Target {
             .map(|c| c.pointers())
             .unwrap_or_default()
     }
+}
+
+pub fn unlock() -> SysResult {
+    ResolvedPtr::LockTgtMan
+        .get()
+        .add_offset(lock_tgt_man_imp::IS_LOCKED)
+        .write::<u8>(0x0)
 }
 
 declare_command!(
@@ -100,36 +108,25 @@ declare_command!(
 
 const TARGET_HOOK_BYTES_ORIGINAL: [u8; 7] = [0x48, 0x8b, 0x8f, 0x88, 0x00, 0x00, 0x00];
 impl ToggleCommand for SaveTargetHook {
-    fn is(&self) -> ProcResult<bool> {
-        read::<[u8; 7]>(Hook::LockedTargetPointer).map(|val| val != TARGET_HOOK_BYTES_ORIGINAL)
+    fn is(&self) -> SysResult<bool> {
+        read::<[u8; 7]>(Hook::SaveTarget).map(|val| val != TARGET_HOOK_BYTES_ORIGINAL)
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
         if state {
             let mut fun = ASM.get_function("save_target_hook");
-            let mut asm = fun.take_bytes();
 
-            write_addr_to_slice(
-                &mut asm,
-                fun.reloc("saved_pointer_loc"),
-                CaveAddress::SavedTargetPointer,
-            )?;
-            write_rel_i32(
-                &mut asm,
-                CaveAddress::SaveTargetHook,
-                fun.reloc("hook_loc"),
-                Hook::LockedTargetPointer.add_offset(7),
-                4,
-            )?;
-            install_hook(&asm, CaveAddress::SaveTargetHook, Hook::LockedTargetPointer, 7)?;
+            fun.patch::<POINTER>("saved_pointer_loc", CaveAddr::SavedTargetPointer);
+            fun.patch_rel32("hook_loc", CaveAddr::SaveTargetHook, Hook::SaveTarget.add(7), 4);
+            install_hook(&fun.bytes, CaveAddr::SaveTargetHook, Hook::SaveTarget, 7)?;
         } else {
-            write_bytes(Hook::LockedTargetPointer, &TARGET_HOOK_BYTES_ORIGINAL)?;
+            write_bytes(Hook::SaveTarget, &TARGET_HOOK_BYTES_ORIGINAL)?;
         }
         Ok(())
     }
 }
 
 impl ValueCommand<i32> for Health {
-    fn get(&self) -> ProcResult<i32> {
+    fn get(&self) -> SysResult<i32> {
         target().chr_ins()?.get_current_hp()
     }
     fn set(&self, val: i32) -> anyhow::Result<()> {
@@ -139,7 +136,7 @@ impl ValueCommand<i32> for Health {
 }
 
 impl ValueCommand<f32> for HealthPercentage {
-    fn get(&self) -> ProcResult<f32> {
+    fn get(&self) -> SysResult<f32> {
         target().chr_ins()?.get_hp_pct()
     }
     fn set(&self, val: f32) -> anyhow::Result<()> {
@@ -168,7 +165,7 @@ impl ValueCommand<u8> for RepeatAction {
     fn can_get(&self) -> bool {
         false
     }
-    fn get(&self) -> ProcResult<u8> {
+    fn get(&self) -> SysResult<u8> {
         unreachable!("no getter for RepeatAction")
     }
 }
@@ -183,40 +180,29 @@ fn force_act_orig_instr_off() -> i32 {
 }
 impl ValueCommand<ActArray> for ForceActSequence {
     fn set(&self, mut val: ActArray) -> anyhow::Result<()> {
-        let location = CaveAddress::ForceActSequenceHook;
+        let location = CaveAddr::ForceActSequenceHook;
         let npc_think_param_id = target().chr_ins()?.npc_think_param_id()?;
 
         let mut fun = ASM.get_function("force_act_sequence_hook");
-        let mut asm = fun.take_bytes();
 
-        write_addr_to_slice(
-            &mut asm,
-            fun.reloc("should_run_flag"),
-            CaveAddress::ActSeqeunceShouldRun,
-        )?;
-        write_to_slice::<i32>(&mut asm, fun.reloc("npc_think_param_id"), npc_think_param_id)?;
-        write_addr_to_slice(&mut asm, fun.reloc("current_idx"), CaveAddress::CurrentActIdx)?;
-        write_addr_to_slice(&mut asm, fun.reloc("act_array"), CaveAddress::ActArray)?;
-        write_to_slice::<i32>(&mut asm, fun.reloc("orig_instr_off"), force_act_orig_instr_off())?;
-        write_rel_i32(
-            &mut asm,
-            location,
-            fun.reloc("hook_loc"),
-            Hook::GetForceActIdx.add_offset(7),
-            4,
-        )?;
+        fun.patch::<POINTER>("should_run_flag", CaveAddr::ActSeqeunceShouldRun);
+        fun.patch::<DWORD>("npc_think_param_id", npc_think_param_id);
+        fun.patch::<POINTER>("current_idx", CaveAddr::CurrentActIdx);
+        fun.patch::<POINTER>("act_array", CaveAddr::ActArray);
+        fun.patch::<DWORD>("orig_instr_off", force_act_orig_instr_off());
+        fun.patch_rel32("hook_loc", location, Hook::GetForceActIdx.add(7), 4);
 
         val.zero_fill();
-        write_bytes(CaveAddress::ActArray, &val.as_qword_le_bytes())?;
-        write::<i32>(CaveAddress::CurrentActIdx, 0x0)?;
-        write::<u8>(CaveAddress::ActSeqeunceShouldRun, 0x1)?;
-        install_hook(&asm, location, Hook::GetForceActIdx, 7)?;
+        write_bytes(CaveAddr::ActArray, &val.as_qword_le_bytes())?;
+        write::<i32>(CaveAddr::CurrentActIdx, 0x0)?;
+        write::<u8>(CaveAddr::ActSeqeunceShouldRun, 0x1)?;
+        install_hook(&fun.bytes, location, Hook::GetForceActIdx, 7)?;
         Ok(())
     }
     fn can_get(&self) -> bool {
         false
     }
-    fn get(&self) -> ProcResult<ActArray> {
+    fn get(&self) -> SysResult<ActArray> {
         unreachable!("no getter for ForceActSequence")
     }
 }
@@ -228,7 +214,7 @@ impl UnitCommand for ResetPosition {
 }
 
 impl ToggleCommand for NoDamage {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         target().chr_ins()?.is_no_damage()
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -240,36 +226,24 @@ impl ToggleCommand for NoDamage {
 const TARGET_STAGGER_HOOK_BYTES_ORIGINAL: [u8; 8] =
     [0x48, 0x8b, 0x41, 0x08, 0x83, 0x48, 0x2c, 0x08];
 impl ToggleCommand for NoStagger {
-    fn is(&self) -> ProcResult<bool> {
-        read::<[u8; 8]>(Hook::TargetNoStagger).map(|val| val != TARGET_STAGGER_HOOK_BYTES_ORIGINAL)
+    fn is(&self) -> SysResult<bool> {
+        read::<[u8; 8]>(Hook::TargetStagger).map(|val| val != TARGET_STAGGER_HOOK_BYTES_ORIGINAL)
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
         if state {
             let mut fun = ASM.get_function("target_stagger_hook");
-            let mut asm = fun.take_bytes();
-
-            write_addr_to_slice(
-                &mut asm,
-                fun.reloc("target_ptr_loc"),
-                CaveAddress::SavedTargetPointer,
-            )?;
-            write_rel_i32(
-                &mut asm,
-                CaveAddress::TargetNoStaggerHook,
-                fun.reloc("hook_loc"),
-                Hook::TargetNoStagger.add_offset(8),
-                4,
-            )?;
-            install_hook(&asm, CaveAddress::TargetNoStaggerHook, Hook::TargetNoStagger, 8)?;
+            fun.patch::<POINTER>("target_ptr_loc", CaveAddr::SavedTargetPointer);
+            fun.patch_rel32("hook_loc", CaveAddr::TargetStaggerHook, Hook::TargetStagger.add(8), 4);
+            install_hook(&fun.bytes, CaveAddr::TargetStaggerHook, Hook::TargetStagger, 8)?;
         } else {
-            write_bytes(Hook::TargetNoStagger, &TARGET_STAGGER_HOOK_BYTES_ORIGINAL)?;
+            write_bytes(Hook::TargetStagger, &TARGET_STAGGER_HOOK_BYTES_ORIGINAL)?;
         }
         Ok(())
     }
 }
 
 impl ToggleCommand for DisableAi {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         target().chr_ins()?.is_disable_ai()
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -279,7 +253,7 @@ impl ToggleCommand for DisableAi {
 }
 
 impl ToggleCommand for RepeatLastAction {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         target().chr_ins()?.is_repeat_act()
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {

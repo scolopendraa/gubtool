@@ -118,19 +118,21 @@ const DS2_UTILITY: [Command; 7] = [
     Command::Toggle(&darksouls2::attach::StartEventLogger),
 ];
 
-const ER_PLAYER: [Command; 14] = [
+const ER_PLAYER: [Command; 16] = [
     Command::Toggle(&eldenring::attach::NoDeath),
     Command::Toggle(&eldenring::attach::NoDamage),
     Command::Toggle(&eldenring::attach::InfinitePoise),
     Command::Toggle(&eldenring::attach::OneShot),
     Command::Toggle(&eldenring::attach::RuneArc),
-    Command::Toggle(&eldenring::attach::SetRfbsOnLoad),
     Command::Toggle(&eldenring::attach::Hidden),
     Command::Toggle(&eldenring::attach::Silent),
     Command::Toggle(&eldenring::attach::InfiniteStamina),
     Command::Toggle(&eldenring::attach::InfiniteFp),
     Command::Toggle(&eldenring::attach::InfiniteConsumables),
     Command::Toggle(&eldenring::attach::InfiniteArrows),
+    Command::Toggle(&eldenring::attach::NoRuneLossOnDeath),
+    Command::Toggle(&eldenring::attach::NoTimePassOnDeath),
+    Command::Toggle(&eldenring::attach::SetRfbsOnLoad),
     Command::Toggle(&eldenring::attach::TorrentAnywhere),
     Command::Toggle(&eldenring::attach::TorrentNoDeath),
 ];

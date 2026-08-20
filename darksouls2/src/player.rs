@@ -7,7 +7,7 @@ use {
             ChainReadExt,
             Offset,
             chr_ctrl::stats_offsets::{self},
-            code_cave::CaveAddress,
+            code_cave::CaveAddr,
             game_manager_imp,
             module_offsets::{BasePointer, Function, Hook, Patch},
         },
@@ -16,13 +16,13 @@ use {
         utils::player_loaded_check,
     },
     gubtool_core::{
-        address::Address,
+        address::{Address, POINTER},
         attached::{is_32, version},
         game_version::DarkSouls2Version,
         slice_ops::*,
         sys::{
             ipc::{FfiValue, X86CallingConvention},
-            sys_error::{PointerType, ProcResult, ProcessError},
+            sys_error::{PointerType, SysError, SysResult},
         },
     },
     shared::{
@@ -68,10 +68,10 @@ impl Player {
             }
         }
     }
-    pub fn chr_ctrl(&mut self) -> ProcResult<&mut ChrCtrl> {
+    pub fn chr_ctrl(&mut self) -> SysResult<&mut ChrCtrl> {
         self.chr_ctrl
             .as_mut()
-            .ok_or(ProcessError::null_pointer(PointerType::Player))
+            .ok_or(SysError::null_pointer(PointerType::Player))
     }
     pub fn pointers(&self) -> Vec<(String, u64)> {
         self.chr_ctrl
@@ -98,7 +98,7 @@ declare_command!(
 );
 
 impl ValueCommand<u32> for Souls {
-    fn get(&self) -> ProcResult<u32> {
+    fn get(&self) -> SysResult<u32> {
         player()
             .chr_ctrl()?
             .get_ptr(ResolvedChrPtr::Stats)
@@ -133,7 +133,7 @@ impl Souls {
 }
 
 impl ToggleCommand for NoDeath {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         Ok(game_state::is_flag(StateFlag::PlayerNoDeath))
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -146,7 +146,7 @@ impl ToggleCommand for NoDeath {
 const VANILLA_NO_DAMAGE_ORIGINAL: [u8; 6] = [0x89, 0x8e, 0xfc, 0x00, 0x00, 0x00];
 const SCHOLAR_NO_DAMAGE_ORIGINAL: [u8; 6] = [0x89, 0x83, 0x68, 0x01, 0x00, 0x00];
 impl ToggleCommand for NoDamage {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         let bytes: &[u8] = match is_32() {
             true => &VANILLA_NO_DAMAGE_ORIGINAL,
             false => &SCHOLAR_NO_DAMAGE_ORIGINAL,
@@ -155,13 +155,15 @@ impl ToggleCommand for NoDamage {
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
         let hook_loc = Hook::PlayerNoDamage;
-        let cave_loc = CaveAddress::PlayerNoDamageHook;
+        let cave_loc = CaveAddr::PlayerNoDamageHook;
+
         if state {
             let mut fun = asm_function("player_no_damage");
-            let mut asm = fun.take_bytes();
-            write_addr_to_slice(&mut asm, fun.reloc("game_man_imp"), BasePointer::GameManagerImp)?;
-            write_rel_i32(&mut asm, cave_loc, fun.reloc("hook_loc"), hook_loc.add_offset(6), 4)?;
-            install_hook(&asm, cave_loc, hook_loc, 6)?;
+
+            fun.patch::<POINTER>("game_man_imp", BasePointer::GameManagerImp);
+            fun.patch_rel32("hook_loc", cave_loc, hook_loc.add(6), 4);
+
+            install_hook(&fun.bytes, cave_loc, hook_loc, 6)?;
         } else {
             let bytes: &[u8] = match is_32() {
                 true => &VANILLA_NO_DAMAGE_ORIGINAL,
@@ -176,7 +178,7 @@ impl ToggleCommand for NoDamage {
 const VANILLA_INFINITE_POISE_ORIGINAL: [u8; 7] = [0x83, 0xbb, 0xec, 0x05, 0x00, 0x00, 0x00];
 const SCHOLAR_INFINITE_POISE_ORIGINAL: [u8; 6] = [0x39, 0x9d, 0xec, 0x05, 0x00, 0x00];
 impl ToggleCommand for InfinitePoise {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         if is_32() {
             read::<[u8; 7]>(Hook::InfinitePoise).map(|val| val != VANILLA_INFINITE_POISE_ORIGINAL)
         } else {
@@ -185,24 +187,21 @@ impl ToggleCommand for InfinitePoise {
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
         if state {
-            let orig_instr_len = if is_32() {
-                7
-            } else {
-                6
-            };
+            let orig_instr_len = if is_32() { 7 } else { 6 };
+
             let mut fun = asm_function("infinite_poise_hook");
-            let mut asm = fun.take_bytes();
-            write_addr_to_slice(&mut asm, fun.reloc("game_man_imp"), BasePointer::GameManagerImp)?;
-            write_rel_i32(
-                &mut asm,
-                CaveAddress::InfinitePoiseHook,
-                fun.reloc("hook_loc"),
-                Hook::InfinitePoise.add_offset(orig_instr_len),
+
+            fun.patch::<POINTER>("game_man_imp", BasePointer::GameManagerImp);
+            fun.patch_rel32(
+                "hook_loc",
+                CaveAddr::InfinitePoiseHook,
+                Hook::InfinitePoise.add(orig_instr_len),
                 4,
-            )?;
+            );
+
             install_hook(
-                &asm,
-                CaveAddress::InfinitePoiseHook,
+                &fun.bytes,
+                CaveAddr::InfinitePoiseHook,
                 Hook::InfinitePoise,
                 orig_instr_len,
             )?;
@@ -218,22 +217,18 @@ impl ToggleCommand for InfinitePoise {
 }
 
 impl ToggleCommand for InfiniteStamina {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         read::<u8>(Patch::InfiniteStamina).map(|val| val != 0x83)
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
-        let byte = if state {
-            0x82
-        } else {
-            0x83
-        };
+        let byte = if state { 0x82 } else { 0x83 };
         write::<u8>(Patch::InfiniteStamina, byte)?;
         Ok(())
     }
 }
 
 impl ToggleCommand for InfiniteDurability {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         read::<[u8; 5]>(Patch::InfiniteDurability).map(|val| val == [0x90; 5])
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -249,7 +244,7 @@ impl ToggleCommand for InfiniteDurability {
 }
 
 impl ToggleCommand for InfiniteConsumables {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         read::<[u8; 4]>(Patch::InfiniteConsumables).map(|val| val == [0x90; 4])
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -264,7 +259,7 @@ impl ToggleCommand for InfiniteConsumables {
 }
 
 impl ToggleCommand for NoHollowing {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         read::<[u8; 6]>(Patch::NoHollowing).map(|val| val == [0x90; 6])
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -279,7 +274,7 @@ impl ToggleCommand for NoHollowing {
 }
 
 impl ToggleCommand for NoSoulLoss {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         read::<[u8; 6]>(Patch::NoSoulLoss).map(|val| val == [0x90; 6])
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -295,7 +290,7 @@ impl ToggleCommand for NoSoulLoss {
 }
 
 impl ToggleCommand for NoSoulGain {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         read::<[u8; 5]>(Patch::NoSoulGain).map(|val| val == [0x90; 5])
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -310,22 +305,18 @@ impl ToggleCommand for NoSoulGain {
 }
 
 impl ToggleCommand for Hidden {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         read::<u8>(Patch::PlayerHidden).map(|val| val != 0x84)
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
-        let byte = if state {
-            0x85
-        } else {
-            0x84
-        };
+        let byte = if state { 0x85 } else { 0x84 };
         write::<u8>(Patch::PlayerHidden, byte)?;
         Ok(())
     }
 }
 
 impl ToggleCommand for Silent {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         read::<[u8; 5]>(Patch::PlayerSilent).map(|val| val == [0x90; 5])
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -337,7 +328,7 @@ impl ToggleCommand for Silent {
                 };
                 if state {
                     write_bytes(Patch::PlayerSilent, &[0x90; 15])?;
-                    write::<u8>(Patch::PlayerSilent.sub_offset(push_op_neg_offset), 0x90)?;
+                    write::<u8>(Patch::PlayerSilent.sub(push_op_neg_offset), 0x90)?;
                 } else {
                     let mut bytes = match version() {
                         Some(DarkSouls2Version::Vanilla1_0_12) => {
@@ -355,7 +346,7 @@ impl ToggleCommand for Silent {
                     };
                     write_rel_i32(&mut bytes, Patch::PlayerSilent, 11, Function::MakeSound, 4)?;
                     write_bytes(Patch::PlayerSilent, &bytes)?;
-                    write::<u8>(Patch::PlayerSilent.sub_offset(push_op_neg_offset), 0x51)?;
+                    write::<u8>(Patch::PlayerSilent.sub(push_op_neg_offset), 0x51)?;
                 }
             }
             false => {
@@ -373,7 +364,7 @@ impl ToggleCommand for Silent {
 }
 
 impl ValueCommand<i32> for Health {
-    fn get(&self) -> ProcResult<i32> {
+    fn get(&self) -> SysResult<i32> {
         player().chr_ctrl()?.get_hp()
     }
     fn set(&self, val: i32) -> anyhow::Result<()> {
@@ -411,16 +402,16 @@ pub(crate) struct Stats {
 
 impl Stats {
     pub fn read(&mut self) {
-        let bytes = player()
+        let val = player()
             .chr_ctrl()
             .and_then(|chr| {
                 chr.get_ptr(ResolvedChrPtr::Stats)
                     .add_offset(stats_offsets::STATS)
-                    .read::<[u8; std::mem::size_of::<Self>()]>()
+                    .read::<Self>()
             })
-            .unwrap_or([0x0; std::mem::size_of::<Self>()]);
+            .unwrap_or_default();
 
-        *self = unsafe { *(bytes.as_ptr() as *const Self) }
+        *self = val
     }
 }
 
@@ -491,8 +482,8 @@ impl StatCommand for Stat {
 
         let stat_bytes = stats_base.read::<[u8; 22]>()?;
 
-        let negative_flag_loc = CaveAddress::NegativeFlag;
-        let buffer_loc = CaveAddress::LevelUpBuffer.addr();
+        let negative_flag_loc = CaveAddr::NegativeFlag;
+        let buffer_loc = CaveAddr::LevelUpBuffer.addr();
 
         let mut buffer = [0x0; 0x100];
 
@@ -511,31 +502,30 @@ impl StatCommand for Stat {
             scholar: 0x39,
         };
 
-        let negative_patch_loc = Function::LevelUp.add_offset(NEGATIVE_LEVEL_PATCH.resolve());
+        let negative_patch_loc = Function::LevelUp.add(NEGATIVE_LEVEL_PATCH.resolve());
         if is_negative {
             write::<u8>(negative_patch_loc, 0x85)?;
         }
 
         let mut fun = asm_function("level_up");
-        let mut asm = fun.take_bytes();
 
-        write_addr_to_slice(&mut asm, fun.reloc("current_level"), buffer_loc + CURRENT_LEVEL)?;
-        write_addr_to_slice(&mut asm, fun.reloc("negative_flag"), negative_flag_loc)?;
-        write_addr_to_slice(&mut asm, fun.reloc("fn_level_lookup"), Function::LevelLookup)?;
-        write_addr_to_slice(&mut asm, fun.reloc("new_level"), buffer_loc + NEW_LEVEL)?;
-        write_addr_to_slice(&mut asm, fun.reloc("required_souls"), buffer_loc + REQUIRED_SOULS)?;
-        write_addr_to_slice(&mut asm, fun.reloc("current_souls"), buffer_loc + CURRENT_SOULS)?;
-        write_addr_to_slice(&mut asm, fun.reloc("stats_entity"), player_stats_entity?)?;
-        write_addr_to_slice(&mut asm, fun.reloc("fn_give_souls"), Function::GiveSouls)?;
-        write_addr_to_slice(&mut asm, fun.reloc("stats_entity"), player_stats_entity?)?;
-        write_addr_to_slice(&mut asm, fun.reloc("current_souls"), buffer_loc + CURRENT_SOULS)?;
-        write_addr_to_slice(&mut asm, fun.reloc("required_souls"), buffer_loc + REQUIRED_SOULS)?;
-        write_addr_to_slice(&mut asm, fun.reloc("souls_after"), buffer_loc + SOULS_AFTER)?;
-        write_addr_to_slice(&mut asm, fun.reloc("stats_entity"), player_stats_entity?)?;
-        write_addr_to_slice(&mut asm, fun.reloc("buffer"), buffer_loc)?;
-        write_addr_to_slice(&mut asm, fun.reloc("fn_level_up"), Function::LevelUp)?;
+        fun.patch::<POINTER>("current_level", buffer_loc + CURRENT_LEVEL);
+        fun.patch::<POINTER>("negative_flag", negative_flag_loc);
+        fun.patch::<POINTER>("fn_level_lookup", Function::LevelLookup);
+        fun.patch::<POINTER>("new_level", buffer_loc + NEW_LEVEL);
+        fun.patch::<POINTER>("required_souls", buffer_loc + REQUIRED_SOULS);
+        fun.patch::<POINTER>("current_souls", buffer_loc + CURRENT_SOULS);
+        fun.patch::<POINTER>("stats_entity", player_stats_entity?);
+        fun.patch::<POINTER>("fn_give_souls", Function::GiveSouls);
+        fun.patch::<POINTER>("stats_entity", player_stats_entity?);
+        fun.patch::<POINTER>("current_souls", buffer_loc + CURRENT_SOULS);
+        fun.patch::<POINTER>("required_souls", buffer_loc + REQUIRED_SOULS);
+        fun.patch::<POINTER>("souls_after", buffer_loc + SOULS_AFTER);
+        fun.patch::<POINTER>("stats_entity", player_stats_entity?);
+        fun.patch::<POINTER>("buffer", buffer_loc);
+        fun.patch::<POINTER>("fn_level_up", Function::LevelUp);
 
-        run_custom_function(asm)?;
+        run_custom_function(fun)?;
 
         if is_negative {
             write::<u8>(negative_patch_loc, 0x84)?;
@@ -549,7 +539,7 @@ impl StatCommand for Stat {
     }
 }
 
-pub fn position() -> ProcResult<[f32; 16]> {
+pub fn position() -> SysResult<[f32; 16]> {
     let pointer = follow_pointers(&game_manager_imp::player_coords_chain(), false)?;
     read::<[f32; 16]>(pointer)
 }

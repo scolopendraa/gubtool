@@ -1,3 +1,4 @@
+push r11
 cmp edx, 0x11
 je check_roll
 cmp edx, 0x6
@@ -6,16 +7,21 @@ cmp edx, 0x10
 je check_backstep
 normal:
 or QWORD PTR [r9+0x10], rax
+return:
+pop r11
 ret
 check_roll:
-cmp BYTE PTR [rip+OFFSET roll_flag], 0x1
+movabs r11, OFFSET roll_flag
+cmp BYTE PTR [r11], 0x1
 jne normal
-ret
+jmp return
 check_jump:
-cmp BYTE PTR [rip+OFFSET jump_flag], 0x1
+movabs r11, OFFSET jump_flag
+cmp BYTE PTR [r11], 0x1
 jne normal
-ret
+jmp return
 check_backstep:
-cmp BYTE PTR [rip+OFFSET backstep_flag], 0x1
+movabs r11, OFFSET backstep_flag
+cmp BYTE PTR [r11], 0x1
 jne normal
-ret
+jmp return

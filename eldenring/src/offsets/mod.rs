@@ -6,46 +6,45 @@ pub mod world_chr_man;
 
 use {
     crate::mem::{is_bit_set, read, set_bit, write},
-    gubtool_core::sys::sys_error::ProcResult,
-    pelite::Pod,
+    gubtool_core::sys::sys_error::SysResult,
 };
 
 pub trait ChainReadExt {
-    fn read_offset(self, offset: u64) -> ProcResult<u64>;
-    fn add_offset(self, offset: u64) -> ProcResult<u64>;
-    fn read<T: Pod>(self) -> ProcResult<T>;
-    fn write<T: Pod>(self, val: T) -> ProcResult;
-    fn is_bit_set(self, mask: u8) -> ProcResult<bool>;
-    fn set_bit(self, mask: u8, state: bool) -> ProcResult;
+    fn read_offset(self, offset: u64) -> SysResult<u64>;
+    fn add_offset(self, offset: u64) -> SysResult<u64>;
+    fn read<T>(self) -> SysResult<T>;
+    fn write<T>(self, val: T) -> SysResult;
+    fn is_bit_set(self, mask: u8) -> SysResult<bool>;
+    fn set_bit(self, mask: u8, state: bool) -> SysResult;
 }
 
-impl ChainReadExt for ProcResult<u64> {
+impl ChainReadExt for SysResult<u64> {
     #[track_caller]
-    fn read_offset(self, offset: u64) -> ProcResult<u64> {
+    fn read_offset(self, offset: u64) -> SysResult<u64> {
         let base = self?;
         read::<u64>(base.saturating_add(offset))
     }
-    fn add_offset(self, offset: u64) -> ProcResult<u64> {
+    fn add_offset(self, offset: u64) -> SysResult<u64> {
         let base = self?;
         Ok(base.saturating_add(offset))
     }
     #[track_caller]
-    fn read<T: Pod>(self) -> ProcResult<T> {
+    fn read<T>(self) -> SysResult<T> {
         let addr = self?;
         read::<T>(addr)
     }
     #[track_caller]
-    fn write<T: Pod>(self, val: T) -> ProcResult {
+    fn write<T>(self, val: T) -> SysResult {
         let addr = self?;
         write::<T>(addr, val)
     }
     #[track_caller]
-    fn is_bit_set(self, mask: u8) -> ProcResult<bool> {
+    fn is_bit_set(self, mask: u8) -> SysResult<bool> {
         let addr = self?;
         is_bit_set(addr, mask)
     }
     #[track_caller]
-    fn set_bit(self, mask: u8, state: bool) -> ProcResult {
+    fn set_bit(self, mask: u8, state: bool) -> SysResult {
         let addr = self?;
         set_bit(addr, mask, state)
     }
@@ -84,6 +83,17 @@ pub mod game_man {
     use gubtool_core::{attached::version, game_version::EldenRingVersion::*};
 
     pub const QUITOUT: u64 = 0x10;
+
+    pub fn stored_time() -> u64 {
+        match version() {
+            Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) | Some(Version1_2_3)
+            | Some(Version1_3_0) | Some(Version1_3_1) | Some(Version1_3_2) | Some(Version1_4_0)
+            | Some(Version1_4_1) | Some(Version1_5_0) | Some(Version1_6_0) | Some(Version1_7_0)
+            | Some(Version1_8_0) | Some(Version1_8_1) | Some(Version1_9_0) | Some(Version1_9_1)
+            | Some(Version2_0_0) | Some(Version2_0_1) => 0x18,
+            _ => 0x20,
+        }
+    }
 
     pub fn start_new_game() -> u64 {
         match version() {
@@ -150,4 +160,8 @@ pub mod menu_man {
 pub mod map_dbg_flags {
     pub const SHOW_ALL_MAPS: u64 = 0x0;
     pub const SHOW_ALL_GRACES: u64 = 0x1;
+}
+
+pub mod lock_tgt_man_imp {
+    pub const IS_LOCKED: u64 = 0x2831;
 }

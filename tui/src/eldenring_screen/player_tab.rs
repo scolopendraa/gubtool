@@ -52,19 +52,21 @@ impl Screen for PlayerTab {
     }
 }
 
-const TOGGLES: [Command; 14] = [
+const TOGGLES: [Command; 16] = [
     Command::Toggle(&player::NoDeath),
     Command::Toggle(&player::NoDamage),
     Command::Toggle(&player::InfinitePoise),
     Command::Toggle(&player::OneShot),
     Command::Toggle(&player::RuneArc),
-    Command::Toggle(&player::SetRfbsOnLoad),
     Command::Toggle(&player::Silent),
     Command::Toggle(&player::Hidden),
     Command::Toggle(&player::InfiniteStamina),
     Command::Toggle(&player::InfiniteFp),
     Command::Toggle(&player::InfiniteConsumables),
     Command::Toggle(&player::InfiniteArrows),
+    Command::Toggle(&player::NoRuneLossOnDeath),
+    Command::Toggle(&player::NoTimePassOnDeath),
+    Command::Toggle(&player::SetRfbsOnLoad),
     Command::Toggle(&player::TorrentAnywhere),
     Command::Toggle(&player::TorrentNoDeath),
 ];

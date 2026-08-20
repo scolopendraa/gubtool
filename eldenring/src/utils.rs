@@ -24,11 +24,7 @@ pub struct LoadedError;
 
 pub fn dlc_check() -> anyhow::Result<()> {
     crate::mem::ensure_game()?;
-    if is_dlc_available() {
-        Ok(())
-    } else {
-        Err(DlcError)
-    }?;
+    if is_dlc_available() { Ok(()) } else { Err(DlcError) }?;
     Ok(())
 }
 
@@ -48,20 +44,12 @@ pub fn is_version_dlc_compat() -> bool {
 }
 
 pub fn version_check() -> Result<(), VersionError> {
-    if !is_version_dlc_compat() {
-        Err(VersionError)
-    } else {
-        Ok(())
-    }
+    if !is_version_dlc_compat() { Err(VersionError) } else { Ok(()) }
 }
 
 pub fn player_loaded_check() -> anyhow::Result<()> {
     crate::mem::ensure_game()?;
-    if is_player_loaded() {
-        Ok(())
-    } else {
-        Err(LoadedError)
-    }?;
+    if is_player_loaded() { Ok(()) } else { Err(LoadedError) }?;
     Ok(())
 }
 

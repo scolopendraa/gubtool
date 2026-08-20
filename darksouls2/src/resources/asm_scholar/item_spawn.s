@@ -1,43 +1,41 @@
+push rbx
+push r13
+push r14
+push r15
 movabs r14, OFFSET game_man_imp
 mov r14, QWORD PTR [r14]
 mov r13, r14
 mov r14, QWORD PTR [r14+0xa8]
 mov r14, QWORD PTR [r14+0x10]
 mov r14, QWORD PTR [r14+0x10]
-movabs r8, OFFSET adjust_quantity_flag
-cmp BYTE PTR [r8], 0x1
+movabs rbx, OFFSET item_args
+cmp BYTE PTR [rbx], 0x1 # adjust_quantity_flag
 jne skip_adjust
 mov rcx, QWORD PTR [r14+0x10]
-movabs r9, OFFSET item_id
-movabs r8, OFFSET stack_count
-movabs rdx, OFFSET current_quantity
-mov r9d, DWORD PTR [r9]
+lea rdx, [rbx+0x4] # current_quantity
+lea r8, [rbx+0x10] # stack_count
+mov r9d, DWORD PTR [rbx+0x18] # item_id
 movabs rax, OFFSET fn_current_item_quantity_check
 sub rsp, 0x30
 call rax
 add rsp, 0x30
-movabs r9, OFFSET quantity
-movabs r10, OFFSET current_quantity
-movabs r11, OFFSET max_quantity
-movzx eax, WORD PTR [r9]
-add eax, DWORD PTR [r10]
-cmp eax, DWORD PTR [r11]
+movzx eax, WORD PTR [rbx+0x20] # quantity
+add eax, DWORD PTR [rbx+0x4] # current_quantity
+cmp eax, DWORD PTR [rbx+0x8] # max_quantity
 jle skip_adjust
-mov eax, DWORD PTR [r11]
-sub eax, DWORD PTR [r10]
-mov WORD PTR [r9], ax
+mov eax, DWORD PTR [rbx+0x8]
+sub eax, DWORD PTR [rbx+0x4]
+mov WORD PTR [rbx+0x20], ax
 skip_adjust:
 sub rsp, 0x208
 mov rcx, r14
-movabs r14, OFFSET item_count
-movabs r15, OFFSET item_struct
-mov rdx, r15
-mov r8d, DWORD PTR [r14]
+lea rdx, [rbx+0x14] # item_struct
+mov r8d, DWORD PTR [rbx+0xc] # item_count
 xor r9d, r9d
 movabs rax, OFFSET fn_item_spawn
 call rax
-mov rdx, r15
-mov r8d, DWORD PTR [r14]
+lea rdx, [rbx+0x14]
+mov r8d, DWORD PTR [rbx+0xc]
 movabs r15, OFFSET stack_loc
 mov rcx, r15
 mov r9d, 0x1
@@ -48,4 +46,8 @@ mov rdx, r15
 movabs rax, OFFSET fn_show_item_dialogue
 call rax
 add rsp, 0x208
+pop r15
+pop r14
+pop r13
+pop rbx
 ret

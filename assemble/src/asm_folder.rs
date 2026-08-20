@@ -33,21 +33,17 @@ impl AsmFolder {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AsmFunction {
     name:        String,
-    bytes:       Vec<u8>,
     relocations: VecDeque<Relocation>,
+    pub bytes:   Vec<u8>,
 }
 
 impl AsmFunction {
     pub fn new(name: String, bytes: Vec<u8>, relocations: VecDeque<Relocation>) -> Self {
         Self {
             name,
-            bytes,
             relocations,
+            bytes,
         }
-    }
-
-    pub fn take_bytes(&mut self) -> Vec<u8> {
-        std::mem::take(&mut self.bytes)
     }
 
     pub fn print_relocs(&self) {
@@ -60,11 +56,7 @@ impl AsmFunction {
     pub fn reloc(&mut self, name: &'static str) -> u64 {
         let reloc = self.relocations.pop_front().unwrap();
 
-        if reloc.symbol == name {
-            reloc.offset
-        } else {
-            panic!("symbol mismatch")
-        }
+        if reloc.symbol == name { reloc.offset } else { panic!("symbol mismatch") }
     }
 
     #[track_caller]

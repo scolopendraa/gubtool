@@ -256,11 +256,8 @@ impl MemoryViewerScreen {
                 style.add_modifier = Modifier::REVERSED;
             }
 
-            let content = if m.read_successful {
-                format!("{:02x}", byte)
-            } else {
-                String::from("??")
-            };
+            let content =
+                if m.read_successful { format!("{:02x}", byte) } else { String::from("??") };
 
             spans.push(Span::styled(content, style));
             spans.push(Span::raw(" "))

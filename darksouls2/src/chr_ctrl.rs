@@ -5,12 +5,12 @@ use {
             self,
             ChainReadExt,
             chr_ctrl::{boss_operator_offsets, chr_ai_manipulator_offsets},
-            code_cave::CaveAddress,
+            code_cave::CaveAddr,
         },
         target::act_logger,
     },
     anyhow::ensure,
-    gubtool_core::{address::Address, sys::sys_error::ProcResult},
+    gubtool_core::{address::Address, sys::sys_error::SysResult},
     std::collections::HashMap,
 };
 
@@ -30,20 +30,20 @@ pub enum ResolvedChrPtr {
 }
 
 impl ChrCtrl {
-    pub fn get_hp(&mut self) -> ProcResult<i32> {
+    pub fn get_hp(&mut self) -> SysResult<i32> {
         self.get_ptr(ResolvedChrPtr::ChrCtrl)
             .add_offset(offsets::chr_ctrl::HEALTH)
             .read::<i32>()
     }
 
-    pub fn set_hp(&mut self, val: i32) -> ProcResult {
+    pub fn set_hp(&mut self, val: i32) -> SysResult {
         let max = self.max_hp()?;
         self.get_ptr(ResolvedChrPtr::ChrCtrl)
             .add_offset(offsets::chr_ctrl::HEALTH)
             .write::<i32>(val.min(max))
     }
 
-    pub fn get_hp_pct(&mut self) -> ProcResult<f32> {
+    pub fn get_hp_pct(&mut self) -> SysResult<f32> {
         let current = self.get_hp()?;
         let max = self.max_hp()?;
         if max == 0 {
@@ -59,19 +59,19 @@ impl ChrCtrl {
         Ok(self.set_hp(val as i32)?)
     }
 
-    pub fn get_min_hp(&mut self) -> ProcResult<i32> {
+    pub fn get_min_hp(&mut self) -> SysResult<i32> {
         self.get_ptr(ResolvedChrPtr::ChrCtrl)
             .add_offset(offsets::chr_ctrl::MIN_HEALTH)
             .read::<i32>()
     }
 
-    pub fn set_min_hp(&mut self, val: i32) -> ProcResult {
+    pub fn set_min_hp(&mut self, val: i32) -> SysResult {
         self.get_ptr(ResolvedChrPtr::ChrCtrl)
             .add_offset(offsets::chr_ctrl::MIN_HEALTH)
             .write::<i32>(val)
     }
 
-    pub fn max_hp(&mut self) -> ProcResult<i32> {
+    pub fn max_hp(&mut self) -> SysResult<i32> {
         self.get_ptr(ResolvedChrPtr::ChrCtrl)
             .add_offset(offsets::chr_ctrl::MAX_HEALTH)
             .read::<i32>()
@@ -81,22 +81,18 @@ impl ChrCtrl {
         self.get_min_hp().map(|val| val == 1).unwrap_or_default()
     }
 
-    pub fn set_no_death(&mut self, state: bool) -> ProcResult {
-        let val = if state {
-            1
-        } else {
-            -99999
-        };
+    pub fn set_no_death(&mut self, state: bool) -> SysResult {
+        let val = if state { 1 } else { -99999 };
         self.set_min_hp(val)
     }
 
-    pub fn coords(&mut self) -> ProcResult<[f32; 3]> {
+    pub fn coords(&mut self) -> SysResult<[f32; 3]> {
         self.get_ptr(ResolvedChrPtr::ChrCtrl)
             .add_offset(offsets::chr_ctrl::COORDS)
             .read::<[f32; 3]>()
     }
 
-    pub fn get_distance(&mut self, other: &mut ChrCtrl) -> ProcResult<f32> {
+    pub fn get_distance(&mut self, other: &mut ChrCtrl) -> SysResult<f32> {
         let self_pos = self.coords()?;
         let other_pos = other.coords()?;
         Ok(((other_pos[0] - self_pos[0]).powi(2)
@@ -105,37 +101,37 @@ impl ChrCtrl {
         .sqrt())
     }
 
-    pub fn chr_id(&mut self) -> ProcResult<i32> {
+    pub fn chr_id(&mut self) -> SysResult<i32> {
         self.get_ptr(ResolvedChrPtr::Params)
             .add_offset(offsets::chr_ctrl::CHR_ID)
             .read::<i32>()
     }
 
-    pub fn poise(&mut self) -> ProcResult<f32> {
+    pub fn poise(&mut self) -> SysResult<f32> {
         self.get_ptr(ResolvedChrPtr::ChrCtrl)
             .add_offset(offsets::chr_ctrl::POISE)
             .read::<f32>()
     }
 
-    pub fn max_poise(&mut self) -> ProcResult<f32> {
+    pub fn max_poise(&mut self) -> SysResult<f32> {
         self.get_ptr(ResolvedChrPtr::ChrCtrl)
             .add_offset(offsets::chr_ctrl::MAX_POISE)
             .read::<f32>()
     }
 
-    pub fn posture(&mut self) -> ProcResult<f32> {
+    pub fn posture(&mut self) -> SysResult<f32> {
         self.get_ptr(ResolvedChrPtr::ChrCtrl)
             .add_offset(offsets::chr_ctrl::POSTURE)
             .read::<f32>()
     }
 
-    pub fn max_posture(&mut self) -> ProcResult<f32> {
+    pub fn max_posture(&mut self) -> SysResult<f32> {
         self.get_ptr(ResolvedChrPtr::ChrCtrl)
             .add_offset(offsets::chr_ctrl::MAX_POSTURE)
             .read::<f32>()
     }
 
-    pub fn rot_quaternion(&mut self) -> ProcResult<[f32; 4]> {
+    pub fn rot_quaternion(&mut self) -> SysResult<[f32; 4]> {
         let [m00, m01, m02, _, m10, m11, m12, _, m20, m21, m22, _] = self
             .get_ptr(ResolvedChrPtr::ChrCtrl)
             .add_offset(offsets::chr_ctrl::ROTATION)
@@ -162,28 +158,28 @@ impl ChrCtrl {
         act_logger().get(chr_ai)
     }
 
-    pub fn repeat_action(&mut self, act_id: i32) -> ProcResult {
+    pub fn repeat_action(&mut self, act_id: i32) -> SysResult {
         let chr_ai = self.get_ptr(ResolvedChrPtr::ChrAi)?;
-        write::<u64>(CaveAddress::ForceActChrAi, chr_ai)?;
-        write::<i32>(CaveAddress::ForceActId, act_id)?;
-        write::<u8>(CaveAddress::ForceActFlag, 0x1)
+        write::<u64>(CaveAddr::ForceActChrAi, chr_ai)?;
+        write::<i32>(CaveAddr::ForceActId, act_id)?;
+        write::<u8>(CaveAddr::ForceActFlag, 0x1)
     }
 
-    pub fn repeat_last_action(&mut self, state: bool) -> ProcResult {
+    pub fn repeat_last_action(&mut self, state: bool) -> SysResult {
         if state {
             if let Some(last_act) = self.last_act() {
                 self.repeat_action(last_act)?;
             }
             Ok(())
         } else {
-            write::<u8>(CaveAddress::ForceActFlag, 0x0)
+            write::<u8>(CaveAddr::ForceActFlag, 0x0)
         }
     }
 
-    pub fn is_action_repeating(&mut self) -> ProcResult<bool> {
+    pub fn is_action_repeating(&mut self) -> SysResult<bool> {
         let chr_ai = self.get_ptr(ResolvedChrPtr::ChrAi)?;
-        Ok(read::<u8>(CaveAddress::ForceActFlag).map(|val| val == 0x1)?
-            && read::<u64>(CaveAddress::ForceActChrAi).map(|chr| chr == chr_ai)?)
+        Ok(read::<u8>(CaveAddr::ForceActFlag).map(|val| val == 0x1)?
+            && read::<u64>(CaveAddr::ForceActChrAi).map(|chr| chr == chr_ai)?)
     }
 }
 
@@ -198,7 +194,7 @@ impl ChrCtrl {
         s
     }
 
-    pub fn is_valid_chr(&mut self) -> ProcResult<bool> {
+    pub fn is_valid_chr(&mut self) -> SysResult<bool> {
         if let Ok(ptr) = self.get_ptr(ResolvedChrPtr::ChrCtrl)
             && ptr == 0x0
         {
@@ -220,7 +216,7 @@ impl ChrCtrl {
             .collect()
     }
 
-    pub fn get_ptr(&mut self, pointer: ResolvedChrPtr) -> ProcResult<u64> {
+    pub fn get_ptr(&mut self, pointer: ResolvedChrPtr) -> SysResult<u64> {
         if let Some(&val) = self.resolved_pointers.get(&pointer) {
             return Ok(val);
         }

@@ -2,9 +2,8 @@ use {
     crate::{
         address::Address,
         attached,
-        sys::sys_error::{AccessType, ProcResult, ProcessError, WriteType},
+        sys::sys_error::{AccessType, SysError, SysResult, WriteType},
     },
-    pelite::Pod,
     std::{any::type_name, mem::MaybeUninit, time::Duration},
     windows::Win32::{
         Foundation::{CloseHandle, WAIT_OBJECT_0},
@@ -16,7 +15,7 @@ use {
 };
 
 #[track_caller]
-pub fn read_unsafe<T: Pod>(address: impl Address) -> ProcResult<T> {
+pub fn read_unsafe<T>(address: impl Address) -> SysResult<T> {
     unsafe {
         let mut value = MaybeUninit::<T>::uninit();
         let size = std::mem::size_of::<T>();
@@ -31,7 +30,7 @@ pub fn read_unsafe<T: Pod>(address: impl Address) -> ProcResult<T> {
         );
 
         if result.is_err() {
-            return Err(ProcessError::io(
+            return Err(SysError::io(
                 AccessType::Read(type_name::<T>()),
                 address.addr(),
                 std::io::Error::last_os_error(),
@@ -39,7 +38,7 @@ pub fn read_unsafe<T: Pod>(address: impl Address) -> ProcResult<T> {
         }
 
         if nread != size {
-            return Err(ProcessError::partial_access(
+            return Err(SysError::partial_access(
                 AccessType::Read(type_name::<T>()),
                 nread,
                 address.addr(),
@@ -51,7 +50,7 @@ pub fn read_unsafe<T: Pod>(address: impl Address) -> ProcResult<T> {
 }
 
 #[track_caller]
-pub fn write_unsafe<T: Pod>(address: impl Address, value: T) -> ProcResult {
+pub fn write_unsafe<T>(address: impl Address, value: T) -> SysResult {
     unsafe {
         let size = std::mem::size_of::<T>();
         let mut nwritten = 0;
@@ -65,7 +64,7 @@ pub fn write_unsafe<T: Pod>(address: impl Address, value: T) -> ProcResult {
         );
 
         if result.is_err() {
-            return Err(ProcessError::io(
+            return Err(SysError::io(
                 AccessType::Write(WriteType::Type(type_name::<T>())),
                 address.addr(),
                 std::io::Error::last_os_error(),
@@ -73,7 +72,7 @@ pub fn write_unsafe<T: Pod>(address: impl Address, value: T) -> ProcResult {
         }
 
         if nwritten != size {
-            return Err(ProcessError::partial_access(
+            return Err(SysError::partial_access(
                 AccessType::Write(WriteType::Type(type_name::<T>())),
                 nwritten,
                 address.addr(),
@@ -84,7 +83,7 @@ pub fn write_unsafe<T: Pod>(address: impl Address, value: T) -> ProcResult {
 }
 
 #[track_caller]
-pub fn write_bytes_unsafe(address: impl Address, data: &[u8]) -> ProcResult {
+pub fn write_bytes_unsafe(address: impl Address, data: &[u8]) -> SysResult {
     unsafe {
         let size = data.len();
         let mut nwritten = 0;
@@ -98,7 +97,7 @@ pub fn write_bytes_unsafe(address: impl Address, data: &[u8]) -> ProcResult {
         );
 
         if result.is_err() {
-            return Err(ProcessError::io(
+            return Err(SysError::io(
                 AccessType::Write(WriteType::Bytes(size)),
                 address.addr(),
                 std::io::Error::last_os_error(),
@@ -106,7 +105,7 @@ pub fn write_bytes_unsafe(address: impl Address, data: &[u8]) -> ProcResult {
         }
 
         if nwritten != size {
-            return Err(ProcessError::partial_access(
+            return Err(SysError::partial_access(
                 AccessType::Write(WriteType::Bytes(size)),
                 nwritten,
                 address.addr(),
@@ -116,16 +115,13 @@ pub fn write_bytes_unsafe(address: impl Address, data: &[u8]) -> ProcResult {
     Ok(())
 }
 
-pub fn spawn_thread_release(
-    thread_start_address: impl Address,
-    thread_code: Vec<u8>,
-) -> ProcResult {
+pub fn spawn_thread_release(thread_start_address: impl Address, thread_code: Vec<u8>) -> SysResult {
     unsafe {
         write_bytes_unsafe(thread_start_address, &thread_code)?;
         let start: LPTHREAD_START_ROUTINE = Some(std::mem::transmute(thread_start_address.addr()));
         let thread_handle = CreateRemoteThread(attached::handle()?, None, 0, start, None, 0, None)
             .map_err(|err| {
-                ProcessError::RemoteThreadCreate {
+                SysError::RemoteThreadCreate {
                     os_error: err.code().0,
                 }
             })?;
@@ -134,13 +130,13 @@ pub fn spawn_thread_release(
     }
 }
 
-pub fn spawn_thread_join(thread_start_address: impl Address, thread_code: Vec<u8>) -> ProcResult {
+pub fn spawn_thread_join(thread_start_address: impl Address, thread_code: Vec<u8>) -> SysResult {
     unsafe {
         write_bytes_unsafe(thread_start_address, &thread_code)?;
         let start: LPTHREAD_START_ROUTINE = Some(std::mem::transmute(thread_start_address.addr()));
         let thread_handle = CreateRemoteThread(attached::handle()?, None, 0, start, None, 0, None)
             .map_err(|err| {
-                ProcessError::RemoteThreadCreate {
+                SysError::RemoteThreadCreate {
                     os_error: err.code().0,
                 }
             })?;
@@ -153,7 +149,7 @@ pub fn spawn_thread_join(thread_start_address: impl Address, thread_code: Vec<u8
         match wait_result {
             WAIT_OBJECT_0 => Ok(()),
             _ => {
-                Err(ProcessError::RemoteThreadReturn {
+                Err(SysError::RemoteThreadReturn {
                     timeout: Duration::from_millis(timeout as u64),
                 })
             }

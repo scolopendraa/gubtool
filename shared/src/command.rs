@@ -1,6 +1,6 @@
 use {
     crate::{act_array::ActArray, parse_input::ParseInput},
-    gubtool_core::sys::sys_error::ProcResult,
+    gubtool_core::sys::sys_error::SysResult,
     std::fmt::Display,
 };
 
@@ -31,7 +31,7 @@ pub trait UnitCommand: Send + Sync + Display {
 }
 
 pub trait ToggleCommand: Send + Sync + Display {
-    fn is(&self) -> ProcResult<bool>;
+    fn is(&self) -> SysResult<bool>;
     fn set(&self, state: bool) -> anyhow::Result<()>;
 
     fn toggle(&self) -> anyhow::Result<()> {
@@ -62,7 +62,7 @@ where T: Display + Send + 'static + ParseInput + Default
 pub trait ValueCommand<T>: Send + Sync + Display
 where T: Display + Send + 'static + ParseInput + Default
 {
-    fn get(&self) -> ProcResult<T>;
+    fn get(&self) -> SysResult<T>;
     fn set(&self, val: T) -> anyhow::Result<()>;
 
     fn can_get(&self) -> bool {

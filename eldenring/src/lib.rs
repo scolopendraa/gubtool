@@ -1,3 +1,4 @@
+mod ai;
 pub mod attach;
 pub mod chr_ins;
 pub mod emevd;
@@ -21,7 +22,11 @@ use {
     },
     std::sync::atomic::Ordering,
 };
-pub use {attach::attach, pointer_cache::get_pointers};
+pub use {
+    attach::attach,
+    offsets::code_cave::pointers as cave_pointers,
+    pointer_cache::{get_pointers, load_all_pointers},
+};
 
 mod mem {
     gubtool_core::declare_mem_functions!(Game::EldenRing);

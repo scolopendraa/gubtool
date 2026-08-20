@@ -5,8 +5,7 @@ pub mod module_offsets;
 
 use {
     crate::mem::{read, read_address, write},
-    gubtool_core::{attached::is_32, sys::sys_error::ProcResult},
-    pelite::Pod,
+    gubtool_core::{attached::is_32, sys::sys_error::SysResult},
 };
 
 pub struct Offset {
@@ -17,39 +16,35 @@ pub struct Offset {
 impl Offset {
     #[inline(always)]
     pub fn resolve(&self) -> u64 {
-        if is_32() {
-            self.vanilla
-        } else {
-            self.scholar
-        }
+        if is_32() { self.vanilla } else { self.scholar }
     }
 }
 
 pub trait ChainReadExt {
     #[track_caller]
-    fn read_offset(self, offset: Offset) -> ProcResult<u64>;
+    fn read_offset(self, offset: Offset) -> SysResult<u64>;
     #[track_caller]
-    fn add_offset(self, offset: Offset) -> ProcResult<u64>;
+    fn add_offset(self, offset: Offset) -> SysResult<u64>;
     #[track_caller]
-    fn read<T: Pod>(self) -> ProcResult<T>;
+    fn read<T>(self) -> SysResult<T>;
     #[track_caller]
-    fn write<T: Pod>(self, val: T) -> ProcResult;
+    fn write<T>(self, val: T) -> SysResult;
 }
 
-impl ChainReadExt for ProcResult<u64> {
-    fn read_offset(self, offset: Offset) -> ProcResult<u64> {
+impl ChainReadExt for SysResult<u64> {
+    fn read_offset(self, offset: Offset) -> SysResult<u64> {
         let base = self?;
         read_address(base.saturating_add(offset.resolve()))
     }
-    fn add_offset(self, offset: Offset) -> ProcResult<u64> {
+    fn add_offset(self, offset: Offset) -> SysResult<u64> {
         let base = self?;
         Ok(base.saturating_add(offset.resolve()))
     }
-    fn read<T: Pod>(self) -> ProcResult<T> {
+    fn read<T>(self) -> SysResult<T> {
         let addr = self?;
         read::<T>(addr)
     }
-    fn write<T: Pod>(self, val: T) -> ProcResult {
+    fn write<T>(self, val: T) -> SysResult {
         let addr = self?;
         write::<T>(addr, val)
     }

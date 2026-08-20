@@ -20,10 +20,10 @@ mov DWORD PTR [rcx], OFFSET group_id
 mov DWORD PTR [rcx+0x4], OFFSET command_id
 lea r8, [rbp-0x1b0]
 mov QWORD PTR [r8+0xd0], rcx
-movabs rax, OFFSET args_location
+movabs rax, OFFSET args_loc
 lea rcx, [rax]
 mov QWORD PTR [r8+0xd8], rcx
-movabs rax, OFFSET cs_emk_system_base
+movabs rax, OFFSET cs_emk_system
 mov rax, [rax]
 mov rcx, QWORD PTR [rax+0x28]
 mov eax, 0x3ca3d70a

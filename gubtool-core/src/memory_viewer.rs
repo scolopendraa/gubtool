@@ -2,7 +2,7 @@ use {
     crate::{
         attached::{is_32, module_base},
         slice_ops::read_from_slice,
-        sys::{read_unsafe, sys_error::ProcessError, write_unsafe},
+        sys::{read_unsafe, sys_error::SysError, write_unsafe},
     },
     arboard::Clipboard,
     pelite::Pod,
@@ -178,7 +178,7 @@ impl MemoryViewer {
         }
     }
 
-    pub fn write_at_highlighted<T: Pod>(&self, val: T) -> Result<(), ProcessError> {
+    pub fn write_at_highlighted<T: Pod>(&self, val: T) -> Result<(), SysError> {
         write_unsafe::<T>(self.base_address + self.highlighted_offset, val)
     }
 

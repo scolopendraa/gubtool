@@ -167,11 +167,8 @@ impl TravelTab {
         } else {
             ""
         };
-        let style = if is_alive {
-            Style::from(theme().success)
-        } else {
-            Style::from(theme().error)
-        };
+        let style =
+            if is_alive { Style::from(theme().success) } else { Style::from(theme().error) };
         Span::raw(text).style(style)
     }
 
@@ -186,11 +183,7 @@ impl TravelTab {
         } else {
             "Unlit"
         };
-        let style = if lit {
-            Style::from(theme().success)
-        } else {
-            Style::from(theme().error)
-        };
+        let style = if lit { Style::from(theme().success) } else { Style::from(theme().error) };
         Span::raw(text).style(style)
     }
 }

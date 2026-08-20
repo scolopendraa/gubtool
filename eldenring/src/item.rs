@@ -3,7 +3,7 @@ use {
         event,
         mem::*,
         offsets::{
-            code_cave::CaveAddress,
+            code_cave::CaveAddr,
             module_offsets::{BasePointer, Function},
         },
         resources::{
@@ -33,7 +33,7 @@ use {
         },
         utils::{DlcError, VersionError, dlc_check, player_loaded_check, version_check},
     },
-    gubtool_core::slice_ops::*,
+    gubtool_core::{address::POINTER, slice_ops::*},
 };
 
 pub struct ItemSpawnRequest {
@@ -141,28 +141,19 @@ fn itemspawn(
     write_to_slice::<i32>(&mut item_struct, 0x50, aow_id)?;
 
     let mut fun = ASM.get_function("item_spawn");
-    let mut asm = fun.take_bytes();
 
-    write_addr_to_slice(&mut asm, fun.reloc("item_struct"), CaveAddress::ItemSpawnStruct)?;
-    write_addr_to_slice(
-        &mut asm,
-        fun.reloc("check_quantity_flag"),
-        CaveAddress::ShouldCheckQuantity,
-    )?;
-    write_addr_to_slice(
-        &mut asm,
-        fun.reloc("fn_get_item_quantity"),
-        Function::GetPlayerItemQuantityById,
-    )?;
-    write_addr_to_slice(&mut asm, fun.reloc("max_quantity"), CaveAddress::MaxQuantity)?;
-    write_addr_to_slice(&mut asm, fun.reloc("map_item_man_impl"), BasePointer::MapItemManImpl)?;
-    write_addr_to_slice(&mut asm, fun.reloc("fn_item_spawn"), Function::ItemSpawn)?;
+    fun.patch::<POINTER>("item_struct", CaveAddr::ItemSpawnStruct);
+    fun.patch::<POINTER>("check_quantity_flag", CaveAddr::ShouldCheckQuantity);
+    fun.patch::<POINTER>("fn_get_item_quantity", Function::GetPlayerItemQuantityById);
+    fun.patch::<POINTER>("max_quantity", CaveAddr::MaxQuantity);
+    fun.patch::<POINTER>("map_item_man_impl", BasePointer::MapItemManImpl);
+    fun.patch::<POINTER>("fn_item_spawn", Function::ItemSpawn);
 
-    write::<u8>(CaveAddress::ShouldCheckQuantity, is_quantity_adjustable as u8)?;
-    write::<i32>(CaveAddress::MaxQuantity, max_quantity as i32)?;
-    write_bytes(CaveAddress::ItemSpawnStruct, &item_struct)?;
+    write::<u8>(CaveAddr::ShouldCheckQuantity, is_quantity_adjustable as u8)?;
+    write::<i32>(CaveAddr::MaxQuantity, max_quantity as i32)?;
+    write_bytes(CaveAddr::ItemSpawnStruct, &item_struct)?;
 
-    run_custom_function(asm)
+    run_custom_function(fun)
 }
 
 pub fn mass_spawn(category: Categories, quantity: i64, upgrade: i64) -> anyhow::Result<()> {

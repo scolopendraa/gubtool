@@ -4,13 +4,13 @@ use {
         offsets::{ChainReadExt, chr_ctrl::stats_offsets},
         player::player,
     },
-    gubtool_core::sys::sys_error::ProcResult,
+    gubtool_core::sys::sys_error::SysResult,
     shared::command::EmptyCommand,
-    std::ptr,
     strum::Display,
 };
 
 #[repr(C, packed)]
+#[derive(Default)]
 pub struct CovenantData {
     current_covenant: u8,
     found_flags:      [u8; 10],
@@ -20,15 +20,14 @@ pub struct CovenantData {
 
 impl CovenantData {
     pub fn read() -> Self {
-        let bytes = player()
+        player()
             .chr_ctrl()
             .and_then(|chr| {
                 chr.get_ptr(ResolvedChrPtr::Stats)
                     .add_offset(stats_offsets::COVENANT)
-                    .read::<[u8; std::mem::size_of::<Self>()]>()
+                    .read::<Self>()
             })
-            .unwrap_or([0x0; std::mem::size_of::<Self>()]);
-        unsafe { ptr::read_unaligned(bytes.as_ptr() as *const Self) }
+            .unwrap_or_default()
     }
 
     pub fn assemble_covenant_info(&self, covenant: CovenantKind) -> CovenantInfo {
@@ -55,7 +54,7 @@ impl std::fmt::Display for Covenant {
 }
 
 impl Covenant {
-    pub fn get(&self) -> ProcResult<CovenantKind> {
+    pub fn get(&self) -> SysResult<CovenantKind> {
         player()
             .chr_ctrl()?
             .get_ptr(ResolvedChrPtr::Stats)
@@ -64,7 +63,7 @@ impl Covenant {
             .map(|val| CovenantKind::try_from(val).unwrap_or_default())
     }
 
-    pub fn set(&self, covenant: CovenantKind) -> ProcResult {
+    pub fn set(&self, covenant: CovenantKind) -> SysResult {
         player()
             .chr_ctrl()?
             .get_ptr(ResolvedChrPtr::Stats)

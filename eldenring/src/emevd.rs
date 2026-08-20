@@ -1,29 +1,29 @@
 use {
     crate::{
-        mem::{run_custom_function, write_bytes},
+        mem::{run_custom_function_in_thread, write_bytes},
         offsets::{
-            code_cave::CaveAddress,
+            code_cave::CaveAddr,
             module_offsets::{BasePointer, Function},
         },
         resources::ASM,
         utils::player_loaded_check,
     },
-    gubtool_core::slice_ops::*,
+    assemble::patch::DWORD,
+    gubtool_core::{address::POINTER, slice_ops::*},
 };
 
 fn execute_emevd_command(group_id: i32, command_id: i32, args: &[u8]) -> anyhow::Result<()> {
     let mut fun = ASM.get_function("execute_emevd_command");
-    let mut asm = fun.take_bytes();
 
-    write_addr_to_slice(&mut asm, fun.reloc("fn_emk_event_ins_ctor"), Function::EmkEventInsCtor)?;
-    write_to_slice::<i32>(&mut asm, fun.reloc("group_id"), group_id)?;
-    write_to_slice::<i32>(&mut asm, fun.reloc("command_id"), command_id)?;
-    write_addr_to_slice(&mut asm, fun.reloc("args_location"), CaveAddress::EmevdArgs)?;
-    write_addr_to_slice(&mut asm, fun.reloc("cs_emk_system_base"), BasePointer::CsEmkSystem)?;
-    write_addr_to_slice(&mut asm, fun.reloc("fn_emevd_switch"), Function::EmevdSwitch)?;
+    fun.patch::<POINTER>("fn_emk_event_ins_ctor", Function::EmkEventInsCtor);
+    fun.patch::<DWORD>("group_id", group_id);
+    fun.patch::<DWORD>("command_id", command_id);
+    fun.patch::<POINTER>("args_loc", CaveAddr::EmevdArgs);
+    fun.patch::<POINTER>("cs_emk_system", BasePointer::CsEmkSystem);
+    fun.patch::<POINTER>("fn_emevd_switch", Function::EmevdSwitch);
 
-    write_bytes(CaveAddress::EmevdArgs, args)?;
-    run_custom_function(asm)
+    write_bytes(CaveAddr::EmevdArgs, args)?;
+    run_custom_function_in_thread(fun)
 }
 
 pub fn set_night() -> anyhow::Result<()> {

@@ -3,7 +3,7 @@ use {
     gubtool_core::{
         appdata::{AppDataError, app_data_dir},
         slice_ops::read_from_slice,
-        sys::sys_error::ProcResult,
+        sys::sys_error::SysResult,
     },
     std::{collections::HashMap, fs::OpenOptions, io::Write},
     thiserror::Error,
@@ -17,7 +17,7 @@ pub struct EventRecord {
 }
 
 impl EventRecord {
-    fn read_at(bytes: &[u8], offset: u64, time_stamp: DateTime<Local>) -> ProcResult<Self> {
+    fn read_at(bytes: &[u8], offset: u64, time_stamp: DateTime<Local>) -> SysResult<Self> {
         Ok(Self {
             event_id: read_from_slice::<u32>(bytes, offset)?,
             state: read_from_slice::<u8>(bytes, offset + 4)? != 0x0,
@@ -36,7 +36,7 @@ pub struct EventLog {
 }
 
 impl EventLog {
-    pub fn poll(&mut self, write_idx: i32, buffer: &[u8]) -> ProcResult {
+    pub fn poll(&mut self, write_idx: i32, buffer: &[u8]) -> SysResult {
         let now = Local::now();
         let num_to_read = (write_idx - self.read_idx) & 511;
         for i in 0..num_to_read {
@@ -100,18 +100,18 @@ pub trait EventLogger {
     fn event_log(&self) -> &EventLog;
     fn event_log_mut(&mut self) -> &mut EventLog;
     fn file_prefix(&self) -> &'static str;
-    fn read_buffer(&self) -> ProcResult<[u8; 0x1000]>;
-    fn write_idx(&self) -> ProcResult<i32>;
-    fn clear_cave(&self) -> ProcResult;
+    fn read_buffer(&self) -> SysResult<[u8; 0x1000]>;
+    fn write_idx(&self) -> SysResult<i32>;
+    fn clear_cave(&self) -> SysResult;
     fn toggle_hook(&self) -> anyhow::Result<()>;
 
-    fn poll(&mut self) -> ProcResult {
+    fn poll(&mut self) -> SysResult {
         let bytes = self.read_buffer()?;
         let write_idx = self.write_idx()?;
         self.event_log_mut().poll(write_idx, &bytes)
     }
 
-    fn clear(&mut self) -> ProcResult {
+    fn clear(&mut self) -> SysResult {
         let log = self.event_log_mut();
         log.records.clear();
         log.dupe_map.clear();

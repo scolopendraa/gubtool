@@ -2,7 +2,7 @@ use {
     crate::{
         event,
         mem::*,
-        offsets::{ChainReadExt, code_cave::CaveAddress, module_offsets::Function},
+        offsets::{ChainReadExt, code_cave::CaveAddr, module_offsets::Function},
         player,
         pointer_cache::ResolvedPtr,
         resources::{
@@ -13,10 +13,11 @@ use {
         utils::{dlc_check, player_loaded_check},
     },
     anyhow::ensure,
+    assemble::patch::DWORD,
     gubtool_core::{
-        address::Address,
+        address::{Address, POINTER},
         slice_ops::*,
-        sys::{ipc::FfiValue, sys_error::ProcResult},
+        sys::{ipc::FfiValue, sys_error::SysResult},
     },
     shared::{
         command::{ToggleCommand, UnitCommand},
@@ -26,7 +27,7 @@ use {
     std::fmt::Display,
 };
 
-pub fn get_event(event_id: u32) -> ProcResult<bool> {
+pub fn get_event(event_id: u32) -> SysResult<bool> {
     if let Some((data_ptr, block_offset)) = event_flag_lookup(event_id)? {
         let mask = 1 << (7 - (block_offset & 7));
         is_bit_set(data_ptr + (block_offset >> 3) as u64, mask)
@@ -55,7 +56,7 @@ struct VirtMemInfo {
 }
 
 impl VirtMemInfo {
-    pub fn read() -> ProcResult<Self> {
+    pub fn read() -> SysResult<Self> {
         let bytes = ResolvedPtr::VirtualMemFlag.get().read::<[u8; 0x40]>()?;
         Ok(Self {
             block_size:       read_from_slice::<u32>(&bytes, 0x1c)?,
@@ -77,7 +78,7 @@ struct Node {
 }
 
 impl Node {
-    fn read_at(address: u64) -> ProcResult<Self> {
+    fn read_at(address: u64) -> SysResult<Self> {
         let bytes = read::<[u8; 0x34]>(address)?;
         Ok(Self {
             left_child:  read_from_slice::<u64>(&bytes, 0x0)?,
@@ -90,8 +91,12 @@ impl Node {
     }
 }
 
-fn event_flag_lookup(event_id: u32) -> ProcResult<Option<(u64, u32)>> {
+fn event_flag_lookup(event_id: u32) -> SysResult<Option<(u64, u32)>> {
     let virt_mem_info = VirtMemInfo::read()?;
+
+    if virt_mem_info.block_size == 0 {
+        return Ok(None)
+    }
     let block_idx = event_id / virt_mem_info.block_size;
     let block_offset = event_id % virt_mem_info.block_size;
 
@@ -137,25 +142,16 @@ pub fn execute_talk_command(
     let params: Vec<u8> = params.iter().flat_map(|&x| x.to_le_bytes()).collect();
 
     let mut fun = ASM.get_function("execute_talk_command");
-    let mut asm = fun.take_bytes();
 
-    write_to_slice::<i32>(&mut asm, fun.reloc("command_id"), command_id)?;
-    write_addr_to_slice(
-        &mut asm,
-        fun.reloc("fn_external_event_temp_ctor"),
-        Function::ExternalEventTempCtor,
-    )?;
-    write_addr_to_slice(&mut asm, fun.reloc("chr_handle"), chr_handle)?;
-    write_to_slice::<i32>(&mut asm, fun.reloc("params_len"), params.len())?;
-    write_addr_to_slice(&mut asm, fun.reloc("params_loc"), CaveAddress::EzStateParams)?;
-    write_addr_to_slice(
-        &mut asm,
-        fun.reloc("fn_execute_talk_command"),
-        Function::ExecuteTalkCommand,
-    )?;
+    fun.patch::<DWORD>("command_id", command_id);
+    fun.patch::<POINTER>("fn_external_event_temp_ctor", Function::ExternalEventTempCtor);
+    fun.patch::<POINTER>("chr_handle", chr_handle);
+    fun.patch::<DWORD>("params_len", params.len() as u32);
+    fun.patch::<POINTER>("params_loc", CaveAddr::EzStateParams);
+    fun.patch::<POINTER>("fn_execute_talk_command", Function::ExecuteTalkCommand);
 
-    write_bytes(CaveAddress::EzStateParams, &params)?;
-    run_custom_function(asm)
+    write_bytes(CaveAddr::EzStateParams, &params)?;
+    run_custom_function(fun)
 }
 
 impl TalkCommand {
@@ -193,15 +189,15 @@ impl EventLogger for ErEventLogger {
     fn file_prefix(&self) -> &'static str {
         "eldenring"
     }
-    fn write_idx(&self) -> ProcResult<i32> {
-        read::<i32>(CaveAddress::EventLogWriteIdx.addr())
+    fn write_idx(&self) -> SysResult<i32> {
+        read::<i32>(CaveAddr::EventLogWriteIdx.addr())
     }
-    fn read_buffer(&self) -> ProcResult<[u8; 0x1000]> {
-        read::<[u8; 0x1000]>(CaveAddress::EventLogBuffer.addr())
+    fn read_buffer(&self) -> SysResult<[u8; 0x1000]> {
+        read::<[u8; 0x1000]>(CaveAddr::EventLogBuffer.addr())
     }
-    fn clear_cave(&self) -> ProcResult {
-        write::<i32>(CaveAddress::EventLogWriteIdx.addr(), 0x0)?;
-        write_bytes(CaveAddress::EventLogBuffer.addr(), &[0x0; 0x1000])
+    fn clear_cave(&self) -> SysResult {
+        write::<i32>(CaveAddr::EventLogWriteIdx.addr(), 0x0)?;
+        write_bytes(CaveAddr::EventLogBuffer.addr(), &[0x0; 0x1000])
     }
     fn toggle_hook(&self) -> anyhow::Result<()> {
         EventLogHook.toggle()
@@ -212,32 +208,19 @@ declare_command!(EventLogHook, FightFortissax, FightEldenBeast, UnlockMetyr, Dlc
 
 const EVENT_LOG_HOOK_ORIGINAL: [u8; 5] = [0x48, 0x89, 0x5c, 0x24, 0x08];
 impl ToggleCommand for EventLogHook {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         read::<[u8; 5]>(Function::SetEvent).map(|bytes| bytes != EVENT_LOG_HOOK_ORIGINAL)
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
         match state {
             true => {
-                let location = CaveAddress::EventLogHook;
-
                 let mut fun = ASM.get_function("event_log");
-                let mut asm = fun.take_bytes();
 
-                write_addr_to_slice(
-                    &mut asm,
-                    fun.reloc("write_index"),
-                    CaveAddress::EventLogWriteIdx,
-                )?;
-                write_addr_to_slice(&mut asm, fun.reloc("buffer"), CaveAddress::EventLogBuffer)?;
-                write_rel_i32(
-                    &mut asm,
-                    location,
-                    fun.reloc("hook_loc"),
-                    Function::SetEvent.add_offset(5),
-                    4,
-                )?;
+                fun.patch::<POINTER>("write_index", CaveAddr::EventLogWriteIdx);
+                fun.patch::<POINTER>("buffer", CaveAddr::EventLogBuffer);
+                fun.patch_rel32("hook_loc", CaveAddr::EventLogHook, Function::SetEvent.add(5), 4);
 
-                install_hook(&asm, location, Function::SetEvent, 5)?;
+                install_hook(&fun.bytes, CaveAddr::EventLogHook, Function::SetEvent, 5)?;
             }
             false => write_bytes(Function::SetEvent, &EVENT_LOG_HOOK_ORIGINAL)?,
         }
@@ -261,7 +244,7 @@ impl UnitCommand for FightEldenBeast {
 }
 
 impl ToggleCommand for DlcClear {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         get_event(70)
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -364,7 +347,7 @@ fn general_area_check(area_id: u32) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn _set_event_direct(event_id: u32, state: bool) -> ProcResult {
+fn _set_event_direct(event_id: u32, state: bool) -> SysResult {
     if let Some((data_ptr, block_offset)) = event_flag_lookup(event_id)? {
         let mask = 1 << (7 - (block_offset & 7));
         set_bit(data_ptr + (block_offset >> 3) as u64, mask, state)

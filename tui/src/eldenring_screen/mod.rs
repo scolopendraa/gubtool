@@ -50,7 +50,6 @@ impl EldenRingScreen {
 
 pub fn dbg_lines() -> Vec<String> {
     vec![
-        format!("target: {:#X?}", target::target()),
         format!("player loaded: {}", eldenring::is_player_loaded()),
         format!("dlc available: {}", eldenring::is_dlc_available()),
         format!(
@@ -79,6 +78,13 @@ pub fn dbg_lines() -> Vec<String> {
             target::target()
                 .chr_ins()
                 .and_then(|chr| chr.block_id())
+                .unwrap_or_default()
+        ),
+        format!(
+            "target cool times: {:?}",
+            target::target()
+                .chr_ins()
+                .and_then(|chr| chr.get_cool_times())
                 .unwrap_or_default()
         ),
     ]

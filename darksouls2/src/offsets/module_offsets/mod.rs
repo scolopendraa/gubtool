@@ -4,7 +4,7 @@ mod versions;
 
 use {
     crate::offsets::module_offsets::structs::module_offsets,
-    gubtool_core::{address::Address, attached::module_base},
+    gubtool_core::{address::Address, attached::module_base, impl_address_patch},
 };
 
 #[derive(Clone, Copy)]
@@ -58,6 +58,7 @@ pub enum Patch {
     NoSoulLoss,
     PlayerHidden,
     PlayerSilent,
+    SkipLogos,
     MenuTransition,
     NoRoll,
     NoBackstep,
@@ -145,6 +146,7 @@ impl Address for Patch {
             Self::NoSoulLoss => f.no_soul_loss,
             Self::PlayerHidden => f.player_hidden,
             Self::PlayerSilent => f.player_silent,
+            Self::SkipLogos => f.skip_logos,
             Self::MenuTransition => f.menu_transition,
             Self::NoRoll => f.no_roll,
             Self::NoBackstep => f.no_backstep,
@@ -175,3 +177,5 @@ impl Address for ExternalFunctionPointer {
         module_base() + offset
     }
 }
+
+impl_address_patch!(BasePointer, Function, Hook, Patch, Data, ExternalFunctionPointer);

@@ -4,7 +4,7 @@ use {
         mem::*,
         offsets::{
             ChainReadExt,
-            code_cave::CaveAddress,
+            code_cave::CaveAddr,
             game_manager_imp,
             module_offsets::BasePointer,
         },
@@ -12,7 +12,7 @@ use {
         target::{act_logger, target},
         utility,
     },
-    gubtool_core::{address::Address, slice_ops::*, sys::sys_error::ProcResult},
+    gubtool_core::{address::Address, slice_ops::*, sys::sys_error::SysResult},
     std::sync::{
         LazyLock,
         Mutex,
@@ -66,7 +66,7 @@ pub struct StateFlags {
 impl StateFlags {
     pub fn update(&self) {
         let mut buffer = self.buffer.lock().unwrap();
-        *buffer = read::<[u8; 0x20]>(CaveAddress::StateHandlerFlags).unwrap_or_default();
+        *buffer = read::<[u8; 0x20]>(CaveAddr::StateHandlerFlags).unwrap_or_default();
     }
 
     pub fn is_flag(&self, flag_offset: StateFlag) -> bool {
@@ -100,8 +100,8 @@ pub fn is_flag(flag_offset: StateFlag) -> bool {
     STATE_FLAGS.is_flag(flag_offset)
 }
 
-pub fn set_flag(flag_offset: StateFlag, state: bool) -> ProcResult {
-    write::<u8>(CaveAddress::StateHandlerFlags.add_offset(flag_offset as u64), state as u8)
+pub fn set_flag(flag_offset: StateFlag, state: bool) -> SysResult {
+    write::<u8>(CaveAddr::StateHandlerFlags.add(flag_offset as u64), state as u8)
 }
 
 #[repr(u64)]

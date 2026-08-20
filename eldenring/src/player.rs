@@ -8,8 +8,9 @@ use {
         mem::*,
         offsets::{
             ChainReadExt,
-            code_cave::CaveAddress,
+            code_cave::CaveAddr,
             game_data_man,
+            game_man,
             module_offsets::{BasePointer, Data, Function, Hook, Patch},
             world_chr_man,
         },
@@ -17,14 +18,15 @@ use {
         resources::ASM,
         utils::{dlc_check, player_loaded_check},
     },
+    assemble::patch::{BYTE, DWORD},
     gubtool_core::{
-        address::Address,
+        address::{Address, POINTER},
         attached::version,
         game_version::EldenRingVersion::*,
-        slice_ops::*,
+        slice_ops::write_to_slice,
         sys::{
             ipc::FfiValue,
-            sys_error::{PointerType, ProcResult, ProcessError},
+            sys_error::{PointerType, SysError, SysResult},
         },
     },
     shared::{
@@ -70,10 +72,10 @@ impl Player {
             }
         }
     }
-    pub fn chr_ins(&mut self) -> ProcResult<&mut ChrIns> {
+    pub fn chr_ins(&mut self) -> SysResult<&mut ChrIns> {
         self.chr_ins
             .as_mut()
-            .ok_or(ProcessError::null_pointer(PointerType::Player))
+            .ok_or(SysError::null_pointer(PointerType::Player))
     }
     pub fn pointers(&self) -> Vec<(String, u64)> {
         self.chr_ins
@@ -109,10 +111,10 @@ impl Torrent {
 
         self.chr_ins = ChrIns::from_handle(handle);
     }
-    pub fn chr_ins(&mut self) -> ProcResult<&mut ChrIns> {
+    pub fn chr_ins(&mut self) -> SysResult<&mut ChrIns> {
         self.chr_ins
             .as_mut()
-            .ok_or(ProcessError::null_pointer(PointerType::Torrent))
+            .ok_or(SysError::null_pointer(PointerType::Torrent))
     }
     pub fn pointers(&self) -> Vec<(String, u64)> {
         self.chr_ins
@@ -134,6 +136,8 @@ declare_command!(
     NoDamage,
     InfinitePoise,
     SetRfbsOnLoad,
+    NoRuneLossOnDeath,
+    NoTimePassOnDeath,
     RuneArc,
     TorrentAnywhere,
     TorrentNoDeath,
@@ -144,19 +148,19 @@ declare_command!(
     Rest,
 );
 
-fn is_chr_dbg_flag(offset: ChrDbgOffset) -> ProcResult<bool> {
-    read::<u8>(Data::ChrDbgFlags.add_offset(offset as u64)).map(|val| val == 1)
+fn is_chr_dbg_flag(offset: ChrDbgOffset) -> SysResult<bool> {
+    read::<u8>(Data::ChrDbgFlags.add(offset as u64)).map(|val| val == 1)
 }
 
 fn set_chr_dbg_flag(offset: ChrDbgOffset, state: bool) -> anyhow::Result<()> {
-    write::<u8>(Data::ChrDbgFlags.add_offset(offset as u64), state as u8)?;
+    write::<u8>(Data::ChrDbgFlags.add(offset as u64), state as u8)?;
     Ok(())
 }
 
 macro_rules! impl_chr_dbg {
     ($struct_name:ident, $chr_dbg_offset:path) => {
         impl ToggleCommand for $struct_name {
-            fn is(&self) -> ProcResult<bool> {
+            fn is(&self) -> SysResult<bool> {
                 is_chr_dbg_flag($chr_dbg_offset)
             }
             fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -176,7 +180,7 @@ impl_chr_dbg!(Hidden, ChrDbgOffset::Hidden);
 impl_chr_dbg!(Silent, ChrDbgOffset::Silent);
 
 impl ToggleCommand for NoDamage {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         Ok(game_state::is_flag(StateFlag::PlayerNoDamage))
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -186,13 +190,13 @@ impl ToggleCommand for NoDamage {
     }
 }
 impl NoDamage {
-    pub fn set_in_game(&self, state: bool) -> ProcResult {
+    pub fn set_in_game(&self, state: bool) -> SysResult {
         player().chr_ins()?.set_no_damage(state)
     }
 }
 
 impl ValueCommand<i32> for Health {
-    fn get(&self) -> ProcResult<i32> {
+    fn get(&self) -> SysResult<i32> {
         player().chr_ins()?.get_current_hp()
     }
     fn set(&self, val: i32) -> anyhow::Result<()> {
@@ -209,7 +213,7 @@ impl UnitCommand for Die {
 }
 
 impl ValueCommand<f32> for AnimationSpeed {
-    fn get(&self) -> ProcResult<f32> {
+    fn get(&self) -> SysResult<f32> {
         player().chr_ins()?.get_animation_speed()
     }
     fn set(&self, val: f32) -> anyhow::Result<()> {
@@ -225,7 +229,7 @@ impl UnitCommand for Rest {
 }
 
 impl ToggleCommand for RuneArc {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         Ok(player_game_data().rune_arc_active || game_state::is_flag(StateFlag::RuneArc))
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -235,7 +239,7 @@ impl ToggleCommand for RuneArc {
     }
 }
 impl RuneArc {
-    pub fn set_in_game(&self, state: bool) -> ProcResult {
+    pub fn set_in_game(&self, state: bool) -> SysResult {
         ResolvedPtr::PlayerGameData
             .get()
             .add_offset(PlayerGameDataOffset::RuneArc as u64)
@@ -244,7 +248,7 @@ impl RuneArc {
 }
 
 impl ToggleCommand for SetRfbsOnLoad {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         Ok(game_state::is_flag(StateFlag::Rfbs))
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -253,14 +257,14 @@ impl ToggleCommand for SetRfbsOnLoad {
     }
 }
 impl SetRfbsOnLoad {
-    pub fn apply_in_game(&self) -> ProcResult {
+    pub fn apply_in_game(&self) -> SysResult {
         let max_hp = player().chr_ins()?.get_max_hp()?;
         player().chr_ins()?.set_hp((max_hp * 20) / 100 - 1)
     }
 }
 
 impl ValueCommand<u32> for Runes {
-    fn get(&self) -> ProcResult<u32> {
+    fn get(&self) -> SysResult<u32> {
         Ok(player_game_data().rune_count)
     }
     fn set(&self, val: u32) -> anyhow::Result<()> {
@@ -283,7 +287,7 @@ impl Runes {
 }
 
 impl ToggleCommand for TorrentAnywhere {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         read::<[u8; 3]>(Patch::WhistleDisabled).map(|val| val != [0x0f, 0x95, 0xc0])
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -301,8 +305,72 @@ impl ToggleCommand for TorrentAnywhere {
     }
 }
 
+impl ToggleCommand for NoRuneLossOnDeath {
+    fn is(&self) -> SysResult<bool> {
+        read::<u8>(Patch::NoRuneLossOnDeath).map(|val| val != 0xf)
+    }
+    fn set(&self, state: bool) -> anyhow::Result<()> {
+        let orig_bytes = match version() {
+            Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) | Some(Version1_2_3)
+            | Some(Version1_3_0) | Some(Version1_3_1) | Some(Version1_3_2) | Some(Version1_4_0)
+            | Some(Version1_4_1) | Some(Version1_5_0) | Some(Version1_6_0) | Some(Version1_7_0)
+            | Some(Version1_8_0) | Some(Version1_8_1) | Some(Version1_9_0) | Some(Version1_9_1)
+            | Some(Version2_0_0) | Some(Version2_0_1) => [0xf, 0x84, 0xdc, 0x1, 0x0, 0x0],
+            _ => [0xf, 0x84, 0xe4, 0x1, 0x0, 0x0],
+        };
+        match state {
+            true => {
+                let mut bytes = [0xe9, 0x0, 0x0, 0x0, 0x0, 0x90];
+                let orig_jump = i32::from_le_bytes([
+                    orig_bytes[2],
+                    orig_bytes[3],
+                    orig_bytes[4],
+                    orig_bytes[5],
+                ]);
+                write_to_slice::<i32>(&mut bytes, 1, orig_jump + 1)?;
+                write_bytes(Patch::NoRuneLossOnDeath, &bytes)?
+            }
+            false => write_bytes(Patch::NoRuneLossOnDeath, &orig_bytes)?,
+        }
+        Ok(())
+    }
+}
+
+const NO_TIME_PASS_ORIGINAL: [u8; 5] = [0x4c, 0x8b, 0x74, 0x24, 0x70];
+impl ToggleCommand for NoTimePassOnDeath {
+    fn is(&self) -> SysResult<bool> {
+        read::<[u8; 5]>(Hook::NoTimePassOnDeath).map(|val| val != NO_TIME_PASS_ORIGINAL)
+    }
+    fn set(&self, state: bool) -> anyhow::Result<()> {
+        match state {
+            true => {
+                let mut fun = ASM.get_function("no_time_pass_on_death");
+
+                fun.patch::<POINTER>("world_area_time_impl", BasePointer::WorldAreaTimeImpl);
+                fun.patch::<POINTER>("game_man", BasePointer::GameMan);
+                fun.patch::<BYTE>("stored_time_off", game_man::stored_time() as u8);
+                fun.patch_rel32(
+                    "hook_loc",
+                    CaveAddr::NoTimePassOnDeathHook,
+                    Hook::NoTimePassOnDeath.add(5),
+                    4,
+                );
+
+                install_hook(
+                    &fun.bytes,
+                    CaveAddr::NoTimePassOnDeathHook,
+                    Hook::NoTimePassOnDeath,
+                    5,
+                )?
+            }
+            false => write::<[u8; 5]>(Hook::NoTimePassOnDeath, NO_TIME_PASS_ORIGINAL)?,
+        }
+        Ok(())
+    }
+}
+
 impl ToggleCommand for TorrentNoDeath {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         Ok(game_state::is_flag(StateFlag::TorrentNoDeath))
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -312,13 +380,13 @@ impl ToggleCommand for TorrentNoDeath {
     }
 }
 impl TorrentNoDeath {
-    pub fn set_in_game(&self, state: bool) -> ProcResult {
+    pub fn set_in_game(&self, state: bool) -> SysResult {
         torrent().chr_ins()?.set_no_death(state)
     }
 }
 
 impl ToggleCommand for InfinitePoise {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         read::<[u8; 7]>(Hook::PlayerInfinitePoise).map(|val| val != infinite_poise_bytes_original())
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -338,71 +406,45 @@ fn infinite_poise_bytes_original() -> [u8; 7] {
     }
 }
 impl InfinitePoise {
-    fn set_infinite_poise(&self, state: bool) -> ProcResult {
+    fn set_infinite_poise(&self, state: bool) -> SysResult {
         if state {
             let mut fun = ASM.get_function("infinite_poise_hook");
-            let mut asm = fun.take_bytes();
 
-            write_addr_to_slice(&mut asm, fun.reloc("world_chr_man"), BasePointer::WorldChrMan)?;
-            write_to_slice::<i32>(
-                &mut asm,
-                fun.reloc("player_ins_off"),
-                world_chr_man::player_ins(),
-            )?;
-            write_addr_to_slice(
-                &mut asm,
-                fun.reloc("fn_get_chr_ins"),
-                Function::GetChrInsByEntityId,
-            )?;
-            write_rel_i32(
-                &mut asm,
-                CaveAddress::InfinitePoiseHook,
-                fun.reloc("hook_loc"),
-                Hook::PlayerInfinitePoise.add_offset(7),
+            fun.patch::<POINTER>("world_chr_man", BasePointer::WorldChrMan);
+            fun.patch::<DWORD>("player_ins_off", world_chr_man::player_ins() as u32);
+            fun.patch::<POINTER>("fn_get_chr_ins", Function::GetChrInsByEntityId);
+            fun.patch_rel32(
+                "hook_loc",
+                CaveAddr::InfinitePoiseHook,
+                Hook::PlayerInfinitePoise.add(7),
                 4,
-            )?;
-            install_hook(&asm, CaveAddress::InfinitePoiseHook, Hook::PlayerInfinitePoise, 7)
+            );
+
+            install_hook(&fun.bytes, CaveAddr::InfinitePoiseHook, Hook::PlayerInfinitePoise, 7)
         } else {
             write_bytes(Hook::PlayerInfinitePoise, &infinite_poise_bytes_original())
         }
     }
-    fn set_no_grab(&self, state: bool) -> ProcResult {
+    fn set_no_grab(&self, state: bool) -> SysResult {
         if state {
             let mut fun = ASM.get_function("grab_hook");
-            let mut asm = fun.take_bytes();
 
-            let location = CaveAddress::NoGrabHook;
-            let skip_grab_jmp_location = Hook::PlayerNoGrab.add_offset(0x95);
+            let location = CaveAddr::NoGrabHook;
+            let skip_grab_jmp_location = Hook::PlayerNoGrab.add(0x95);
 
-            write_addr_to_slice(&mut asm, fun.reloc("world_chr_man"), BasePointer::WorldChrMan)?;
-            write_to_slice::<i32>(
-                &mut asm,
-                fun.reloc("player_ins_off"),
-                world_chr_man::player_ins(),
-            )?;
-            write_rel_i32(
-                &mut asm,
-                location,
-                fun.reloc("skip_grab_jmp_location"),
-                skip_grab_jmp_location,
-                4,
-            )?;
-            write_rel_i32(
-                &mut asm,
-                location,
-                fun.reloc("hook_loc"),
-                Hook::PlayerNoGrab.add_offset(9),
-                4,
-            )?;
+            fun.patch::<POINTER>("world_chr_man", BasePointer::WorldChrMan);
+            fun.patch::<DWORD>("player_ins_off", world_chr_man::player_ins() as u32);
+            fun.patch_rel32("skip_grab_jmp_location", location, skip_grab_jmp_location, 4);
+            fun.patch_rel32("hook_loc", location, Hook::PlayerNoGrab.add(9), 4);
 
-            install_hook(&asm, location, Hook::PlayerNoGrab, 9)
+            install_hook(&fun.bytes, location, Hook::PlayerNoGrab, 9)
         } else {
             write_bytes(Hook::PlayerNoGrab, &GRAB_HOOK_BYTES_ORIGINAL)
         }
     }
 }
 
-pub fn map_coords() -> ProcResult<[f32; 3]> {
+pub fn map_coords() -> SysResult<[f32; 3]> {
     player()
         .chr_ins()?
         .get_ptr(ResolvedChrPtr::ChrIns)
@@ -410,7 +452,7 @@ pub fn map_coords() -> ProcResult<[f32; 3]> {
         .read::<[f32; 3]>()
 }
 
-pub fn map_angle() -> ProcResult<f32> {
+pub fn map_angle() -> SysResult<f32> {
     player()
         .chr_ins()?
         .get_ptr(ResolvedChrPtr::ChrIns)
@@ -508,11 +550,11 @@ pub fn player_game_data() -> MutexGuard<'static, PlayerGameData> {
 impl PlayerGameData {
     pub fn read(&mut self) {
         if is_player_loaded() {
-            let bytes = ResolvedPtr::PlayerGameData
+            let new = ResolvedPtr::PlayerGameData
                 .get()
-                .read::<[u8; std::mem::size_of::<Self>()]>()
-                .unwrap_or([0x0; std::mem::size_of::<Self>()]);
-            *self = unsafe { *(bytes.as_ptr() as *const Self) }
+                .read::<Self>()
+                .unwrap_or_default();
+            *self = new
         } else {
             *self = Self::default()
         }

@@ -16,7 +16,7 @@ mod win;
 #[cfg(windows)]
 pub use win::*;
 use {
-    crate::{address::Address, attached::is_32, sys::sys_error::ProcResult},
+    crate::{address::Address, attached::is_32, sys::sys_error::SysResult},
     assemble::AsmFolder,
     std::sync::LazyLock,
 };
@@ -29,7 +29,7 @@ static ASM64: LazyLock<AsmFolder> =
     LazyLock::new(|| bincode::deserialize(ASM_LIB64_BYTES).unwrap());
 
 #[track_caller]
-pub fn read_address_unsafe(address: impl Address) -> ProcResult<u64> {
+pub fn read_address_unsafe(address: impl Address) -> SysResult<u64> {
     if is_32() {
         read_unsafe::<u32>(address).map(|addr| addr as u64)
     } else {

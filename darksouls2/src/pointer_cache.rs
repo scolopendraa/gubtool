@@ -9,11 +9,12 @@ use {
         },
         resources::map_ids::MapId,
     },
-    gubtool_core::sys::sys_error::ProcResult,
+    gubtool_core::sys::sys_error::SysResult,
     std::{
         collections::HashMap,
         sync::{LazyLock, Mutex},
     },
+    strum::{EnumIter, IntoEnumIterator},
 };
 
 pub(crate) static POINTER_CACHE: LazyLock<PointerCache> = LazyLock::new(PointerCache::default);
@@ -23,7 +24,7 @@ pub struct PointerCache {
     map: Mutex<HashMap<ResolvedPtr, u64>>,
 }
 
-#[derive(Debug, Hash, Eq, PartialEq, Clone, Copy)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone, Copy, EnumIter)]
 pub(crate) enum ResolvedPtr {
     GameManagerImp,
     GameDataManager,
@@ -38,7 +39,7 @@ pub(crate) enum ResolvedPtr {
 }
 
 impl PointerCache {
-    pub fn lookup(&self, pointer: ResolvedPtr) -> ProcResult<u64> {
+    pub fn lookup(&self, pointer: ResolvedPtr) -> SysResult<u64> {
         {
             let cache = self.map.lock().unwrap();
             if let Some(&val) = cache.get(&pointer) {
@@ -99,8 +100,15 @@ impl PointerCache {
 }
 
 impl ResolvedPtr {
-    pub fn get(self) -> ProcResult<u64> {
+    pub fn get(self) -> SysResult<u64> {
         POINTER_CACHE.lookup(self)
+    }
+}
+
+pub fn load_all_pointers() {
+    POINTER_CACHE.reset_pointers();
+    for ptr in ResolvedPtr::iter() {
+        let _ = POINTER_CACHE.lookup(ptr);
     }
 }
 

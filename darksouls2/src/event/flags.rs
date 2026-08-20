@@ -2,7 +2,7 @@ use {
     crate::{
         mem::*,
         offsets::{
-            code_cave::CaveAddress,
+            code_cave::CaveAddr,
             module_offsets::{Function, Hook},
         },
         pointer_cache::ResolvedPtr,
@@ -11,12 +11,12 @@ use {
     },
     anyhow::anyhow,
     gubtool_core::{
-        address::Address,
+        address::{Address, POINTER},
         attached::is_32,
         slice_ops::*,
         sys::{
             ipc::{FfiValue, X86CallingConvention},
-            sys_error::ProcResult,
+            sys_error::SysResult,
         },
     },
     shared::{
@@ -37,7 +37,7 @@ pub fn set_event_flag(flag_id: u32, state: bool) -> anyhow::Result<()> {
     run_game_function(Function::SetEvent, &args, X86CallingConvention::__thiscall)
 }
 
-pub fn get_event_flag(flag_id: u32) -> ProcResult<bool> {
+pub fn get_event_flag(flag_id: u32) -> SysResult<bool> {
     if let Some((byte_addr, bit_mask)) = event_flag_lookup(flag_id)? {
         is_bit_set(byte_addr, bit_mask)
     } else {
@@ -54,7 +54,7 @@ struct Node {
 }
 
 impl Node {
-    fn read_at(address: u64) -> ProcResult<Self> {
+    fn read_at(address: u64) -> SysResult<Self> {
         if is_32() {
             let bytes = read::<[u8; 0x10]>(address)?;
             Ok(Self {
@@ -75,7 +75,7 @@ impl Node {
     }
 }
 
-fn event_flag_lookup(flag_id: u32) -> ProcResult<Option<(u64, u8)>> {
+fn event_flag_lookup(flag_id: u32) -> SysResult<Option<(u64, u8)>> {
     let event_flag_man = ResolvedPtr::EventFlagManager.get()?;
 
     let group = flag_id / 10000;
@@ -125,23 +125,23 @@ impl EventLogger for Ds2EventLogger {
     fn file_prefix(&self) -> &'static str {
         "darksouls2"
     }
-    fn write_idx(&self) -> ProcResult<i32> {
-        read::<i32>(CaveAddress::EventLogWriteIdx)
+    fn write_idx(&self) -> SysResult<i32> {
+        read::<i32>(CaveAddr::EventLogWriteIdx)
     }
-    fn read_buffer(&self) -> ProcResult<[u8; 0x1000]> {
-        read::<[u8; 0x1000]>(CaveAddress::EventLogBuffer)
+    fn read_buffer(&self) -> SysResult<[u8; 0x1000]> {
+        read::<[u8; 0x1000]>(CaveAddr::EventLogBuffer)
     }
-    fn clear_cave(&self) -> ProcResult {
-        write::<i32>(CaveAddress::EventLogWriteIdx, 0x0)?;
-        write_bytes(CaveAddress::EventLogBuffer, &[0x0; 0x1000])
+    fn clear_cave(&self) -> SysResult {
+        write::<i32>(CaveAddr::EventLogWriteIdx, 0x0)?;
+        write_bytes(CaveAddr::EventLogBuffer, &[0x0; 0x1000])
     }
     fn toggle_hook(&self) -> anyhow::Result<()> {
-        EventLogHook.toggle()
+        StartEventLogger.toggle()
     }
 }
 
 declare_command!(
-    EventLogHook,
+    StartEventLogger,
     KingsRingAquired => "King's Ring Aquired",
     NashandraUnlocked,
     AldiaUnlocked,
@@ -159,25 +159,19 @@ declare_command!(
 );
 
 const EVENT_LOG_HOOK_ORIGINAL: [u8; 5] = [0xb8, 0x59, 0x17, 0xb7, 0xd1];
-impl ToggleCommand for EventLogHook {
-    fn is(&self) -> ProcResult<bool> {
+impl ToggleCommand for StartEventLogger {
+    fn is(&self) -> SysResult<bool> {
         read::<[u8; 5]>(Hook::EventLog).map(|bytes| bytes != EVENT_LOG_HOOK_ORIGINAL)
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
         if state {
             let mut fun = asm_function("event_log");
-            let mut asm = fun.take_bytes();
 
-            write_addr_to_slice(&mut asm, fun.reloc("write_index"), CaveAddress::EventLogWriteIdx)?;
-            write_addr_to_slice(&mut asm, fun.reloc("buffer"), CaveAddress::EventLogBuffer)?;
-            write_rel_i32(
-                &mut asm,
-                CaveAddress::EventLogHook,
-                fun.reloc("hook_loc"),
-                Hook::EventLog.add_offset(5),
-                4,
-            )?;
-            install_hook(&asm, CaveAddress::EventLogHook, Hook::EventLog, 5)?;
+            fun.patch::<POINTER>("write_index", CaveAddr::EventLogWriteIdx);
+            fun.patch::<POINTER>("buffer", CaveAddr::EventLogBuffer);
+            fun.patch_rel32("hook_loc", CaveAddr::EventLogHook, Hook::EventLog.add(5), 4);
+
+            install_hook(&fun.bytes, CaveAddr::EventLogHook, Hook::EventLog, 5)?;
         } else {
             write_bytes(Hook::EventLog, &EVENT_LOG_HOOK_ORIGINAL)?;
         }
@@ -188,7 +182,7 @@ impl ToggleCommand for EventLogHook {
 const VANILLA_IVORY_SKIP_ORIGINAL: [u8; 6] = [0x55, 0x8b, 0xec, 0x83, 0xec, 0x08];
 const SCHOLAR_IVORY_SKIP_ORIGINAL: [u8; 5] = [0x48, 0x89, 0x74, 0x24, 0x10];
 impl ToggleCommand for SkipIvoryKingGauntlet {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         if is_32() {
             read::<[u8; 6]>(Function::SetEvent).map(|val| val != VANILLA_IVORY_SKIP_ORIGINAL)
         } else {
@@ -197,33 +191,20 @@ impl ToggleCommand for SkipIvoryKingGauntlet {
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
         if state {
-            let orig_instr_len = if is_32() {
-                6
-            } else {
-                5
-            };
+            let orig_instr_len = if is_32() { 6 } else { 5 };
             let mut fun = asm_function("ivory_skip");
-            let mut asm = fun.take_bytes();
 
-            write_addr_to_slice(
-                &mut asm,
-                fun.reloc("fn_get_map_entity"),
-                Function::MapEntityFromMapIdAndObjId,
-            )?;
-            write_addr_to_slice(
-                &mut asm,
-                fun.reloc("fn_get_map_object"),
-                Function::GetStateActComponent,
-            )?;
-            write_addr_to_slice(&mut asm, fun.reloc("fn_set_event"), Function::SetEvent)?;
-            write_rel_i32(
-                &mut asm,
-                CaveAddress::IvorySkipHook,
-                fun.reloc("hook_loc"),
-                Function::SetEvent.add_offset(orig_instr_len),
+            fun.patch::<POINTER>("fn_get_map_entity", Function::MapEntityFromMapIdAndObjId);
+            fun.patch::<POINTER>("fn_get_map_object", Function::GetStateActComponent);
+            fun.patch::<POINTER>("fn_set_event", Function::SetEvent);
+            fun.patch_rel32(
+                "hook_loc",
+                CaveAddr::IvorySkipHook,
+                Function::SetEvent.add(orig_instr_len),
                 4,
-            )?;
-            install_hook(&asm, CaveAddress::IvorySkipHook, Function::SetEvent, orig_instr_len)?;
+            );
+
+            install_hook(&fun.bytes, CaveAddr::IvorySkipHook, Function::SetEvent, orig_instr_len)?;
         } else {
             let bytes: &[u8] = if is_32() {
                 &VANILLA_IVORY_SKIP_ORIGINAL
@@ -239,7 +220,7 @@ impl ToggleCommand for SkipIvoryKingGauntlet {
 const VANILLA_LOYCE_SKIP_ORIGINAL: [u8; 7] = [0x88, 0x94, 0x08, 0xa1, 0x02, 0x00, 0x00];
 const SCHOLAR_LOYCE_SKIP_ORIGINAL: [u8; 8] = [0x44, 0x88, 0x84, 0x08, 0xa1, 0x03, 0x00, 0x00];
 impl ToggleCommand for DisableLoyceKnights {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         match is_32() {
             true => {
                 read::<[u8; 7]>(Hook::SetSharedFlag)
@@ -253,22 +234,20 @@ impl ToggleCommand for DisableLoyceKnights {
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
         if state {
-            let orig_instr_len = if is_32() {
-                7
-            } else {
-                8
-            };
+            let orig_instr_len = if is_32() { 7 } else { 8 };
             let mut fun = asm_function("ivory_knights");
-            let mut asm = fun.take_bytes();
-
-            write_rel_i32(
-                &mut asm,
-                CaveAddress::IvoryKnightsHook,
-                fun.reloc("hook_loc"),
-                Hook::SetSharedFlag.add_offset(orig_instr_len),
+            fun.patch_rel32(
+                "hook_loc",
+                CaveAddr::IvoryKnightsHook,
+                Hook::SetSharedFlag.add(orig_instr_len),
                 4,
+            );
+            install_hook(
+                &fun.bytes,
+                CaveAddr::IvoryKnightsHook,
+                Hook::SetSharedFlag,
+                orig_instr_len,
             )?;
-            install_hook(&asm, CaveAddress::IvoryKnightsHook, Hook::SetSharedFlag, orig_instr_len)?;
         } else {
             let bytes: &[u8] = if is_32() {
                 &VANILLA_LOYCE_SKIP_ORIGINAL
@@ -305,7 +284,7 @@ pub enum EventFlag {
 }
 
 impl EventFlag {
-    pub fn get(&self) -> ProcResult<bool> {
+    pub fn get(&self) -> SysResult<bool> {
         get_event_flag(*self as u32)
     }
 
@@ -320,7 +299,7 @@ impl EventFlag {
 }
 
 impl ToggleCommand for KingsRingAquired {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         EventFlag::KingsRingAcquired.get()
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -328,7 +307,7 @@ impl ToggleCommand for KingsRingAquired {
     }
 }
 impl ToggleCommand for NashandraUnlocked {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         EventFlag::GiantLordDefeated.get()
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -336,7 +315,7 @@ impl ToggleCommand for NashandraUnlocked {
     }
 }
 impl ToggleCommand for AldiaUnlocked {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         Ok(EventFlag::VendrickDefeated.get()? && EventFlag::UnlockAldia.get()?)
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -345,7 +324,7 @@ impl ToggleCommand for AldiaUnlocked {
     }
 }
 impl ToggleCommand for DarkChasmLitShadedWoods {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         EventFlag::ShadedWoodsChasmCleared.get()
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -353,7 +332,7 @@ impl ToggleCommand for DarkChasmLitShadedWoods {
     }
 }
 impl ToggleCommand for DarkChasmLitDrangleicCastle {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         EventFlag::DrangleicCastleChasmCleared.get()
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -361,7 +340,7 @@ impl ToggleCommand for DarkChasmLitDrangleicCastle {
     }
 }
 impl ToggleCommand for DarkChasmLitBlackGulch {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         EventFlag::BlackGulchChasmCleared.get()
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -369,7 +348,7 @@ impl ToggleCommand for DarkChasmLitBlackGulch {
     }
 }
 impl ToggleCommand for BrumeTowerActivated {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         EventFlag::ActivateBrume.get()
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -377,7 +356,7 @@ impl ToggleCommand for BrumeTowerActivated {
     }
 }
 impl ToggleCommand for AavaVisible {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         EventFlag::VisibleAava.get()
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -385,7 +364,7 @@ impl ToggleCommand for AavaVisible {
     }
 }
 impl ToggleCommand for UndoAlsanasSeal {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         Ok(EventFlag::EleumLoyceWinds.get()? && EventFlag::EleumLoyceWinds.get()?)
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -394,7 +373,7 @@ impl ToggleCommand for UndoAlsanasSeal {
     }
 }
 impl ToggleCommand for FreeLoyceKnightOuterWall {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         EventFlag::LoyceKnightOuterWall.get()
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -402,7 +381,7 @@ impl ToggleCommand for FreeLoyceKnightOuterWall {
     }
 }
 impl ToggleCommand for FreeLoyceKnightAbandonedDwelling {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         EventFlag::LoyceKnightAbandonedDwelling.get()
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
@@ -411,7 +390,7 @@ impl ToggleCommand for FreeLoyceKnightAbandonedDwelling {
 }
 
 impl ToggleCommand for FreeLoyceKnightLowerGarrison {
-    fn is(&self) -> ProcResult<bool> {
+    fn is(&self) -> SysResult<bool> {
         EventFlag::LoyceKnightLowerGarrison.get()
     }
     fn set(&self, state: bool) -> anyhow::Result<()> {
