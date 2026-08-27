@@ -22,10 +22,12 @@ pub trait Patch<P: PatchSize> {
 }
 
 impl AsmFunction {
+    #[track_caller]
     pub fn patch<P: PatchSize>(&mut self, relocation: &'static str, data: impl Patch<P>) {
         data.patch(self, relocation);
     }
 
+    #[track_caller]
     pub fn patch_rel32<T, U>(
         &mut self,
         relocation: &'static str,

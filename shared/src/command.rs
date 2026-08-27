@@ -4,6 +4,7 @@ use {
     std::fmt::Display,
 };
 
+#[derive(Clone, Copy)]
 pub enum Command {
     Unit(&'static dyn UnitCommand),
     Toggle(&'static dyn ToggleCommand),
@@ -12,7 +13,18 @@ pub enum Command {
     Value(ValCmd),
     Option(OptCmd),
 }
+impl Command {
+    pub fn key(&self) -> Option<&'static str> {
+        match self {
+            Command::Unit(c) => c.key(),
+            Command::Toggle(c) => c.key(),
+            Command::Value(c) => c.key(),
+            _ => None,
+        }
+    }
+}
 
+#[derive(Clone, Copy)]
 pub enum ValCmd {
     I32(&'static dyn ValueCommand<i32>),
     F32(&'static dyn ValueCommand<f32>),
@@ -22,18 +34,20 @@ pub enum ValCmd {
     ActArray(&'static dyn ValueCommand<ActArray>),
 }
 
+#[derive(Clone, Copy)]
 pub enum OptCmd {
     F32(&'static dyn OptionCommand<f32>),
 }
 
 pub trait UnitCommand: Send + Sync + Display {
     fn execute(&self) -> anyhow::Result<()>;
+    fn key(&self) -> Option<&'static str>;
 }
 
 pub trait ToggleCommand: Send + Sync + Display {
     fn is(&self) -> SysResult<bool>;
     fn set(&self, state: bool) -> anyhow::Result<()>;
-
+    fn key(&self) -> Option<&'static str>;
     fn toggle(&self) -> anyhow::Result<()> {
         let new_state = !self.is().unwrap_or_default();
         self.set(new_state)
@@ -64,7 +78,7 @@ where T: Display + Send + 'static + ParseInput + Default
 {
     fn get(&self) -> SysResult<T>;
     fn set(&self, val: T) -> anyhow::Result<()>;
-
+    fn key(&self) -> Option<&'static str>;
     fn can_get(&self) -> bool {
         true
     }
@@ -97,6 +111,19 @@ impl Display for ValCmd {
         };
 
         value.fmt(f)
+    }
+}
+
+impl ValCmd {
+    fn key(&self) -> Option<&'static str> {
+        match self {
+            Self::I32(v) => v.key(),
+            Self::F32(v) => v.key(),
+            Self::U8(v) => v.key(),
+            Self::U32(v) => v.key(),
+            Self::U64(v) => v.key(),
+            Self::ActArray(v) => v.key(),
+        }
     }
 }
 

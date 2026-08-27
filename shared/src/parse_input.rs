@@ -89,3 +89,29 @@ impl ParseRegistry {
 pub fn can_input_be_parsed_from_type(type_id: TypeId, s: &str) -> bool {
     REGISTRY.can_parse(type_id, s)
 }
+
+pub fn title_case_from_pascal_case(string: &str) -> String {
+    let mut formatted = String::new();
+
+    for (i, ch) in string.chars().enumerate() {
+        if i > 0 && ch.is_uppercase() {
+            formatted.push(' ');
+        }
+        formatted.push(ch);
+    }
+
+    formatted
+}
+
+pub fn lower_snake_case_from_pascal_case(string: &str) -> String {
+    let mut formatted = String::new();
+
+    for (i, ch) in string.chars().enumerate() {
+        if i > 0 && ch.is_uppercase() {
+            formatted.push('_');
+        }
+        formatted.push(ch.to_ascii_lowercase());
+    }
+
+    formatted
+}

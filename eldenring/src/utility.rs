@@ -24,51 +24,30 @@ use {
     },
     shared::{
         command::{ToggleCommand, UnitCommand, ValueCommand},
-        declare_command,
+        toggle_command,
+        unit_command,
+        value_command,
     },
 };
 
-declare_command!(
-    Quitout,
-    ClearCount,
-    TriggerNewGameCycle,
-    FpsCap,
-    DisableLogos,
-    FreezeWorld,
-    MuteMusic,
-    DrawHitboxes,
-    ShowAllGraces,
-    ShowAllMaps,
-    StutterFix,
-    GameSpeed,
-    MapInCombat,
-    TravelInDungeons,
-    DisableAreaWelcomeMessage,
-    DisableRoll,
-    DisableJump,
-    DisableBackstep,
-);
-
-impl UnitCommand for Quitout {
-    fn execute(&self) -> anyhow::Result<()> {
-        player_loaded_check()?;
-        ResolvedPtr::GameMan
-            .get()
-            .add_offset(game_man::QUITOUT)
-            .write::<u8>(0x1)?;
-        Ok(())
-    }
-}
+unit_command!(Quitout {
+    player_loaded_check()?;
+    Ok(ResolvedPtr::GameMan
+        .get()
+        .add_offset(game_man::QUITOUT)
+        .write::<u8>(0x1)?)
+});
 
 const NG_EVENT_IDS: [u32; 8] = [50, 51, 52, 53, 54, 55, 56, 57];
-impl ValueCommand<i32> for ClearCount {
-    fn get(&self) -> SysResult<i32> {
+value_command!(ClearCount, i32 {
+    get: {
         ResolvedPtr::GameDataMan
             .get()
             .add_offset(game_data_man::NEW_GAME)
             .read::<i32>()
     }
-    fn set(&self, val: i32) -> anyhow::Result<()> {
+
+    set(val): {
         player_loaded_check()?;
         ResolvedPtr::GameDataMan
             .get()
@@ -81,78 +60,84 @@ impl ValueCommand<i32> for ClearCount {
             .enumerate()
             .try_for_each(|(i, &id)| event::set_event(id, i == current_ng as usize))
     }
-}
+});
 
-impl UnitCommand for TriggerNewGameCycle {
-    fn execute(&self) -> anyhow::Result<()> {
-        player_loaded_check()?;
-        ResolvedPtr::GameMan
-            .get()
-            .add_offset(game_man::start_new_game())
-            .write::<u8>(0x1)?;
-        Ok(())
-    }
-}
+unit_command!(TriggerNewGame {
+    player_loaded_check()?;
+    Ok(ResolvedPtr::GameMan
+        .get()
+        .add_offset(game_man::start_new_game())
+        .write::<u8>(0x1)?)
+});
 
-impl ValueCommand<f32> for FpsCap {
-    fn get(&self) -> SysResult<f32> {
-        read::<f32>(Patch::FpsCap.add(0x3)).map(|val| (1.0_f32 / val).round())
+value_command!(FpsCap, f32 {
+    get: {
+        read::<f32>(Patch::FpsCap.add(0x3))
+            .map(|val| (1.0_f32 / val).round())
     }
-    fn set(&self, val: f32) -> anyhow::Result<()> {
-        write::<f32>(Patch::FpsCap.add(0x3), 1.0_f32 / val)?;
-        Ok(())
-    }
-}
 
-impl ToggleCommand for DisableLogos {
-    fn is(&self) -> SysResult<bool> {
-        read::<[u8; 2]>(Patch::NoLogo).map(|val| val != [0x74, 0x53])
+    set(val): {
+        Ok(write::<f32>(Patch::FpsCap.add(0x3), 1.0_f32 / val)?)
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+});
+
+toggle_command!(DisableLogos {
+    is: {
+        read::<[u8; 2]>(Patch::NoLogo)
+            .map(|val| val != [0x74, 0x53])
+    }
+
+    set(state): {
         match state {
             false => write_bytes(Patch::NoLogo, &[0x74, 0x53])?,
             true => write_bytes(Patch::NoLogo, &[0x90, 0x90])?,
         }
         Ok(())
     }
-}
+});
 
-impl ToggleCommand for FreezeWorld {
-    fn is(&self) -> SysResult<bool> {
-        read::<[u8; 2]>(Patch::PauseWorld).map(|val| val != [0x0f, 0x84])
+toggle_command!(FreezeWorld {
+    is: {
+        read::<[u8; 2]>(Patch::PauseWorld)
+            .map(|val| val != [0x0f, 0x84])
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         match state {
             false => write_bytes(Patch::PauseWorld, &[0x0f, 0x84])?,
             true => write_bytes(Patch::PauseWorld, &[0x0f, 0x85])?,
         }
         Ok(())
     }
-}
+});
 
-impl ToggleCommand for MuteMusic {
-    fn is(&self) -> SysResult<bool> {
-        read::<[u8; 4]>(Patch::MuteMusic).map(|val| val != [0x0f, 0xb6, 0x48, 0x04])
+toggle_command!(MuteMusic {
+    is: {
+        read::<[u8; 4]>(Patch::MuteMusic)
+            .map(|val| val != [0x0f, 0xb6, 0x48, 0x04])
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         match state {
             false => write_bytes(Patch::MuteMusic, &[0x0f, 0xb6, 0x48, 0x04])?,
             true => write_bytes(Patch::MuteMusic, &[0x31, 0xc9, 0x90, 0x90])?,
         }
         Ok(())
     }
-}
+});
 
-impl ToggleCommand for DrawHitboxes {
-    fn is(&self) -> SysResult<bool> {
+toggle_command!(DrawHitboxes {
+    is: {
         Ok(game_state::is_flag(StateFlag::Hitboxes))
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         game_state::set_flag(StateFlag::Hitboxes, state)?;
-        let _ = self.set_in_game(state);
+        let _ = DrawHitboxes.set_in_game(state);
         Ok(())
     }
-}
+});
+
 impl DrawHitboxes {
     pub fn get_in_game(&self) -> SysResult<bool> {
         ResolvedPtr::DamageManager
@@ -169,36 +154,40 @@ impl DrawHitboxes {
     }
 }
 
-impl ToggleCommand for ShowAllGraces {
-    fn is(&self) -> SysResult<bool> {
-        read::<u8>(Data::MapDbgFlags.add(map_dbg_flags::SHOW_ALL_GRACES)).map(|val| val != 0x0)
+toggle_command!(ShowAllGraces {
+    is: {
+        read::<u8>(Data::MapDbgFlags.add(map_dbg_flags::SHOW_ALL_GRACES))
+            .map(|val| val != 0x0)
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
-        write::<u8>(Data::MapDbgFlags.add(map_dbg_flags::SHOW_ALL_GRACES), state as u8)?;
-        Ok(())
-    }
-}
 
-impl ToggleCommand for ShowAllMaps {
-    fn is(&self) -> SysResult<bool> {
-        read::<u8>(Data::MapDbgFlags.add(map_dbg_flags::SHOW_ALL_MAPS)).map(|val| val != 0x0)
+    set(state): {
+        Ok(write::<u8>(Data::MapDbgFlags.add(map_dbg_flags::SHOW_ALL_GRACES), state as u8)?)
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
-        write::<u8>(Data::MapDbgFlags.add(map_dbg_flags::SHOW_ALL_MAPS), state as u8)?;
-        Ok(())
-    }
-}
+});
 
-impl ToggleCommand for StutterFix {
-    fn is(&self) -> SysResult<bool> {
+toggle_command!(ShowAllMaps {
+    is: {
+        read::<u8>(Data::MapDbgFlags.add(map_dbg_flags::SHOW_ALL_MAPS))
+            .map(|val| val != 0x0)
+    }
+
+    set(state): {
+        Ok(write::<u8>(Data::MapDbgFlags.add(map_dbg_flags::SHOW_ALL_MAPS), state as u8)?)
+    }
+});
+
+toggle_command!(StutterFix {
+    is: {
         Ok(game_state::is_flag(StateFlag::StutterFix))
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         game_state::set_flag(StateFlag::StutterFix, state)?;
-        let _ = self.set_in_game(state);
+        let _ = StutterFix.set_in_game(state);
         Ok(())
     }
-}
+});
+
 impl StutterFix {
     pub fn get_in_game(&self) -> SysResult<bool> {
         ResolvedPtr::DlUserInputManagerImpl
@@ -215,27 +204,28 @@ impl StutterFix {
     }
 }
 
-impl ValueCommand<f32> for GameSpeed {
-    fn get(&self) -> SysResult<f32> {
+value_command!(GameSpeed, f32 {
+    get: {
         ResolvedPtr::CsFlipperImp
             .get()
             .add_offset(cs_flipper_imp::game_speed())
             .read::<f32>()
     }
-    fn set(&self, val: f32) -> anyhow::Result<()> {
-        ResolvedPtr::CsFlipperImp
+
+    set(val): {
+        Ok(ResolvedPtr::CsFlipperImp
             .get()
             .add_offset(cs_flipper_imp::game_speed())
-            .write::<f32>(val)?;
-        Ok(())
+            .write::<f32>(val)?)
     }
-}
+});
 
-impl ToggleCommand for MapInCombat {
-    fn is(&self) -> SysResult<bool> {
+toggle_command!(MapInCombat {
+    is: {
         read::<u8>(Patch::OpenMap).map(|val| val != 0x74)
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         match state {
             true => {
                 write::<u8>(Patch::OpenMap, 0xeb)?;
@@ -248,41 +238,47 @@ impl ToggleCommand for MapInCombat {
         }
         Ok(())
     }
-}
+});
 
-impl ToggleCommand for TravelInDungeons {
-    fn is(&self) -> SysResult<bool> {
-        read::<[u8; 5]>(Patch::CanFastTravel).map(|val| val != [0x84, 0xc0, 0x0f, 0x94, 0xc0])
+toggle_command!(TravelInDungeons {
+    is: {
+        read::<[u8; 5]>(Patch::CanFastTravel)
+            .map(|val| val != [0x84, 0xc0, 0x0f, 0x94, 0xc0])
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         match state {
             true => write_bytes(Patch::CanFastTravel, &[0xb0, 0x01, 0x90, 0x90, 0x90])?,
             false => write_bytes(Patch::CanFastTravel, &[0x84, 0xc0, 0x0f, 0x94, 0xc0])?,
         }
         Ok(())
     }
-}
+});
 
-impl ToggleCommand for DisableAreaWelcomeMessage {
-    fn is(&self) -> SysResult<bool> {
-        Ok(game_state::is_flag(StateFlag::TitleCards))
+const AREA_MESSAGE_BYTES: [u8; 3] = [0x48, 0x8b, 0xcb];
+toggle_command!(DisableAreaWelcomeMessage {
+    is: {
+        read::<[u8; 3]>(Patch::DisableAreaWelcomeMessage)
+            .map(|val| val != AREA_MESSAGE_BYTES)
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
-        game_state::set_flag(StateFlag::TitleCards, state)?;
-        Ok(())
+
+    set(state): {
+        let bytes = if state { [0xeb, 0x6, 0x90] } else { AREA_MESSAGE_BYTES };
+        Ok(write::<[u8; 3]>(Patch::DisableAreaWelcomeMessage, bytes)?)
     }
-}
+});
 
 macro_rules! impl_control_toggle {
     ($struct_name:ident, $control_flag:path) => {
-        impl ToggleCommand for $struct_name {
-            fn is(&self) -> SysResult<bool> {
+    toggle_command!($struct_name {
+            is: {
                 is_control_disabled($control_flag)
             }
-            fn set(&self, state: bool) -> anyhow::Result<()> {
+
+            set(state): {
                 set_control($control_flag, state)
             }
-        }
+        });
     };
 }
 
@@ -327,6 +323,5 @@ fn set_control(flag: ControlFlag, state: bool) -> anyhow::Result<()> {
     if state {
         install_action_hook()?;
     }
-    write::<u8>(flag, state as u8)?;
-    Ok(())
+    Ok(write::<u8>(flag, state as u8)?)
 }

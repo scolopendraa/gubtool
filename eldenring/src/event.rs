@@ -8,6 +8,7 @@ use {
         resources::{
             ASM,
             bosses::{BOSSES, Boss},
+            graces::{self, Grace},
             talk_commands::TalkCommand,
         },
         utils::{dlc_check, player_loaded_check},
@@ -21,8 +22,9 @@ use {
     },
     shared::{
         command::{ToggleCommand, UnitCommand},
-        declare_command,
         event_log::{EventLog, EventLogger},
+        toggle_command,
+        unit_command,
     },
     std::fmt::Display,
 };
@@ -200,18 +202,18 @@ impl EventLogger for ErEventLogger {
         write_bytes(CaveAddr::EventLogBuffer.addr(), &[0x0; 0x1000])
     }
     fn toggle_hook(&self) -> anyhow::Result<()> {
-        EventLogHook.toggle()
+        StartEventLogger.toggle()
     }
 }
 
-declare_command!(EventLogHook, FightFortissax, FightEldenBeast, UnlockMetyr, DlcClear,);
-
 const EVENT_LOG_HOOK_ORIGINAL: [u8; 5] = [0x48, 0x89, 0x5c, 0x24, 0x08];
-impl ToggleCommand for EventLogHook {
-    fn is(&self) -> SysResult<bool> {
-        read::<[u8; 5]>(Function::SetEvent).map(|bytes| bytes != EVENT_LOG_HOOK_ORIGINAL)
+toggle_command!(StartEventLogger {
+    is: {
+        read::<[u8; 5]>(Function::SetEvent)
+            .map(|bytes| bytes != EVENT_LOG_HOOK_ORIGINAL)
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         match state {
             true => {
                 let mut fun = ASM.get_function("event_log");
@@ -226,35 +228,31 @@ impl ToggleCommand for EventLogHook {
         }
         Ok(())
     }
-}
+});
 
-impl UnitCommand for FightFortissax {
-    fn execute(&self) -> anyhow::Result<()> {
-        general_area_check(201523200)?;
-        set_event(12032859, true)
-    }
-}
+unit_command!(FightFortissax {
+    general_area_check(201523200)?;
+    set_event(12032859, true)
+});
 
-impl UnitCommand for FightEldenBeast {
-    fn execute(&self) -> anyhow::Result<()> {
-        general_area_check(318767104)?;
-        set_event(19002802, true)?;
-        set_event(19002805, true)
-    }
-}
+unit_command!(FightEldenBeast {
+    general_area_check(318767104)?;
+    set_event(19002802, true)?;
+    set_event(19002805, true)
+});
 
-impl ToggleCommand for DlcClear {
-    fn is(&self) -> SysResult<bool> {
+toggle_command!(DlcClear {
+    is: {
         get_event(70)
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         dlc_check()?;
         set_event(70, state)
     }
-}
+});
 
-impl UnitCommand for UnlockMetyr {
-    fn execute(&self) -> anyhow::Result<()> {
+unit_command!(UnlockMetyr {
         dlc_check()?;
         let events = [
             2050400600,
@@ -278,15 +276,19 @@ impl UnitCommand for UnlockMetyr {
             9440,
             2051450180,
         ];
-        events.iter().try_for_each(|&i| set_event(i, true))?;
-        Ok(())
-    }
-}
+        events.iter().try_for_each(|&i| set_event(i, true))
+});
 
-pub fn mass_revive(first_encounter: bool) -> anyhow::Result<()> {
+unit_command!(MassReviveBosses {
     BOSSES
         .iter()
-        .try_for_each(|boss| boss.revive(first_encounter))
+        .try_for_each(|boss| boss.revive(true))
+});
+
+pub enum AliveStatus {
+    Dead,
+    Alive,
+    AliveSecondEncounter,
 }
 
 impl Boss {
@@ -321,12 +323,6 @@ impl Boss {
     }
 }
 
-pub enum AliveStatus {
-    Dead,
-    Alive,
-    AliveSecondEncounter,
-}
-
 impl Display for AliveStatus {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self {
@@ -337,6 +333,19 @@ impl Display for AliveStatus {
         write!(f, "{s}")
     }
 }
+
+impl Grace {
+    pub fn is_unlocked(&self) -> SysResult<bool> {
+        get_event(self.flag_id)
+    }
+    pub fn unlock(&self) -> anyhow::Result<()> {
+        set_event(self.flag_id, true)
+    }
+}
+
+unit_command!(UnlockAllGraces {
+    graces::GRACES.iter().try_for_each(|grace| grace.unlock())
+});
 
 fn general_area_check(area_id: u32) -> anyhow::Result<()> {
     player_loaded_check()?;

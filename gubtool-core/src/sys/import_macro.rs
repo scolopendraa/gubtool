@@ -115,7 +115,7 @@ macro_rules! declare_mem_functions {
             Ok(())
         }
 
-        fn resolve_attached_port() -> anyhow::Result<u16> {
+        pub fn resolve_attached_port() -> anyhow::Result<u16> {
             let mut attached_port = attached::port()?;
             let attached_pid = attached::pid()?;
 
@@ -236,13 +236,12 @@ macro_rules! declare_x86_specifics {
             ensure_game()?;
             let attached_port = resolve_attached_port()?;
 
-            request_parameterized_function(
+            Ok(request_parameterized_function(
                 attached_port,
                 function_address,
                 arguments,
                 Some(calling_convention),
-            )?;
-            Ok(())
+            )?)
         }
     };
 }
@@ -258,8 +257,12 @@ macro_rules! declare_x64_specifics {
             ensure_game()?;
             let attached_port = resolve_attached_port()?;
 
-            request_parameterized_function(attached_port, function_address, arguments, None)?;
-            Ok(())
+            Ok(request_parameterized_function(
+                attached_port,
+                function_address,
+                arguments,
+                None,
+            )?)
         }
     };
 }

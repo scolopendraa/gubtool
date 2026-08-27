@@ -4,17 +4,17 @@ use {
 };
 
 pub const CHARACTER_MANAGER: Offset = Offset {
-    vanilla: 0,
+    vanilla: 0x18,
     scholar: 0x18,
 };
 
 pub const CAMERA_MANAGER: Offset = Offset {
-    vanilla: 0,
+    vanilla: 0x1c,
     scholar: 0x20,
 };
 
 pub const AI_MANAGER: Offset = Offset {
-    vanilla: 0,
+    vanilla: 0x20,
     scholar: 0x28,
 };
 
@@ -24,7 +24,7 @@ pub const APP_RESOURCE_MANAGER: Offset = Offset {
 };
 
 pub const ENEMY_GENERATOR_MANAGER: Offset = Offset {
-    vanilla: 0,
+    vanilla: 0x2c,
     scholar: 0x40,
 };
 

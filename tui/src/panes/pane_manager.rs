@@ -2,6 +2,7 @@ use {
     crate::{event::KeyContext, panes::Pane},
     crossterm::event::{KeyCode, KeyModifiers},
     ratatui::{Frame, layout::Rect},
+    shared::command::Command,
 };
 
 pub struct PaneManager {
@@ -25,7 +26,7 @@ impl PaneManager {
         self.panes[self.current_pane].select(idx)
     }
 
-    pub fn current_command(&self) -> Option<&shared::command::Command> {
+    pub fn current_command(&self) -> Option<Command> {
         self.panes[self.current_pane].current_command()
     }
 

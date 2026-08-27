@@ -1,5 +1,6 @@
 use {
     crate::{
+        enemy::{self, act_logger},
         mem::{read, write},
         offsets::{
             self,
@@ -7,7 +8,7 @@ use {
             chr_ctrl::{boss_operator_offsets, chr_ai_manipulator_offsets},
             code_cave::CaveAddr,
         },
-        target::act_logger,
+        speffect::{SpEffect, apply_speffect},
     },
     anyhow::ensure,
     gubtool_core::{address::Address, sys::sys_error::SysResult},
@@ -27,6 +28,7 @@ pub enum ResolvedChrPtr {
     BossOperator,
     ChrAiManipulator,
     ChrAi,
+    SpEffectCtrl,
 }
 
 impl ChrCtrl {
@@ -165,6 +167,11 @@ impl ChrCtrl {
         write::<u8>(CaveAddr::ForceActFlag, 0x1)
     }
 
+    pub fn apply_speffect(&mut self, speffect: SpEffect) -> anyhow::Result<()> {
+        let speffect_ctrl = self.get_ptr(ResolvedChrPtr::SpEffectCtrl)?;
+        apply_speffect(speffect_ctrl, speffect)
+    }
+
     pub fn repeat_last_action(&mut self, state: bool) -> SysResult {
         if state {
             if let Some(last_act) = self.last_act() {
@@ -180,6 +187,16 @@ impl ChrCtrl {
         let chr_ai = self.get_ptr(ResolvedChrPtr::ChrAi)?;
         Ok(read::<u8>(CaveAddr::ForceActFlag).map(|val| val == 0x1)?
             && read::<u64>(CaveAddr::ForceActChrAi).map(|chr| chr == chr_ai)?)
+    }
+
+    pub fn is_ai_disabled(&mut self) -> SysResult<bool> {
+        let chr_ai = self.get_ptr(ResolvedChrPtr::ChrAi)?;
+        enemy::is_chr_ai_disabled(chr_ai)
+    }
+
+    pub fn set_disable_ai(&mut self, state: bool) -> SysResult {
+        let chr_ai = self.get_ptr(ResolvedChrPtr::ChrAi)?;
+        enemy::set_disable_chr_ai(chr_ai, state)
     }
 }
 
@@ -232,6 +249,10 @@ impl ChrCtrl {
             ResolvedChrPtr::Params => {
                 self.get_ptr(ResolvedChrPtr::ChrCtrl)
                     .read_offset(offsets::chr_ctrl::PARAMS_PTR)
+            }
+            ResolvedChrPtr::SpEffectCtrl => {
+                self.get_ptr(ResolvedChrPtr::ChrCtrl)
+                    .read_offset(offsets::chr_ctrl::CHR_SPEFFECT_CTRL)
             }
             ResolvedChrPtr::BossOperator => {
                 self.get_ptr(ResolvedChrPtr::ChrCtrl)

@@ -41,7 +41,7 @@ pub fn rest() -> anyhow::Result<()> {
     execute_emevd_command(2004, 47, &[])
 }
 
-pub(crate) fn disable_title_card() -> anyhow::Result<()> {
+fn disable_title_card() -> anyhow::Result<()> {
     execute_emevd_command(2012, 8, &[])
 }
 

@@ -25,6 +25,7 @@ use {
         widgets::{Cell, Row},
     },
     ratatui_themes::Style,
+    shared::command::UnitCommand,
 };
 
 pub(super) struct TravelTab {
@@ -37,11 +38,12 @@ impl TravelTab {
             pane_manager: PaneManager::new(vec![
                 TablePane::new_static(&BossTable)
                     .with_title("Bosses")
-                    .with_controls(&CONTROLS)
+                    .with_controls(&BOSS_CONTROLS)
                     .freeze()
                     .boxed(),
                 TablePane::new_static(&BonfireTable)
                     .with_title("Graces")
+                    .with_controls(&BONFIRE_CONTROLS)
                     .freeze()
                     .boxed(),
             ]),
@@ -58,10 +60,15 @@ impl Screen for TravelTab {
 
         self.pane_manager.draw(frame, &layout);
 
-        let text = self.revive_status_line();
+        let text = self.boss_alive_status_line();
         let width = layout[0].width;
         let len = text.width();
         frame.render_widget(text, layout[0] + Offset::new(width as i32 - len as i32 - 1, 0));
+
+        let text = self.bonfire_unlocked_status_line();
+        let width = layout[1].width;
+        let len = text.width();
+        frame.render_widget(text, layout[1] + Offset::new(width as i32 - len as i32 - 1, 0));
     }
 
     fn handle_keys(&mut self, ctx: &mut KeyContext) {
@@ -125,6 +132,14 @@ impl TableController for BonfireTable {
             GRACES[selected].warp().send_error();
         }
 
+        if ctx.key_with_modifiers(KeyCode::Char('t'), KeyModifiers::CONTROL) {
+            event::UnlockAllGraces.execute().send_error();
+        }
+
+        if ctx.key_char('t') {
+            GRACES[selected].unlock().send_error();
+        }
+
         if ctx.key_char('f') {
             request_search(&BonfireSearch);
         }
@@ -151,13 +166,18 @@ impl SearchRequest for BonfireSearch {
     }
 }
 
-const CONTROLS: [Control; 2] = [
+const BOSS_CONTROLS: [Control; 2] = [
     Control::new("r", "Revive"),
     Control::new("ctrl-r", "Revive FE"),
 ];
 
+const BONFIRE_CONTROLS: [Control; 2] = [
+    Control::new("t", "Unlock"),
+    Control::new("ctrl-t", "Unlock All"),
+];
+
 impl TravelTab {
-    fn revive_status_line(&self) -> Span<'static> {
+    fn boss_alive_status_line(&self) -> Span<'static> {
         let selected_idx = self.pane_manager.get_list_selected(0).unwrap_or_default();
         let boss = BOSSES[selected_idx];
         let revive_status = boss.revive_status();
@@ -174,5 +194,21 @@ impl TravelTab {
         };
 
         Span::from(text).style(style)
+    }
+
+    fn bonfire_unlocked_status_line(&self) -> Span<'static> {
+        let selected_idx = self.pane_manager.get_list_selected(1).unwrap_or_default();
+        let grace = &graces::GRACES[selected_idx];
+        let unlocked = grace.is_unlocked().unwrap_or_default();
+        let text = if !eldenring::is_player_loaded() {
+            ""
+        } else if unlocked {
+            "Unlocked"
+        } else {
+            "Locked"
+        };
+        let style =
+            if unlocked { Style::from(theme().success) } else { Style::from(theme().error) };
+        Span::raw(text).style(style)
     }
 }

@@ -23,10 +23,10 @@ pub enum ParseActArrayError {
 }
 
 impl ActArray {
-    pub fn zero_fill(&mut self) {
-        self.acts.resize(MAX_ACTS_AMOUNT, 0);
-    }
-    pub fn as_qword_le_bytes(&self) -> Vec<u8> {
+    pub fn as_dword_le_bytes(&self) -> Vec<u8> {
+        let mut acts = self.acts.clone();
+        acts.resize(MAX_ACTS_AMOUNT, 0);
+
         self.acts
             .iter()
             .flat_map(|&x| (x as i32).to_le_bytes())

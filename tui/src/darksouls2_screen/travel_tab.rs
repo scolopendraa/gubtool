@@ -5,6 +5,7 @@ use {
         input::fuzzy_finder::SearchRequest,
         panes::{PaneManager, TableController, TablePane, TableView},
         screen::Screen,
+        spawn_task,
         theme::theme,
     },
     crossterm::event::{KeyCode, KeyModifiers},
@@ -34,6 +35,7 @@ impl TravelTab {
             pane_manager: PaneManager::new(vec![
                 TablePane::new_static(&BossList)
                     .with_title("Bosses")
+                    .with_controls(&BOSSES_CONTROLS)
                     .freeze()
                     .boxed(),
                 TablePane::new_static(&BonfireTable)
@@ -48,22 +50,22 @@ impl TravelTab {
 
 impl Screen for TravelTab {
     fn draw(&mut self, frame: &mut Frame, rect: Rect) {
-        let rects = Layout::default()
+        let layout = Layout::default()
             .direction(Direction::Horizontal)
             .constraints(vec![Constraint::Percentage(40), Constraint::Percentage(60)])
             .split(rect);
 
-        self.pane_manager.draw(frame, &rects);
+        self.pane_manager.draw(frame, &layout);
 
         let text = self.boss_alive_status_line();
-        let width = rects[0].width;
+        let width = layout[0].width;
         let len = text.width();
-        frame.render_widget(text, rects[0] + Offset::new(width as i32 - len as i32 - 1, 0));
+        frame.render_widget(text, layout[0] + Offset::new(width as i32 - len as i32 - 1, 0));
 
         let text = self.bonfire_lit_status_line();
-        let width = rects[1].width;
+        let width = layout[1].width;
         let len = text.width();
-        frame.render_widget(text, rects[1] + Offset::new(width as i32 - len as i32 - 1, 0));
+        frame.render_widget(text, layout[1] + Offset::new(width as i32 - len as i32 - 1, 0));
     }
 
     fn handle_keys(&mut self, ctx: &mut KeyContext) {
@@ -85,8 +87,15 @@ impl TableController for BossList {
         if ctx.key_enter() {
             thread::spawn(move || bosses::BOSSES[selected].warp().send_error());
         }
+
         if ctx.key_char('f') {
             request_search(&BossesSearch);
+        }
+
+        if ctx.key_char('r') {
+            spawn_task! {
+                bosses::BOSSES[selected].revive().await.send_error();
+            }
         }
     }
 }
@@ -99,7 +108,7 @@ impl TableController for BonfireTable {
             .map(|bonfire| {
                 Row::new([
                     Cell::from(bonfire.name),
-                    Cell::from(bonfire.main_area).fg(theme().muted),
+                    Cell::from(bonfire.map_id.to_string()).fg(theme().muted),
                 ])
             })
             .collect();
@@ -143,10 +152,12 @@ impl SearchRequest for BonfireSearch {
     fn items(&self) -> Vec<Utf32String> {
         bonfires::BONFIRES
             .iter()
-            .map(|bonfire| Utf32String::from(format!("{}|{}", bonfire.name, bonfire.main_area)))
+            .map(|bonfire| Utf32String::from(format!("{}|{}", bonfire.name, bonfire.map_id)))
             .collect()
     }
 }
+
+const BOSSES_CONTROLS: [Control; 1] = [Control::new("r", "Revive")];
 
 const BONFIRE_CONTROLS: [Control; 3] = [
     Control::new("r", "Rest"),

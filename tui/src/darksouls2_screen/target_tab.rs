@@ -74,7 +74,11 @@ const ACTION_ITEMS: [Command; 4] = [
     Command::Value(ValCmd::I32(&target::RepeatAction)),
 ];
 
-const TOGGLE_ITEMS: [Command; 1] = [Command::Toggle(&target::RepeatLastAction)];
+const TOGGLE_ITEMS: [Command; 3] = [
+    Command::Toggle(&target::RepeatLastAction),
+    Command::Toggle(&target::DisableAi),
+    Command::Toggle(&target::DisableAiExceptTarget),
+];
 
 impl_tablecontroller_for_commands!(ActionItems, ACTION_ITEMS);
 impl_tablecontroller_for_commands!(ToggleItems, TOGGLE_ITEMS);

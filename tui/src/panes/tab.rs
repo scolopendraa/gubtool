@@ -9,6 +9,7 @@ use {
         screen::Screen,
     },
     ratatui::{Frame, layout::Rect},
+    shared::command::Command,
 };
 
 pub struct TabPane {
@@ -47,7 +48,7 @@ impl Pane for TabPane {
     fn selected(&self) -> Option<usize> {
         self.current_list().selected()
     }
-    fn current_command(&self) -> Option<&shared::command::Command> {
+    fn current_command(&self) -> Option<Command> {
         self.current_list().current_command()
     }
     fn draw_pane(&mut self, frame: &mut Frame, rect: Rect, active: bool) {

@@ -4,7 +4,7 @@ use {
             controls::{Control, draw_controls},
             helpers::bordered_block,
         },
-        event::KeyContext,
+        event::{Event, KeyContext, send_event},
         panes::{Pane, TableController, TableControllerSource},
         screen::Screen,
         theme::{get_theme_version, theme},
@@ -17,6 +17,7 @@ use {
         style::{Modifier, Stylize},
         widgets::{Row, Table, TableState},
     },
+    shared::command::Command,
 };
 
 pub struct TablePane {
@@ -126,9 +127,9 @@ impl Pane for TablePane {
     fn selected(&self) -> Option<usize> {
         self.state.selected()
     }
-    fn current_command(&self) -> Option<&shared::command::Command> {
+    fn current_command(&self) -> Option<Command> {
         if let Some(idx) = self.selected() {
-            self.pane_controller.get_command(idx)
+            self.pane_controller.get_command(idx).copied()
         } else {
             None
         }
@@ -274,6 +275,12 @@ impl TablePane {
 
         if ctx.key_char('G') {
             self.select(self.size.saturating_sub(1));
+        }
+
+        if ctx.key_char('c')
+            && let Some(command) = self.current_command()
+        {
+            send_event(Event::CliCommandInfo(command));
         }
 
         self.handle_keys_selected(ctx);

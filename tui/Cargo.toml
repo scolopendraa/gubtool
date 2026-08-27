@@ -16,6 +16,7 @@ serde = { workspace = true }
 toml = { workspace = true }
 tokio = { workspace = true }
 num-format = { workspace = true }
+wayclip-global-hotkey = { workspace = true }
 
 config = { version = "0.1.0", path = "../config" }
 gubtool-core = { version = "0.1.0", path = "../gubtool-core" }

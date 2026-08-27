@@ -80,6 +80,11 @@ pub const MAX_POSTURE: Offset = Offset {
     scholar: 0x1c0,
 };
 
+pub const CHR_SPEFFECT_CTRL: Offset = Offset {
+    vanilla: 0x308,
+    scholar: 0x3e0,
+};
+
 pub mod stats_offsets {
     use crate::offsets::Offset;
 

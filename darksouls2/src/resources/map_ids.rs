@@ -1,10 +1,9 @@
-use strum::Display;
+use std::fmt::Display;
 
 #[repr(u32)]
-#[derive(Clone, Copy, Debug, Display)]
-#[strum(serialize_all = "title_case")]
+#[derive(Clone, Copy, Debug)]
 pub enum MapId {
-    ThingsBetwixed          = 0xa020000,  // m10_02_00_00
+    ThingsBetwixt           = 0xa020000,  // m10_02_00_00
     Majula                  = 0xa040000,  // m10_04_00_00
     ForestOfFallenGiants    = 0xa0a0000,  // m10_10_00_00
     BrightstoneCoveTseldora = 0xa0e0000,  // m10_14_00_00
@@ -26,10 +25,46 @@ pub enum MapId {
     ShrineOfAmana           = 0x140b0000, // m20_11_00_00
     DrangleicCastle         = 0x14150000, // m20_21_00_00
     UndeadCrypt             = 0x14180000, // m20_24_00_00
-    DragonsMemory           = 0x141a0000, // m20_26_00_00
+    DragonsMemories         = 0x141a0000, // m20_26_00_00
     DarkChasmOfOld          = 0x28030000, // m40_03_00_00
     ShulvaSanctumCity       = 0x32230000, // m50_35_00_00
     BrumeTower              = 0x32240000, // m50_36_00_00
     FrozenEleumLoyce        = 0x32250000, // m50_37_00_00
     KingsMemory             = 0x32260000, // m50_38_00_00
+}
+
+impl Display for MapId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            Self::ThingsBetwixt => "Things Betwixt",
+            Self::Majula => "Majula",
+            Self::ForestOfFallenGiants => "Forest of Fallen Giants",
+            Self::BrightstoneCoveTseldora => "Brightstone Cove Tseldora",
+            Self::AldiasKeep => "Aldia's Keep",
+            Self::TheLostBastille => "The Lost Bastille",
+            Self::HarvestValley => "Harvest Valley",
+            Self::NoMansWharf => "No-Man's Wharf",
+            Self::IronKeep => "Iron Keep",
+            Self::HuntsmansCorpse => "Huntsman's Copse",
+            Self::TheGutter => "The Gutter",
+            Self::DragonAerie => "Dragon Aerie",
+            Self::PathToShadedWoods => "Path to Shaded Woods",
+            Self::PathToNoMansWharf => "Path to No-Man's Wharf",
+            Self::HeidesTowerOfFlame => "Heide's Tower of Flame",
+            Self::ShadedWoods => "Shaded Woods",
+            Self::DoorsOfPharros => "Doors of Pharros",
+            Self::GraveOfSaints => "Grave of Saints",
+            Self::GiantsMemory => "Giant's Memory",
+            Self::ShrineOfAmana => "Shrine of Amana",
+            Self::DrangleicCastle => "Drangleic Castle",
+            Self::UndeadCrypt => "Undead Crypt",
+            Self::DragonsMemories => "Dragon Memories",
+            Self::DarkChasmOfOld => "Dark Chasm of Old",
+            Self::ShulvaSanctumCity => "Shulva, Sanctum City",
+            Self::BrumeTower => "Brume Tower",
+            Self::FrozenEleumLoyce => "Frozen Eleum Loyce",
+            Self::KingsMemory => "King's Memory",
+        };
+        write!(f, "{s}")
+    }
 }

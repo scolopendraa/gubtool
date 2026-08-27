@@ -8,6 +8,7 @@ use {
         attached::{self, AddressSize},
         sys::{ASM32, ASM64, dll::Dll, ipc::ipc_error::IpcError, write_bytes_unsafe},
     },
+    anyhow::Result,
     std::{net::UdpSocket, time::Duration},
 };
 
@@ -68,6 +69,10 @@ pub fn worker_thread_dll_load_code(
     fun.patch::<POINTER>("load_library_w_loc", load_library_w_pointer_loc.addr());
 
     Ok(fun.bytes)
+}
+
+pub fn send_dll_request(port: u16, path_loc: impl Address) -> Result<(), IpcError> {
+    send_request(port, WorkerThreadRequest::LoadLibrary, Some(&path_loc.addr().to_le_bytes()))
 }
 
 fn send_request(

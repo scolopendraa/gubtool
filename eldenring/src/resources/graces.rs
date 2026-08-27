@@ -3,7 +3,7 @@ pub struct Grace {
     pub main_area:       &'static str,
     pub name:            &'static str,
     pub grace_entity_id: i64,
-    pub flag_id:         i32,
+    pub flag_id:         u32,
     pub dlc:             bool,
 }
 

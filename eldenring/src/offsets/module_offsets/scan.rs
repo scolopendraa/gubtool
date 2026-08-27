@@ -1,16 +1,5 @@
 use {
-    crate::{
-        offsets::module_offsets::structs::{
-            BasePointers,
-            Data,
-            ExternalFunctionPointers,
-            Functions,
-            Hooks,
-            ModuleOffsets,
-            Patches,
-        },
-        resources::scan_patterns::*,
-    },
+    crate::{offsets::module_offsets::structs::ModuleOffsets, resources::scan_patterns::*},
     gubtool_core::{
         aob_scanner::{ScanStrategy, scan_error::ScanError},
         parallel_scan,
@@ -73,6 +62,7 @@ fn scan(strategy: ScanStrategy) -> Result<ModuleOffsets, ScanError> {
             close_map: CLOSE_MAP,
             can_fast_travel: CAN_FAST_TRAVEL,
             no_rune_loss_on_death: NO_RUNE_LOSS_ON_DEATH,
+            disable_area_welcome_message: DISABLE_AREA_WELCOME_MESSAGE,
 
             chr_dbg_flags: CHR_DBG_FLAGS,
             map_dbg_flags: MAP_DBG_FLAGS,
@@ -80,10 +70,11 @@ fn scan(strategy: ScanStrategy) -> Result<ModuleOffsets, ScanError> {
             kernel32_create_thread: KERNEL32_CREATE_THREAD,
             kernel32_close_handle: KERNEL32_CLOSE_HANDLE,
             kernel32_load_library_w: KERNEL32_LOAD_LIBRARY_W,
+            lua_event_system: LUA_EVENT_SYSTEM,
         }
     );
 
-    let base_ptrs = BasePointers {
+    let offsets = ModuleOffsets {
         world_chr_man,
         field_area,
         game_man,
@@ -98,8 +89,6 @@ fn scan(strategy: ScanStrategy) -> Result<ModuleOffsets, ScanError> {
         cs_flipper_imp,
         cs_dlc_imp,
         lock_tgt_man_imp,
-    };
-    let functions = Functions {
         grace_warp,
         block_warp,
         get_player_item_quantity_by_id,
@@ -115,8 +104,6 @@ fn scan(strategy: ScanStrategy) -> Result<ModuleOffsets, ScanError> {
         external_event_temp_ctor,
         execute_talk_command,
         add_cool_time,
-    };
-    let hooks = Hooks {
         locked_target_pointer,
         target_no_stagger,
         player_no_grab,
@@ -126,8 +113,6 @@ fn scan(strategy: ScanStrategy) -> Result<ModuleOffsets, ScanError> {
         get_force_act_idx,
         set_requested_action,
         no_time_pass_on_death,
-    };
-    let patches = Patches {
         no_logo,
         fps_cap,
         mute_music,
@@ -138,24 +123,13 @@ fn scan(strategy: ScanStrategy) -> Result<ModuleOffsets, ScanError> {
         close_map,
         can_fast_travel,
         no_rune_loss_on_death,
-    };
-    let data = Data {
+        disable_area_welcome_message,
         chr_dbg_flags,
         map_dbg_flags,
-    };
-    let external_fn_ptrs = ExternalFunctionPointers {
         kernel32_create_thread,
         kernel32_close_handle,
         kernel32_load_library_w,
-    };
-
-    let offsets = ModuleOffsets {
-        base_ptrs,
-        functions,
-        hooks,
-        patches,
-        data,
-        external_fn_ptrs,
+        lua_event_system,
     };
 
     Ok(offsets)

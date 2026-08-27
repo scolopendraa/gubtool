@@ -1,11 +1,12 @@
 use {
     crate::{
         common::helpers::create_toggle_string,
-        event::AnyhowExt,
+        event::{AnyhowExt, send_success},
         input::request_input,
         panes::TableView,
         spawn_task,
     },
+    gubtool_core::game_version::Game,
     ratatui::widgets::Row,
     shared::{
         command::{Command, OptCmd, OptionCommand, ValCmd, ValueCommand},
@@ -115,6 +116,23 @@ where T: Display + Send + 'static + ParseInput + Default {
     spawn_task! {
         let val = request_input::<T>(None).await;
         cmd.set(val).send_error();
+    }
+}
+
+pub fn display_cli_command(command: Command, game_screen: Game) {
+    if let Some(key) = command.key() {
+        let game_flag = match game_screen {
+            Game::DarkSouls2 => "--ds2",
+            Game::EldenRing => "--er",
+        };
+
+        let text = match command {
+            Command::Unit(_) => format!("gubtool {} {}", game_flag, key),
+            Command::Toggle(_) => format!("gubtool {} {} <state>", game_flag, key),
+            Command::Value(_) => format!("gubtool {} {} <val>", game_flag, key),
+            _ => unreachable!("key is not implemented for remaining commands"),
+        };
+        send_success(text);
     }
 }
 

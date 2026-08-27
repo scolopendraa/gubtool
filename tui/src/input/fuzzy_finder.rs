@@ -105,8 +105,11 @@ impl TableController for SearchController {
     }
     fn handle_keys_selected(&self, selected: usize, ctx: &mut KeyContext) {
         if ctx.peek_code() == Some(KeyCode::Enter) {
-            let idx = self.matched.borrow()[selected].idx;
-            send_event(Event::SearchResult(idx));
+            let matched = self.matched.borrow();
+            if !matched.is_empty() {
+                let idx = matched[selected].idx;
+                send_event(Event::SearchResult(idx));
+            }
         }
     }
 }

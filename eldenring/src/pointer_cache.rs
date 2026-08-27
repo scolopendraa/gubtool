@@ -34,6 +34,7 @@ pub(crate) enum ResolvedPtr {
     CsFlipperImp,
     CsDlcImp,
     LockTgtMan,
+    LuaEventSystem,
 }
 
 impl PointerCache {
@@ -63,6 +64,7 @@ impl PointerCache {
             ResolvedPtr::CsFlipperImp => read::<u64>(BasePointer::CsFlipperImp),
             ResolvedPtr::CsDlcImp => read::<u64>(BasePointer::CsDlcImp),
             ResolvedPtr::LockTgtMan => read::<u64>(BasePointer::LockTgtManImp),
+            ResolvedPtr::LuaEventSystem => read::<u64>(BasePointer::LuaEventSystem),
         }?;
 
         let mut cache = self.map.lock().unwrap();

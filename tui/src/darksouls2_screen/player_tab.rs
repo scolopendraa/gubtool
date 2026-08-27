@@ -89,10 +89,12 @@ const TOGGLE_ITEMS: [Command; 10] = [
     Command::Toggle(&player::Silent),
 ];
 
-const ACTION_ITEMS: [Command; 3] = [
+const ACTION_ITEMS: [Command; 5] = [
     Command::Value(ValCmd::I32(&player::Health)),
     Command::Value(ValCmd::U32(&player::Souls)),
     Command::Empty(&covenant::Covenant),
+    Command::Unit(&player::RestoreHumanity),
+    Command::Unit(&player::Rest),
 ];
 
 const STAT_ITEMS: [Command; 9] = [

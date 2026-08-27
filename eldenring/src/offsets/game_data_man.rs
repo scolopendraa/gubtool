@@ -1,4 +1,7 @@
-use gubtool_core::{attached::version, game_version::EldenRingVersion::*};
+use gubtool_core::{
+    attached::version,
+    game_version::EldenRingVersion::{self, *},
+};
 
 pub const PLAYER_GAME_DATA: u64 = 0x8;
 
@@ -31,12 +34,8 @@ pub const IGT: u64 = 0xa0;
 pub const NEW_GAME: u64 = 0x120;
 
 pub fn torrent_handle() -> u64 {
-    match version() {
-        Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) | Some(Version1_2_3)
-        | Some(Version1_3_0) | Some(Version1_3_1) | Some(Version1_3_2) | Some(Version1_4_0)
-        | Some(Version1_4_1) | Some(Version1_5_0) | Some(Version1_6_0) | Some(Version1_7_0)
-        | Some(Version1_8_0) | Some(Version1_8_1) | Some(Version1_9_0) | Some(Version1_9_1)
-        | Some(Version2_0_0) | Some(Version2_0_1) => 0x930,
+    match version::<EldenRingVersion>() {
+        Some(v) if v <= Version2_0_1 => 0x930,
         _ => 0x950,
     }
 }

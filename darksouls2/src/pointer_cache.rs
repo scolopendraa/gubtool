@@ -28,6 +28,7 @@ pub struct PointerCache {
 pub(crate) enum ResolvedPtr {
     GameManagerImp,
     GameDataManager,
+    AiManager,
     ClearCountPtr,
     EventManager,
     EventFlagManager,
@@ -56,6 +57,10 @@ impl PointerCache {
             ResolvedPtr::ClearCountPtr => {
                 self.lookup(ResolvedPtr::GameDataManager)
                     .read_offset(game_data_manager_offsets::CLEARCOUNT_PTR)
+            }
+            ResolvedPtr::AiManager => {
+                self.lookup(ResolvedPtr::GameManagerImp)
+                    .read_offset(game_manager_imp::AI_MANAGER)
             }
             ResolvedPtr::EventManager => {
                 self.lookup(ResolvedPtr::GameManagerImp)

@@ -21,8 +21,8 @@ use {
     },
     shared::{
         command::ToggleCommand,
-        declare_command,
         event_log::{EventLog, EventLogger},
+        toggle_command,
     },
 };
 
@@ -140,30 +140,14 @@ impl EventLogger for Ds2EventLogger {
     }
 }
 
-declare_command!(
-    StartEventLogger,
-    KingsRingAquired => "King's Ring Aquired",
-    NashandraUnlocked,
-    AldiaUnlocked,
-    DarkChasmLitShadedWoods => "Dark Chasm Lit (Shaded Woods)",
-    DarkChasmLitDrangleicCastle => "Dark Chasm Lit (Drangleic Castle)",
-    DarkChasmLitBlackGulch => "Dark Chasm Lit (Black Gulch)",
-    BrumeTowerActivated,
-    AavaVisible,
-    UndoAlsanasSeal => "Alsana's Seal Undone",
-    SkipIvoryKingGauntlet,
-    DisableLoyceKnights,
-    FreeLoyceKnightOuterWall => "Loyce Knight Freed (Outer Wall)",
-    FreeLoyceKnightAbandonedDwelling => "Loyce Knight Freed (Abandoned Dwelling)",
-    FreeLoyceKnightLowerGarrison => "Loyce Knight Freed (Lower Garrison)",
-);
-
 const EVENT_LOG_HOOK_ORIGINAL: [u8; 5] = [0xb8, 0x59, 0x17, 0xb7, 0xd1];
-impl ToggleCommand for StartEventLogger {
-    fn is(&self) -> SysResult<bool> {
-        read::<[u8; 5]>(Hook::EventLog).map(|bytes| bytes != EVENT_LOG_HOOK_ORIGINAL)
+toggle_command!(StartEventLogger {
+    is: {
+        read::<[u8; 5]>(Hook::EventLog)
+            .map(|bytes| bytes != EVENT_LOG_HOOK_ORIGINAL)
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         if state {
             let mut fun = asm_function("event_log");
 
@@ -177,19 +161,22 @@ impl ToggleCommand for StartEventLogger {
         }
         Ok(())
     }
-}
+});
 
 const VANILLA_IVORY_SKIP_ORIGINAL: [u8; 6] = [0x55, 0x8b, 0xec, 0x83, 0xec, 0x08];
 const SCHOLAR_IVORY_SKIP_ORIGINAL: [u8; 5] = [0x48, 0x89, 0x74, 0x24, 0x10];
-impl ToggleCommand for SkipIvoryKingGauntlet {
-    fn is(&self) -> SysResult<bool> {
+toggle_command!(SkipIvoryKingGauntlet {
+    is: {
         if is_32() {
-            read::<[u8; 6]>(Function::SetEvent).map(|val| val != VANILLA_IVORY_SKIP_ORIGINAL)
+            read::<[u8; 6]>(Function::SetEvent)
+                .map(|val| val != VANILLA_IVORY_SKIP_ORIGINAL)
         } else {
-            read::<[u8; 5]>(Function::SetEvent).map(|val| val != SCHOLAR_IVORY_SKIP_ORIGINAL)
+            read::<[u8; 5]>(Function::SetEvent)
+                .map(|val| val != SCHOLAR_IVORY_SKIP_ORIGINAL)
         }
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         if state {
             let orig_instr_len = if is_32() { 6 } else { 5 };
             let mut fun = asm_function("ivory_skip");
@@ -215,12 +202,12 @@ impl ToggleCommand for SkipIvoryKingGauntlet {
         }
         Ok(())
     }
-}
+});
 
 const VANILLA_LOYCE_SKIP_ORIGINAL: [u8; 7] = [0x88, 0x94, 0x08, 0xa1, 0x02, 0x00, 0x00];
 const SCHOLAR_LOYCE_SKIP_ORIGINAL: [u8; 8] = [0x44, 0x88, 0x84, 0x08, 0xa1, 0x03, 0x00, 0x00];
-impl ToggleCommand for DisableLoyceKnights {
-    fn is(&self) -> SysResult<bool> {
+toggle_command!(DisableLoyceKnights {
+    is: {
         match is_32() {
             true => {
                 read::<[u8; 7]>(Hook::SetSharedFlag)
@@ -232,7 +219,8 @@ impl ToggleCommand for DisableLoyceKnights {
             }
         }
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         if state {
             let orig_instr_len = if is_32() { 7 } else { 8 };
             let mut fun = asm_function("ivory_knights");
@@ -258,7 +246,7 @@ impl ToggleCommand for DisableLoyceKnights {
         }
         Ok(())
     }
-}
+});
 
 #[repr(u32)]
 #[derive(Clone, Copy)]
@@ -298,105 +286,127 @@ impl EventFlag {
     }
 }
 
-impl ToggleCommand for KingsRingAquired {
-    fn is(&self) -> SysResult<bool> {
+toggle_command!(KingsRingAcquired (display = "King's Ring Acquired") {
+    is: {
         EventFlag::KingsRingAcquired.get()
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         EventFlag::KingsRingAcquired.set(state)
     }
-}
-impl ToggleCommand for NashandraUnlocked {
-    fn is(&self) -> SysResult<bool> {
+});
+
+toggle_command!(NashandraUnlocked {
+    is: {
         EventFlag::GiantLordDefeated.get()
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         EventFlag::GiantLordDefeated.set(state)
     }
-}
-impl ToggleCommand for AldiaUnlocked {
-    fn is(&self) -> SysResult<bool> {
+});
+
+toggle_command!(AldiaUnlocked {
+    is: {
         Ok(EventFlag::VendrickDefeated.get()? && EventFlag::UnlockAldia.get()?)
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         EventFlag::VendrickDefeated.set(state)?;
         EventFlag::UnlockAldia.set(state)
     }
-}
-impl ToggleCommand for DarkChasmLitShadedWoods {
-    fn is(&self) -> SysResult<bool> {
+});
+
+toggle_command!(DarkChasmLitShadedWoods (display = "Dark Chasm Lit (Shaded Woods)") {
+    is: {
         EventFlag::ShadedWoodsChasmCleared.get()
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         EventFlag::ShadedWoodsChasmCleared.set_area_conditional(state, MapId::DarkChasmOfOld)
     }
-}
-impl ToggleCommand for DarkChasmLitDrangleicCastle {
-    fn is(&self) -> SysResult<bool> {
+});
+
+toggle_command!(DarkChasmLitDrangleicCastle (display = "Dark Chasm Lit (Drangleic Castle)") {
+    is: {
         EventFlag::DrangleicCastleChasmCleared.get()
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         EventFlag::DrangleicCastleChasmCleared.set_area_conditional(state, MapId::DarkChasmOfOld)
     }
-}
-impl ToggleCommand for DarkChasmLitBlackGulch {
-    fn is(&self) -> SysResult<bool> {
+});
+
+toggle_command!(DarkChasmLitBlackGulch (display = "Dark Chasm Lit (Black Gulch)") {
+    is: {
         EventFlag::BlackGulchChasmCleared.get()
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         EventFlag::BlackGulchChasmCleared.set_area_conditional(state, MapId::DarkChasmOfOld)
     }
-}
-impl ToggleCommand for BrumeTowerActivated {
-    fn is(&self) -> SysResult<bool> {
+});
+
+toggle_command!(BrumeTowerActivated {
+    is: {
         EventFlag::ActivateBrume.get()
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         EventFlag::ActivateBrume.set_area_conditional(state, MapId::BrumeTower)
     }
-}
-impl ToggleCommand for AavaVisible {
-    fn is(&self) -> SysResult<bool> {
+});
+
+toggle_command!(AavaVisible {
+    is: {
         EventFlag::VisibleAava.get()
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         EventFlag::VisibleAava.set_area_conditional(state, MapId::FrozenEleumLoyce)
     }
-}
-impl ToggleCommand for UndoAlsanasSeal {
-    fn is(&self) -> SysResult<bool> {
+});
+
+toggle_command!(UndoAlsanasSeal (display = "Alsana's Seal Undone") {
+    is: {
         Ok(EventFlag::EleumLoyceWinds.get()? && EventFlag::EleumLoyceWinds.get()?)
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         EventFlag::EleumLoyceIce.set_area_conditional(state, MapId::FrozenEleumLoyce)?;
         EventFlag::EleumLoyceWinds.set_area_conditional(state, MapId::FrozenEleumLoyce)
     }
-}
-impl ToggleCommand for FreeLoyceKnightOuterWall {
-    fn is(&self) -> SysResult<bool> {
+});
+
+toggle_command!(FreeLoyceKnightOuterWall (display = "Loyce Knight Freed (Outer Wall)") {
+    is: {
         EventFlag::LoyceKnightOuterWall.get()
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         EventFlag::LoyceKnightOuterWall.set_area_conditional(state, MapId::FrozenEleumLoyce)
     }
-}
-impl ToggleCommand for FreeLoyceKnightAbandonedDwelling {
-    fn is(&self) -> SysResult<bool> {
+});
+
+toggle_command!(FreeLoyceKnightAbandonedDwelling (display = "Loyce Knight Freed (Abandoned Dwelling)") {
+    is: {
         EventFlag::LoyceKnightAbandonedDwelling.get()
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         EventFlag::LoyceKnightAbandonedDwelling.set_area_conditional(state, MapId::FrozenEleumLoyce)
     }
-}
+});
 
-impl ToggleCommand for FreeLoyceKnightLowerGarrison {
-    fn is(&self) -> SysResult<bool> {
+toggle_command!(FreeLoyceKnightLowerGarrison (display = "Loyce Knight Freed (Lower Garrison)") {
+    is: {
         EventFlag::LoyceKnightLowerGarrison.get()
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         EventFlag::LoyceKnightLowerGarrison.set_area_conditional(state, MapId::FrozenEleumLoyce)
     }
-}
+});
 
 fn _set_event_flag_direct(flag_id: u32, state: bool) -> anyhow::Result<()> {
     player_loaded_check()?;

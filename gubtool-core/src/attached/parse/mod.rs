@@ -53,7 +53,7 @@ fn parse_pe_for_version_and_address_size(
                         Ok(v) => v,
                         Err(err) => {
                             parse_errors.push(err);
-                            DarkSouls2Version::VanillaUnknown
+                            DarkSouls2Version::Vanilla1_0_12
                         }
                     }
                 }
@@ -62,7 +62,7 @@ fn parse_pe_for_version_and_address_size(
                         Ok(v) => v,
                         Err(err) => {
                             parse_errors.push(err);
-                            DarkSouls2Version::ScholarUnknown
+                            DarkSouls2Version::Scholar1_0_3
                         }
                     }
                 }
@@ -74,7 +74,7 @@ fn parse_pe_for_version_and_address_size(
                 Ok(v) => v,
                 Err(err) => {
                     parse_errors.push(err);
-                    EldenRingVersion::VersionUnknown
+                    EldenRingVersion::default()
                 }
             };
             GameVersion::EldenRing(version)
@@ -149,6 +149,7 @@ fn match_eldenring((major, minor, patch): (u16, u16, u16)) -> Result<EldenRingVe
         (2, 6, 0) => EldenRingVersion::Version2_6_0,
         (2, 6, 1) => EldenRingVersion::Version2_6_1,
         (2, 6, 2) => EldenRingVersion::Version2_6_2,
+        (2, 7, 0) => EldenRingVersion::Version2_7_0,
         _ => {
             return Err(ParseError::MatchProductVersion {
                 product_version: (major, minor, patch),

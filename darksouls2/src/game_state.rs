@@ -1,6 +1,7 @@
 use {
     crate::{
         POINTER_CACHE,
+        enemy,
         mem::*,
         offsets::{
             ChainReadExt,
@@ -9,7 +10,7 @@ use {
             module_offsets::BasePointer,
         },
         player::{self, player},
-        target::{act_logger, target},
+        target::target,
         utility,
     },
     gubtool_core::{address::Address, slice_ops::*, sys::sys_error::SysResult},
@@ -48,12 +49,13 @@ impl GameState {
         POINTER_CACHE.reset_pointers();
         player().update();
         STATE_FLAGS.on_loaded();
+        let _ = enemy::clear_disabled_targets();
     }
     fn on_unloaded(&self) {
         POINTER_CACHE.reset_pointers();
         player().update();
         target().clear();
-        act_logger().clear();
+        enemy::act_logger().clear();
         STATE_FLAGS.on_unloaded();
     }
 }

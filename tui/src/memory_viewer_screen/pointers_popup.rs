@@ -80,7 +80,7 @@ impl Popup for PointersPopup {
         self
     }
     fn popup_rect(&self, frame: &mut Frame) -> Rect {
-        centered_popup(60, 60, frame.area())
+        centered_popup(70, 70, frame.area())
     }
 }
 

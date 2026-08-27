@@ -5,22 +5,8 @@ use {
 
 #[derive(Debug)]
 pub struct ModuleOffsets {
-    pub base_ptrs:        BasePointers,
-    pub functions:        Functions,
-    pub hooks:            Hooks,
-    pub patches:          Patches,
-    pub data:             Data,
-    pub external_fn_ptrs: ExternalFunctionPointers,
-}
-
-#[derive(Debug)]
-pub struct BasePointers {
-    pub game_manager_imp: u64,
-    pub katana_main_app:  u64,
-}
-
-#[derive(Debug)]
-pub struct Functions {
+    pub game_manager_imp:                  u64,
+    pub katana_main_app:                   u64,
     pub give_souls:                        u64,
     pub warp:                              u64,
     pub item_spawn:                        u64,
@@ -40,47 +26,35 @@ pub struct Functions {
     pub chr_set_action:                    u64,
     pub ez_state_external_event_ctor:      u64,
     pub ez_state_execute_event:            u64,
-}
-
-#[derive(Debug)]
-pub struct Hooks {
-    pub set_shared_flag:       u64,
-    pub locked_target_pointer: u64,
-    pub credits_skip:          u64,
-    pub faster_menu:           u64,
-    pub event_log:             u64,
-    pub player_no_damage:      u64,
-    pub infinite_poise:        u64,
-}
-
-#[derive(Debug)]
-pub struct Patches {
-    pub infinite_stamina:     u64,
-    pub infinite_consumables: u64,
-    pub infinite_durability:  u64,
-    pub infinite_casts:       u64,
-    pub no_soul_gain:         u64,
-    pub no_hollowing:         u64,
-    pub no_soul_loss:         u64,
-    pub player_hidden:        u64,
-    pub player_silent:        u64,
-    pub skip_logos:           u64,
-    pub menu_transition:      u64,
-    pub no_roll:              u64,
-    pub no_backstep:          u64,
-}
-
-#[derive(Debug)]
-pub struct Data {
-    pub map_id: u64,
-}
-
-#[derive(Debug)]
-pub struct ExternalFunctionPointers {
-    pub kernel32_create_thread:  u64,
-    pub kernel32_close_handle:   u64,
-    pub kernel32_sleep:          u64,
-    pub kernel32_load_library_w: u64,
+    pub apply_speffect:                    u64,
+    pub set_shared_flag:                   u64,
+    pub locked_target_pointer:             u64,
+    pub credits_skip:                      u64,
+    pub faster_menu:                       u64,
+    pub event_log:                         u64,
+    pub player_no_damage:                  u64,
+    pub infinite_poise:                    u64,
+    pub infinite_stamina:                  u64,
+    pub infinite_consumables:              u64,
+    pub infinite_durability:               u64,
+    pub infinite_casts:                    u64,
+    pub no_soul_gain:                      u64,
+    pub no_hollowing:                      u64,
+    pub no_soul_loss:                      u64,
+    pub player_hidden:                     u64,
+    pub player_silent:                     u64,
+    pub skip_logos:                        u64,
+    pub menu_transition:                   u64,
+    pub no_roll:                           u64,
+    pub no_backstep:                       u64,
+    pub map_id:                            u64,
+    pub kernel32_create_thread:            u64,
+    pub kernel32_close_handle:             u64,
+    pub kernel32_sleep:                    u64,
+    pub kernel32_load_library_w:           u64,
+    pub disable_ai:                        u64,
+    pub trigger_ng:                        u64,
+    pub reset_enemy:                       u64,
 }
 
 #[inline(always)]

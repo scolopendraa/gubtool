@@ -8,7 +8,8 @@ use {
         pointer_cache::ResolvedPtr,
         resources::map_ids::MapId,
     },
-    shared::{command::ToggleCommand, declare_command},
+    gubtool_core::sys::sys_error::SysResult,
+    shared::{command::ToggleCommand, toggle_command},
 };
 
 const MYTHA_POISON_WATER_ON: EsdEventScript = EsdEventScript {
@@ -96,45 +97,46 @@ const CLOSE_BELFRY_GATE: EsdEventScript = EsdEventScript {
     ],
 };
 
-declare_command!(MythaPoisonDrained, FlexileShipDocked, BelfryGargoylesGateOpen);
-
-impl ToggleCommand for FlexileShipDocked {
-    fn is(&self) -> gubtool_core::sys::sys_error::SysResult<bool> {
+toggle_command!(FlexileShipDocked {
+    is: {
         get_event_flag(118000010)
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         let script = match state {
             true => MOVE_FLEXILE_SHIP,
             false => MOVE_FLEXILE_SHIP_BACK,
         };
         script.execute()
     }
-}
+});
 
-impl ToggleCommand for MythaPoisonDrained {
-    fn is(&self) -> gubtool_core::sys::sys_error::SysResult<bool> {
+toggle_command!(MythaPoisonDrained {
+    is: {
         get_event_flag(117000055)
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         let script = match state {
             true => MYTHA_POISON_WATER_ON,
             false => MYTHA_POISON_WATER_OFF,
         };
         script.execute()
     }
-}
+});
 
-impl ToggleCommand for BelfryGargoylesGateOpen {
-    fn is(&self) -> gubtool_core::sys::sys_error::SysResult<bool> {
+toggle_command!(BelfryGargoylesGateOpen {
+    is: {
         let state = ResolvedPtr::BelfryGateStateActCtrl.get()?;
         let obj_state = get_obj_state(state)?;
         Ok(obj_state == 20)
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         let script = match state {
             true => OPEN_BELFRY_GATE,
             false => CLOSE_BELFRY_GATE,
         };
         script.execute()
     }
-}
+});

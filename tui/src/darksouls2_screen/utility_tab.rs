@@ -67,9 +67,10 @@ const TOGGLE_ITEMS: [Command; 4] = [
     Command::Toggle(&utility::DisableBackstep),
 ];
 
-const ACTION_ITEMS: [Command; 2] = [
-    Command::Value(ValCmd::U8(&utility::NewGame)),
+const ACTION_ITEMS: [Command; 3] = [
     Command::Unit(&utility::Quitout),
+    Command::Value(ValCmd::U8(&utility::NewGameCycle)),
+    Command::Unit(&utility::TriggerNewGame),
 ];
 
 impl_tablecontroller_for_commands!(ToggleItems, TOGGLE_ITEMS);

@@ -1,6 +1,7 @@
 use {
     crate::{
         attach_options::AttachOptions,
+        command::display_cli_command,
         common::controls::{Control, HelpPopup},
         darksouls2_screen::DarkSouls2Screen,
         debug_screen::DebugPopup,
@@ -110,6 +111,10 @@ impl App {
                     self.info_type = info_type;
                     self.show_info = true;
                 }
+                Event::CliCommandInfo(command) => {
+                    let game_screen = *self.game_screen.borrow();
+                    display_cli_command(command, game_screen);
+                }
                 Event::RenderTick => {
                     detach_if_invalid();
 
@@ -133,6 +138,7 @@ impl App {
                 Event::Attach => {
                     if let Ok(game) = attached::game() {
                         send_event(Event::GameScreen(game));
+
                         spawn_task! {
                             match game {
                                 Game::DarkSouls2 => {
@@ -305,7 +311,7 @@ fn version_paragraph() -> Paragraph<'static> {
 
 impl_game_screen!(DarkSouls2Screen, EldenRingScreen);
 
-const HELP_ENTRIES: [Control; 17] = [
+const HELP_ENTRIES: [Control; 18] = [
     Control::new("hjkl, ← ↑ ↓ → ", "Navigate list"),
     Control::new("ctrl-hjkl, ← ↑ ↓ → ", "Switch list"),
     Control::new("Enter", "Select"),
@@ -313,6 +319,7 @@ const HELP_ENTRIES: [Control; 17] = [
     Control::new("o", "Select game screen"),
     Control::new("a", "Attach options"),
     Control::new("p", "Process selector"),
+    Control::new("c", "Show CLI command"),
     Control::new("1-6", "Switch tab"),
     Control::new("tab", "Select next tab"),
     Control::new("backtab", "Select previous tab"),

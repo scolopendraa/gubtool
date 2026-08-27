@@ -80,28 +80,23 @@ pub mod chr_dbg_flags {
 }
 
 pub mod game_man {
-    use gubtool_core::{attached::version, game_version::EldenRingVersion::*};
+    use gubtool_core::{
+        attached::version,
+        game_version::EldenRingVersion::{self, *},
+    };
 
     pub const QUITOUT: u64 = 0x10;
 
     pub fn stored_time() -> u64 {
-        match version() {
-            Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) | Some(Version1_2_3)
-            | Some(Version1_3_0) | Some(Version1_3_1) | Some(Version1_3_2) | Some(Version1_4_0)
-            | Some(Version1_4_1) | Some(Version1_5_0) | Some(Version1_6_0) | Some(Version1_7_0)
-            | Some(Version1_8_0) | Some(Version1_8_1) | Some(Version1_9_0) | Some(Version1_9_1)
-            | Some(Version2_0_0) | Some(Version2_0_1) => 0x18,
+        match version::<EldenRingVersion>() {
+            Some(v) if v <= Version2_0_1 => 0x18,
             _ => 0x20,
         }
     }
 
     pub fn start_new_game() -> u64 {
-        match version() {
-            Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) | Some(Version1_2_3)
-            | Some(Version1_3_0) | Some(Version1_3_1) | Some(Version1_3_2) | Some(Version1_4_0)
-            | Some(Version1_4_1) | Some(Version1_5_0) | Some(Version1_6_0) | Some(Version1_7_0)
-            | Some(Version1_8_0) | Some(Version1_8_1) | Some(Version1_9_0) | Some(Version1_9_1)
-            | Some(Version2_0_0) | Some(Version2_0_1) => 0xb4d,
+        match version::<EldenRingVersion>() {
+            Some(v) if v <= Version2_0_1 => 0xb4d,
             _ => 0xb7d,
         }
     }
@@ -113,15 +108,14 @@ pub mod damage_manager {
 }
 
 pub mod cs_flipper_imp {
-    use gubtool_core::{attached::version, game_version::EldenRingVersion::*};
+    use gubtool_core::{
+        attached::version,
+        game_version::EldenRingVersion::{self, *},
+    };
 
     pub fn game_speed() -> u64 {
-        match version() {
-            Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) | Some(Version1_2_3)
-            | Some(Version1_3_0) | Some(Version1_3_1) | Some(Version1_3_2) | Some(Version1_4_0)
-            | Some(Version1_4_1) | Some(Version1_5_0) | Some(Version1_6_0) | Some(Version1_7_0)
-            | Some(Version1_8_0) | Some(Version1_8_1) | Some(Version1_9_0) | Some(Version1_9_1)
-            | Some(Version2_0_0) | Some(Version2_0_1) => 0x2d4,
+        match version::<EldenRingVersion>() {
+            Some(v) if v <= Version2_0_1 => 0x2d4,
             _ => 0x2cc,
         }
     }
@@ -139,15 +133,17 @@ pub mod dl_user_input_manager_impl {
 }
 
 pub mod menu_man {
-    use gubtool_core::{attached::version, game_version::EldenRingVersion::*};
+    use gubtool_core::{
+        attached::version,
+        game_version::EldenRingVersion::{self, *},
+    };
 
     pub const FLAG_ARRAY: u64 = 0x90;
     pub const IS_LOADED: u64 = 0x94;
 
     pub fn is_fading() -> u64 {
-        match version() {
-            Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) | Some(Version1_2_3)
-            | Some(Version1_3_0) | Some(Version1_3_1) | Some(Version1_3_2) => 0x8e,
+        match version::<EldenRingVersion>() {
+            Some(v) if v <= Version1_3_2 => 0x8e,
             _ => 0x96,
         }
     }
@@ -164,4 +160,8 @@ pub mod map_dbg_flags {
 
 pub mod lock_tgt_man_imp {
     pub const IS_LOCKED: u64 = 0x2831;
+}
+
+pub mod lua_event_system {
+    pub const LUA_EVENT_PROXY: u64 = 0x8;
 }

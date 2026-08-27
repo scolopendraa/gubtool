@@ -20,6 +20,7 @@ use {
         game_state::{GAME_STATE, STATE_FLAGS},
         pointer_cache::POINTER_CACHE,
     },
+    shared::command_registry::{CommandRegistration, CommandRegistry},
     std::sync::atomic::Ordering,
 };
 pub use {
@@ -33,8 +34,20 @@ mod mem {
     gubtool_core::declare_x64_specifics!();
 }
 
+#[linkme::distributed_slice]
+static ELDEN_RING_COMMANDS: [CommandRegistration];
+pub const COMMAND_REGISTER: CommandRegistry = CommandRegistry::new(&ELDEN_RING_COMMANDS);
+
+#[macro_export]
+macro_rules! link_command {
+    ($struct_path:expr, $struct_name:ident $(, $cli_name:expr)?) => {
+        shared::link_command!(ELDEN_RING_COMMANDS, $struct_path, $struct_name $(, $cli_name)?);
+    };
+}
+
 pub fn init() {
     GAME_STATE.init();
+    STATE_FLAGS.update();
 }
 
 pub fn reset() {

@@ -23,6 +23,7 @@ pub enum BasePointer {
     CsFlipperImp,
     CsDlcImp,
     LockTgtManImp,
+    LuaEventSystem,
 }
 
 #[derive(Clone, Copy)]
@@ -69,6 +70,7 @@ pub enum Patch {
     CloseMap,
     CanFastTravel,
     NoRuneLossOnDeath,
+    DisableAreaWelcomeMessage,
 }
 
 #[derive(Clone, Copy)]
@@ -86,7 +88,7 @@ pub enum ExternalFunctionPointer {
 
 impl Address for BasePointer {
     fn addr(&self) -> u64 {
-        let f = &module_offsets().base_ptrs;
+        let f = module_offsets();
         let offset = match self {
             Self::WorldChrMan => f.world_chr_man,
             Self::FieldArea => f.field_area,
@@ -102,6 +104,7 @@ impl Address for BasePointer {
             Self::CsFlipperImp => f.cs_flipper_imp,
             Self::CsDlcImp => f.cs_dlc_imp,
             Self::LockTgtManImp => f.lock_tgt_man_imp,
+            Self::LuaEventSystem => f.lua_event_system,
         };
         module_base() + offset
     }
@@ -109,7 +112,7 @@ impl Address for BasePointer {
 
 impl Address for Function {
     fn addr(&self) -> u64 {
-        let f = &module_offsets().functions;
+        let f = module_offsets();
         let offset = match self {
             Self::GraceWarp => f.grace_warp,
             Self::BlockWarp => f.block_warp,
@@ -133,7 +136,7 @@ impl Address for Function {
 
 impl Address for Hook {
     fn addr(&self) -> u64 {
-        let f = &module_offsets().hooks;
+        let f = module_offsets();
         let offset = match self {
             Self::SaveTarget => f.locked_target_pointer,
             Self::TargetStagger => f.target_no_stagger,
@@ -151,7 +154,7 @@ impl Address for Hook {
 
 impl Address for Patch {
     fn addr(&self) -> u64 {
-        let f = &module_offsets().patches;
+        let f = module_offsets();
         let offset = match self {
             Self::NoLogo => f.no_logo,
             Self::FpsCap => f.fps_cap,
@@ -163,6 +166,7 @@ impl Address for Patch {
             Self::CloseMap => f.close_map,
             Self::CanFastTravel => f.can_fast_travel,
             Self::NoRuneLossOnDeath => f.no_rune_loss_on_death,
+            Self::DisableAreaWelcomeMessage => f.disable_area_welcome_message,
         };
         module_base() + offset
     }
@@ -170,7 +174,7 @@ impl Address for Patch {
 
 impl Address for Data {
     fn addr(&self) -> u64 {
-        let f = &module_offsets().data;
+        let f = module_offsets();
         let offset = match self {
             Self::ChrDbgFlags => f.chr_dbg_flags,
             Self::MapDbgFlags => f.map_dbg_flags,
@@ -181,7 +185,7 @@ impl Address for Data {
 
 impl Address for ExternalFunctionPointer {
     fn addr(&self) -> u64 {
-        let f = &module_offsets().external_fn_ptrs;
+        let f = module_offsets();
         let offset = match self {
             Self::Kernel32CreateThread => f.kernel32_create_thread,
             Self::Kernel32CloseHandle => f.kernel32_close_handle,

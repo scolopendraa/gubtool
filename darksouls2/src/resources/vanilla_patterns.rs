@@ -187,6 +187,16 @@ pub const EZ_STATE_EXECUTE_EVENT: AobScan = AobScan {
     scan_mode:   AddressingMode::Absolute,
 };
 
+pub const APPLY_SPEFFECT: AobScan = AobScan {
+    name:        "ApplySpeffect()",
+    pattern:     "88 55 fd c6 45 fe 00 e8 ? ? ? ? 5e 8b e5 5d c2 08 00",
+    scan_origin: 0x43960a,
+    offset:      8,
+    scan_mode:   AddressingMode::Relative {
+        bytes_to_next_instr: 4,
+    },
+};
+
 pub const SET_SHARED_FLAG: AobScan = AobScan {
     name:        "SetSharedFlag",
     pattern:     "55 8b ec 8b 45 08 83 f8 07 77 ? 8a 55 0c",
@@ -388,4 +398,28 @@ pub const KERNEL32_LOAD_LIBRARY_W: AobScan = AobScan {
     scan_origin: 0xb274e5,
     offset:      2,
     scan_mode:   AddressingMode::Direct32,
+};
+
+pub const DISABLE_AI: AobScan = AobScan {
+    name:        "DisableAi",
+    pattern:     "8b 06 8b 50 1c 57 8b ce ff d2 8b 76 08 85 f6 75 ef",
+    scan_origin: 0x436d55,
+    offset:      0,
+    scan_mode:   AddressingMode::Absolute,
+};
+
+pub const TRIGGER_NG: AobScan = AobScan {
+    name:        "TriggerNg()",
+    pattern:     "8b 0d ? ? ? ? 8b 01 8b 50 4c ff d2 a1 ? ? ? ?",
+    scan_origin: 0x174640,
+    offset:      0,
+    scan_mode:   AddressingMode::Absolute,
+};
+
+pub const RESET_ENEMY: AobScan = AobScan {
+    name:        "ResetEnemy()",
+    pattern:     "55 8b ec 56 8b f1 57 8d 4e 54 e8 ? ? ? ? 66 3b 45 ?",
+    scan_origin: 0x428f30,
+    offset:      0,
+    scan_mode:   AddressingMode::Absolute,
 };

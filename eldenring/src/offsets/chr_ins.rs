@@ -1,4 +1,7 @@
-use gubtool_core::{attached::version, game_version::EldenRingVersion::*};
+use gubtool_core::{
+    attached::version,
+    game_version::EldenRingVersion::{self, *},
+};
 
 pub const HANDLE: u64 = 0x8;
 pub const BLOCK_ID: u64 = 0x38;
@@ -9,12 +12,8 @@ pub const TEAM_TYPE: u64 = 0x6c;
 pub const SPECIAL_EFFECT: u64 = 0x178;
 
 pub fn entity_id() -> u64 {
-    match version() {
-        Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) | Some(Version1_2_3)
-        | Some(Version1_3_0) | Some(Version1_3_1) | Some(Version1_3_2) | Some(Version1_4_0)
-        | Some(Version1_4_1) | Some(Version1_5_0) | Some(Version1_6_0) | Some(Version1_7_0) => {
-            0x1e4
-        }
+    match version::<EldenRingVersion>() {
+        Some(v) if v <= Version1_7_0 => 0x1e4,
         _ => 0x1e8,
     }
 }
@@ -70,40 +69,31 @@ pub mod speffect_entry {
 }
 
 pub mod ai_think_offsets {
-    use gubtool_core::{attached::version, game_version::EldenRingVersion::*};
+    use gubtool_core::{
+        attached::version,
+        game_version::EldenRingVersion::{self, *},
+    };
     pub const NPC_THINK_PARAM_ID: u64 = 0x28;
     pub const LUA_TIMERS_ARRAY: u64 = 0x8c;
     pub const LUA_NUMBERS_ARRAY: u64 = 0x6cc;
 
     pub fn last_act() -> u64 {
-        match version() {
-            Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) | Some(Version1_2_3)
-            | Some(Version1_3_0) | Some(Version1_3_1) | Some(Version1_3_2) | Some(Version1_4_0)
-            | Some(Version1_4_1) | Some(Version1_5_0) | Some(Version1_6_0) | Some(Version1_7_0) => {
-                0xe9b2
-            }
+        match version::<EldenRingVersion>() {
+            Some(v) if v <= Version1_7_0 => 0xe9b2,
             _ => 0xe9c2,
         }
     }
 
     pub fn force_act() -> u64 {
-        match version() {
-            Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) | Some(Version1_2_3)
-            | Some(Version1_3_0) | Some(Version1_3_1) | Some(Version1_3_2) | Some(Version1_4_0)
-            | Some(Version1_4_1) | Some(Version1_5_0) | Some(Version1_6_0) | Some(Version1_7_0) => {
-                0xe9b1
-            }
+        match version::<EldenRingVersion>() {
+            Some(v) if v <= Version1_7_0 => 0xe9b1,
             _ => 0xe9c1,
         }
     }
 
     pub fn ai_attack_comp() -> u64 {
-        match version() {
-            Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) | Some(Version1_2_3)
-            | Some(Version1_3_0) | Some(Version1_3_1) | Some(Version1_3_2) | Some(Version1_4_0)
-            | Some(Version1_4_1) | Some(Version1_5_0) | Some(Version1_6_0) | Some(Version1_7_0) => {
-                0xdf00
-            }
+        match version::<EldenRingVersion>() {
+            Some(v) if v <= Version1_7_0 => 0xdf00,
             _ => 0xdf10,
         }
     }
@@ -119,9 +109,8 @@ pub mod ride_offsets {
 }
 
 pub fn data_flags() -> u64 {
-    match version() {
-        Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) | Some(Version1_2_3)
-        | Some(Version1_3_0) | Some(Version1_3_1) | Some(Version1_3_2) => 0x197,
+    match version::<EldenRingVersion>() {
+        Some(v) if v <= Version1_3_2 => 0x197,
         _ => 0x19b,
     }
 }
@@ -133,12 +122,8 @@ pub mod bit_flags {
 }
 
 pub fn com_manipulator() -> u64 {
-    match version() {
-        Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) | Some(Version1_2_3)
-        | Some(Version1_3_0) | Some(Version1_3_1) | Some(Version1_3_2) | Some(Version1_4_0)
-        | Some(Version1_4_1) | Some(Version1_5_0) | Some(Version1_6_0) | Some(Version1_7_0) => {
-            0x570
-        }
+    match version::<EldenRingVersion>() {
+        Some(v) if v <= Version1_7_0 => 0x570,
         _ => 0x580,
     }
 }

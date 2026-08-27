@@ -1,29 +1,34 @@
 use {
-    anyhow::{Ok, ensure},
+    anyhow::bail,
     clap::{Parser, Subcommand, ValueEnum},
-    gubtool_core::{
-        attached::{self, game},
-        game_version::Game,
-    },
-    shared::command::{ToggleCommand, UnitCommand},
-    std::{thread, time::Duration},
+    gubtool_core::{attached, game_version::Game},
+    shared::command_registry::{CommandAction, CommandRegistry},
 };
 
 #[derive(Parser)]
 #[command(name = "gubtool")]
-#[derive(Clone, Copy)]
 pub struct Cli {
+    #[arg(long = "er")]
+    eldenring: Option<String>,
+
+    #[arg(long = "ds2")]
+    darksouls2: Option<String>,
+
+    #[arg(long = "any")]
+    any: Option<String>,
+
     #[command(subcommand)]
-    pub command: Option<CliCommand>,
+    command: Option<CliCommand>,
+
+    arg: Option<String>,
 }
 
-#[derive(Subcommand, Clone, Copy)]
-pub enum CliCommand {
-    Quitout,
-    KillTarget,
-    NextPhase,
-    #[cfg(debug_assertions)]
-    AobScan,
+#[derive(Subcommand)]
+enum CliCommand {
+    ListGameCommands {
+        #[arg(value_enum)]
+        game: GameArg,
+    },
     #[cfg(debug_assertions)]
     AsmSizes,
     #[cfg(debug_assertions)]
@@ -33,83 +38,82 @@ pub enum CliCommand {
 pub fn run() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
-    if cli.command.is_none() {
-        if let Err(e) = tui::run() {
-            eprintln!("{e:?}");
+    attached::try_auto_attach();
+
+    if let Ok(game) = attached::game() {
+        match game {
+            Game::DarkSouls2 => darksouls2::init(),
+            Game::EldenRing => eldenring::init(),
         }
-        return Ok(());
     }
 
+    match (&cli.eldenring, &cli.darksouls2, &cli.any, &cli.arg, &cli.command) {
+        (Some(name), None, None, arg, None) => {
+            execute_command_from_registry(&eldenring::COMMAND_REGISTER, name.clone(), arg.clone())
+        }
+
+        (None, Some(name), None, arg, None) => {
+            execute_command_from_registry(&darksouls2::COMMAND_REGISTER, name.clone(), arg.clone())
+        }
+
+        (None, None, Some(name), arg, None) => {
+            let registry = match attached::game() {
+                Ok(Game::DarkSouls2) => &darksouls2::COMMAND_REGISTER,
+                Ok(Game::EldenRing) => &eldenring::COMMAND_REGISTER,
+                Err(_) => bail!("not attached to any game"),
+            };
+            execute_command_from_registry(registry, name.clone(), arg.clone())
+        }
+        (None, None, None, _, Some(command)) => handle_enum_command(command),
+
+        (None, None, None, None, None) => {
+            if let Err(e) = tui::run() {
+                eprintln!("{e:?}");
+            }
+            Ok(())
+        }
+
+        _ => bail!("invalid command"),
+    }
+}
+
+fn handle_enum_command(command: &CliCommand) -> anyhow::Result<()> {
     #[cfg(debug_assertions)]
-    match cli.command.unwrap() {
+    match command {
         CliCommand::AsmSizes => {
             gubtool_core::sys::print_asm_sizes();
             darksouls2::utils::print_asm_sizes();
             eldenring::utils::print_asm_sizes();
-            return Ok(());
+        }
+        CliCommand::ListGameCommands {
+            game,
+        } => {
+            match game {
+                GameArg::DarkSouls2 => darksouls2::COMMAND_REGISTER.print_commands(),
+                GameArg::EldenRing => eldenring::COMMAND_REGISTER.print_commands(),
+            }
         }
         CliCommand::Test => {}
-        _ => (),
-    }
-
-    attached::try_auto_attach();
-    ensure!(attached::is_attached(), "Game not found");
-
-    let game = game().unwrap();
-    match game {
-        Game::DarkSouls2 => darksouls2::init(),
-        Game::EldenRing => eldenring::init(),
-    }
-
-    #[allow(unreachable_patterns)]
-    match cli.command.unwrap() {
-        CliCommand::Quitout => {
-            match game {
-                Game::EldenRing => eldenring::utility::Quitout.execute()?,
-                Game::DarkSouls2 => darksouls2::utility::Quitout.execute()?,
-            }
-        }
-        CliCommand::KillTarget => {
-            match game {
-                Game::EldenRing => {
-                    if !eldenring::target::SaveTargetHook.is()? {
-                        eldenring::target::SaveTargetHook.set(true)?;
-                        thread::sleep(Duration::from_millis(50));
-                    }
-                    eldenring::target::target().chr_ins()?.set_hp(0)?
-                }
-                Game::DarkSouls2 => {
-                    if !darksouls2::target::SaveTargetHook.is()? {
-                        darksouls2::target::SaveTargetHook.set(true)?;
-                        thread::sleep(Duration::from_millis(50));
-                    }
-                    darksouls2::target::target().chr_ctrl()?.set_hp(0)?
-                }
-            }
-        }
-        CliCommand::NextPhase => {
-            match game {
-                Game::EldenRing => eldenring::target::next_phase()?,
-                Game::DarkSouls2 => (),
-            }
-        }
-        #[cfg(debug_assertions)]
-        CliCommand::AobScan => {}
-        #[cfg(debug_assertions)]
-        CliCommand::Test => eldenring::target::unlock()?,
-        _ => (),
     }
     Ok(())
 }
 
-#[derive(Clone, ValueEnum)]
-pub enum OnOff {
-    On  = 1,
-    Off = 0,
+fn execute_command_from_registry(
+    registry: &'static CommandRegistry,
+    command_string: String,
+    arg: Option<String>,
+) -> anyhow::Result<()> {
+    let Some(command) = registry.get_command(&command_string) else {
+        bail!("invalid command")
+    };
+
+    let action = CommandAction::get(command, arg)?;
+
+    action.execute()
 }
 
-impl From<OnOff> for bool {
-    fn from(val: OnOff) -> Self {
-        val as u8 != 0
-    }
+#[derive(Clone, ValueEnum)]
+enum GameArg {
+    DarkSouls2,
+    EldenRing,
 }

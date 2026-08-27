@@ -1,5 +1,5 @@
 use {
-    crate::{event, player, target, utility},
+    crate::{enemy, event, player, target, utility},
     config::{
         attach::{AttachEntry, apply_attach_entries},
         impl_attach_field_bool,
@@ -29,8 +29,9 @@ pub async fn attach() -> anyhow::Result<()> {
     }
 
     target::SaveTargetHook.set(true)?;
-    target::ActHook.set(true)?;
-    apply_attach_entries(ATTACH_ENTRIES)?;
+    enemy::install_act_logger_hook()?;
+
+    apply_attach_entries(&DARK_SOULS_2_ATTACH_ENTRIES)?;
     Ok(())
 }
 
@@ -52,22 +53,5 @@ impl_attach_field_bool!(SkipIvoryKingGauntlet, event, dark_souls_2);
 impl_attach_field_bool!(DisableLoyceKnights, event, dark_souls_2);
 impl_attach_field_bool!(StartEventLogger, event, dark_souls_2);
 
-const ATTACH_ENTRIES: &[&'static dyn AttachEntry] = &[
-    &NoDeath,
-    &NoDamage,
-    &InfinitePoise,
-    &InfiniteStamina,
-    &InfiniteDurability,
-    &InfiniteConsumables,
-    &NoHollowing,
-    &NoSoulLoss,
-    &Hidden,
-    &Silent,
-    &SkipCredits,
-    &FastQuitout,
-    &DisableRoll,
-    &DisableBackstep,
-    &SkipIvoryKingGauntlet,
-    &DisableLoyceKnights,
-    &StartEventLogger,
-];
+#[linkme::distributed_slice]
+static DARK_SOULS_2_ATTACH_ENTRIES: [&'static dyn AttachEntry];

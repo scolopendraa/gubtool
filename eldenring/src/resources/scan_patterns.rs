@@ -463,6 +463,15 @@ pub const NO_RUNE_LOSS_ON_DEATH: AobScan = AobScan {
     scan_mode:   AddressingMode::Absolute,
 };
 
+pub const DISABLE_AREA_WELCOME_MESSAGE: AobScan = AobScan {
+    name:        "DisableAreaWelcomeMessage",
+    pattern:     "48 8b cb e8 ? ? ? ? 83 bb ? ? ? ? 00 7e 13 80 bb ? ? ? ? 00 75 ? c7 83 ? ? ? ? \
+                  ff ff ff ff",
+    scan_origin: 0x771dd2,
+    offset:      0,
+    scan_mode:   AddressingMode::Absolute,
+};
+
 pub const KERNEL32_CREATE_THREAD: AobScan = AobScan {
     name:        "KERNEL32.DLL::CreateThread",
     pattern:     "ba 00 00 02 00 89 74 24 20 33 c9",
@@ -488,6 +497,16 @@ pub const KERNEL32_LOAD_LIBRARY_W: AobScan = AobScan {
     pattern:     "ff 15 ? ? ? ? 48 89 43 30 48 85 c0 75 0d",
     scan_origin: 0x170b1ea,
     offset:      2,
+    scan_mode:   AddressingMode::Relative {
+        bytes_to_next_instr: 4,
+    },
+};
+
+pub const LUA_EVENT_SYSTEM: AobScan = AobScan {
+    name:        "LuaEventSystem",
+    pattern:     "ff 92 40 01 00 00 84 c0 74 ? 48 8b 0d ? ? ? ? 48 85 c9 74 ? 48 83 c4 30 5b",
+    scan_origin: 0xa5d740,
+    offset:      13,
     scan_mode:   AddressingMode::Relative {
         bytes_to_next_instr: 4,
     },

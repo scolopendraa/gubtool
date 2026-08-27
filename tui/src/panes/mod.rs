@@ -12,7 +12,7 @@ pub use {pane_manager::*, tab::*, table::*};
 pub trait Pane: Screen {
     fn select(&mut self, index: usize);
     fn selected(&self) -> Option<usize>;
-    fn current_command(&self) -> Option<&Command>;
+    fn current_command(&self) -> Option<Command>;
     fn draw_pane(&mut self, frame: &mut Frame, rect: Rect, active: bool);
 
     fn draw_active(&mut self, frame: &mut Frame, rect: Rect) {

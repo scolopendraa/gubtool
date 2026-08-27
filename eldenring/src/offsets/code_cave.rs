@@ -34,6 +34,8 @@ pub enum CaveAddr {
     DisableJumpFlag       = 0x151, // u8
     DisableBackstepFlag   = 0x152, // u8
 
+    GraceUnlockStruct     = 0x200,
+
     StateHandlerFlags     = 0xf00, // 0x100
     // Hooks
     SaveTargetHook        = 0x1000, // 0x1D

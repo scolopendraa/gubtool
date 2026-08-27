@@ -1,4 +1,3 @@
-pub use crate::phase_transition::target_next_phase as next_phase;
 use {
     crate::{
         chr_ins::{ChrIns, ResolvedChrPtr},
@@ -12,13 +11,16 @@ use {
     gubtool_core::{
         address::{Address, POINTER},
         attached::version,
-        game_version::EldenRingVersion::*,
+        game_version::{EldenRingVersion, EldenRingVersion::*},
         sys::sys_error::{PointerType, SysError, SysResult},
     },
     shared::{
         act_array::ActArray,
         command::{ToggleCommand, UnitCommand, ValueCommand},
-        declare_command,
+        toggle_command,
+        unit_command,
+        value_command,
+        value_command_set,
     },
     std::sync::{LazyLock, Mutex, MutexGuard},
 };
@@ -91,30 +93,16 @@ pub fn unlock() -> SysResult {
         .write::<u8>(0x0)
 }
 
-declare_command!(
-    SaveTargetHook,
-    Health,
-    HealthPercentage => "Health %",
-    Kill,
-    NextPhase,
-    RepeatAction,
-    ForceActSequence,
-    ResetPosition,
-    NoDamage,
-    NoStagger,
-    DisableAi,
-    RepeatLastAction,
-);
-
 const TARGET_HOOK_BYTES_ORIGINAL: [u8; 7] = [0x48, 0x8b, 0x8f, 0x88, 0x00, 0x00, 0x00];
-impl ToggleCommand for SaveTargetHook {
-    fn is(&self) -> SysResult<bool> {
-        read::<[u8; 7]>(Hook::SaveTarget).map(|val| val != TARGET_HOOK_BYTES_ORIGINAL)
+toggle_command!(SaveTargetHook {
+    is: {
+        read::<[u8; 7]>(Hook::SaveTarget)
+            .map(|val| val != TARGET_HOOK_BYTES_ORIGINAL)
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         if state {
             let mut fun = ASM.get_function("save_target_hook");
-
             fun.patch::<POINTER>("saved_pointer_loc", CaveAddr::SavedTargetPointer);
             fun.patch_rel32("hook_loc", CaveAddr::SaveTargetHook, Hook::SaveTarget.add(7), 4);
             install_hook(&fun.bytes, CaveAddr::SaveTargetHook, Hook::SaveTarget, 7)?;
@@ -123,63 +111,52 @@ impl ToggleCommand for SaveTargetHook {
         }
         Ok(())
     }
-}
+});
 
-impl ValueCommand<i32> for Health {
-    fn get(&self) -> SysResult<i32> {
+value_command!(Health, i32 (cli_name = "target-health") {
+    get: {
         target().chr_ins()?.get_current_hp()
     }
-    fn set(&self, val: i32) -> anyhow::Result<()> {
-        target().chr_ins()?.set_hp(val)?;
-        Ok(())
-    }
-}
 
-impl ValueCommand<f32> for HealthPercentage {
-    fn get(&self) -> SysResult<f32> {
+    set(val): {
+        Ok(target().chr_ins()?.set_hp(val)?)
+    }
+
+});
+
+value_command!(HealthPercentage, f32 (display = "Health %") (cli_name = "target-health-percentage") {
+    get: {
         target().chr_ins()?.get_hp_pct()
     }
-    fn set(&self, val: f32) -> anyhow::Result<()> {
+
+    set(val): {
         target().chr_ins()?.set_hp_pct(val)
     }
-}
+});
 
-impl UnitCommand for Kill {
-    fn execute(&self) -> anyhow::Result<()> {
-        target().chr_ins()?.set_hp(0)?;
-        Ok(())
-    }
-}
+unit_command!(Kill (cli_name = "target-kill") {
+    Ok(target().chr_ins()?.set_hp(0)?)
+});
 
-impl UnitCommand for NextPhase {
-    fn execute(&self) -> anyhow::Result<()> {
-        phase_transition::target_next_phase()
-    }
-}
+unit_command!(NextPhase (cli_name = "target-next-phase") {
+    phase_transition::target_next_phase()
+});
 
-impl ValueCommand<u8> for RepeatAction {
-    fn set(&self, val: u8) -> anyhow::Result<()> {
-        target().chr_ins()?.repeat_act(val)?;
-        Ok(())
+value_command_set!(RepeatAction, u8 (cli_name = "target-repeat-action") {
+    set(val): {
+        Ok(target().chr_ins()?.repeat_act(val)?)
     }
-    fn can_get(&self) -> bool {
-        false
-    }
-    fn get(&self) -> SysResult<u8> {
-        unreachable!("no getter for RepeatAction")
-    }
-}
+});
 
-fn force_act_orig_instr_off() -> i32 {
-    match version() {
-        Some(Version1_2_0) | Some(Version1_2_1) | Some(Version1_2_2) | Some(Version1_2_3)
-        | Some(Version1_3_0) | Some(Version1_3_1) | Some(Version1_3_2) | Some(Version1_4_0)
-        | Some(Version1_4_1) | Some(Version1_5_0) | Some(Version1_6_0) => 0xe9b1,
-        _ => 0xe9c1,
-    }
-}
-impl ValueCommand<ActArray> for ForceActSequence {
-    fn set(&self, mut val: ActArray) -> anyhow::Result<()> {
+value_command_set!(ForceActSequence, ActArray (cli_name = "target-force-act-sequence") {
+    set(val): {
+        let orig_instr_off = {
+            match version::<EldenRingVersion>() {
+                Some(v) if v <= Version1_6_0 => 0xe9b1,
+                _ => 0xe9c1,
+            }
+        };
+
         let location = CaveAddr::ForceActSequenceHook;
         let npc_think_param_id = target().chr_ins()?.npc_think_param_id()?;
 
@@ -189,47 +166,39 @@ impl ValueCommand<ActArray> for ForceActSequence {
         fun.patch::<DWORD>("npc_think_param_id", npc_think_param_id);
         fun.patch::<POINTER>("current_idx", CaveAddr::CurrentActIdx);
         fun.patch::<POINTER>("act_array", CaveAddr::ActArray);
-        fun.patch::<DWORD>("orig_instr_off", force_act_orig_instr_off());
+        fun.patch::<DWORD>("orig_instr_off", orig_instr_off);
         fun.patch_rel32("hook_loc", location, Hook::GetForceActIdx.add(7), 4);
 
-        val.zero_fill();
-        write_bytes(CaveAddr::ActArray, &val.as_qword_le_bytes())?;
+        write_bytes(CaveAddr::ActArray, &val.as_dword_le_bytes())?;
         write::<i32>(CaveAddr::CurrentActIdx, 0x0)?;
         write::<u8>(CaveAddr::ActSeqeunceShouldRun, 0x1)?;
-        install_hook(&fun.bytes, location, Hook::GetForceActIdx, 7)?;
-        Ok(())
+        Ok(install_hook(&fun.bytes, location, Hook::GetForceActIdx, 7)?)
     }
-    fn can_get(&self) -> bool {
-        false
-    }
-    fn get(&self) -> SysResult<ActArray> {
-        unreachable!("no getter for ForceActSequence")
-    }
-}
+});
 
-impl UnitCommand for ResetPosition {
-    fn execute(&self) -> anyhow::Result<()> {
-        target().chr_ins()?.reset_position()
-    }
-}
+unit_command!(ResetPosition (cli_name = "target-reset-position") {
+    target().chr_ins()?.reset_position()
+});
 
-impl ToggleCommand for NoDamage {
-    fn is(&self) -> SysResult<bool> {
+toggle_command!(NoDamage (cli_name = "target-no-damage") {
+    is: {
         target().chr_ins()?.is_no_damage()
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
-        target().chr_ins()?.set_no_damage(state)?;
-        Ok(())
+
+    set(state): {
+        Ok(target().chr_ins()?.set_no_damage(state)?)
     }
-}
+});
 
 const TARGET_STAGGER_HOOK_BYTES_ORIGINAL: [u8; 8] =
     [0x48, 0x8b, 0x41, 0x08, 0x83, 0x48, 0x2c, 0x08];
-impl ToggleCommand for NoStagger {
-    fn is(&self) -> SysResult<bool> {
-        read::<[u8; 8]>(Hook::TargetStagger).map(|val| val != TARGET_STAGGER_HOOK_BYTES_ORIGINAL)
+toggle_command!(NoStagger (cli_name = "target-no-stagger") {
+    is: {
+        read::<[u8; 8]>(Hook::TargetStagger)
+            .map(|val| val != TARGET_STAGGER_HOOK_BYTES_ORIGINAL)
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         if state {
             let mut fun = ASM.get_function("target_stagger_hook");
             fun.patch::<POINTER>("target_ptr_loc", CaveAddr::SavedTargetPointer);
@@ -240,24 +209,24 @@ impl ToggleCommand for NoStagger {
         }
         Ok(())
     }
-}
+});
 
-impl ToggleCommand for DisableAi {
-    fn is(&self) -> SysResult<bool> {
+toggle_command!(DisableAi (cli_name = "target-disable-ai") {
+    is: {
         target().chr_ins()?.is_disable_ai()
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
-        target().chr_ins()?.set_disable_ai(state)?;
-        Ok(())
-    }
-}
 
-impl ToggleCommand for RepeatLastAction {
-    fn is(&self) -> SysResult<bool> {
+    set(state): {
+        Ok(target().chr_ins()?.set_disable_ai(state)?)
+    }
+});
+
+toggle_command!(RepeatLastAction (cli_name = "target-repeat-last-action") {
+    is: {
         target().chr_ins()?.is_repeat_act()
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
-        target().chr_ins()?.set_repeat_last_act(state)?;
-        Ok(())
+
+    set(state): {
+        Ok(target().chr_ins()?.set_repeat_last_act(state)?)
     }
-}
+});

@@ -2,7 +2,10 @@ pub use offsets::module_offsets::scan::*;
 use {
     crate::{event::get_event, is_dlc_available, is_player_loaded, offsets, resources::ASM},
     anyhow::bail,
-    gubtool_core::{attached::version, game_version::EldenRingVersion::*},
+    gubtool_core::{
+        attached::version,
+        game_version::{EldenRingVersion, EldenRingVersion::*},
+    },
     std::{
         thread,
         time::{Duration, Instant},
@@ -29,18 +32,7 @@ pub fn dlc_check() -> anyhow::Result<()> {
 }
 
 pub fn is_version_dlc_compat() -> bool {
-    matches!(
-        version(),
-        Some(Version2_2_0)
-            | Some(Version2_2_3)
-            | Some(Version2_3_0)
-            | Some(Version2_4_0)
-            | Some(Version2_5_0)
-            | Some(Version2_6_0)
-            | Some(Version2_6_1)
-            | Some(Version2_6_2)
-            | None
-    )
+    matches!(version::<EldenRingVersion>(), Some(v) if v <= Version2_0_1)
 }
 
 pub fn version_check() -> Result<(), VersionError> {

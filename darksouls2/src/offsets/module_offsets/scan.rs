@@ -1,13 +1,5 @@
 use {
-    crate::offsets::module_offsets::structs::{
-        BasePointers,
-        Data,
-        ExternalFunctionPointers,
-        Functions,
-        Hooks,
-        ModuleOffsets,
-        Patches,
-    },
+    crate::offsets::module_offsets::structs::ModuleOffsets,
     gubtool_core::{
         aob_scanner::{ScanStrategy, scan_error::ScanError},
         attached::{self, AddressSize},
@@ -44,6 +36,7 @@ macro_rules! patterns {
                 chr_set_action: CHR_SET_ACTION,
                 ez_state_external_event_ctor: EZ_STATE_EXTERNAL_EVENT_CTOR,
                 ez_state_execute_event: EZ_STATE_EXECUTE_EVENT,
+                apply_speffect: APPLY_SPEFFECT,
 
                 set_shared_flag: SET_SHARED_FLAG,
                 locked_target_pointer: LOCKED_TARGET_POINTER,
@@ -73,14 +66,16 @@ macro_rules! patterns {
                 kernel32_close_handle: KERNEL32_CLOSE_HANDLE,
                 kernel32_sleep: KERNEL32_SLEEP,
                 kernel32_load_library_w: KERNEL32_LOAD_LIBRARY_W,
+
+                disable_ai: DISABLE_AI,
+                trigger_ng: TRIGGER_NG,
+                reset_enemy: RESET_ENEMY,
             }
         );
 
-    let base_ptrs = BasePointers {
+    let offsets = ModuleOffsets {
         game_manager_imp,
         katana_main_app,
-    };
-    let functions = Functions {
         give_souls,
         warp,
         item_spawn,
@@ -100,8 +95,6 @@ macro_rules! patterns {
         chr_set_action,
         ez_state_external_event_ctor,
         ez_state_execute_event,
-    };
-    let hooks = Hooks {
         set_shared_flag,
         locked_target_pointer,
         credits_skip,
@@ -109,8 +102,6 @@ macro_rules! patterns {
         event_log,
         player_no_damage,
         infinite_poise,
-    };
-    let patches = Patches {
         infinite_stamina,
         infinite_consumables,
         infinite_durability,
@@ -124,19 +115,15 @@ macro_rules! patterns {
         menu_transition,
         no_roll,
         no_backstep,
-    };
-    let data = Data {
         map_id,
-    };
-    let external_fn_ptrs = ExternalFunctionPointers {
         kernel32_create_thread,
         kernel32_close_handle,
         kernel32_sleep,
         kernel32_load_library_w,
-    };
-
-    let offsets = ModuleOffsets {
-        base_ptrs, functions, hooks, patches, data, external_fn_ptrs
+        apply_speffect,
+        disable_ai,
+        trigger_ng,
+        reset_enemy,
     };
 
     offsets

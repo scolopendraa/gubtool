@@ -7,6 +7,7 @@ use {
         attached::AttachError,
         sys::{ipc::ipc_error::IpcError, sys_error::SysError},
     },
+    shared::command::Command,
     std::{
         sync::{OnceLock, mpsc},
         thread,
@@ -18,6 +19,7 @@ pub enum Event {
     RenderTick,
     Key(KeyContext),
     Info((String, InfoType)),
+    CliCommandInfo(Command),
     Input((&'static str, tokio::sync::oneshot::Sender<String>, std::any::TypeId)),
     SearchRequest(&'static dyn SearchRequest),
     SearchResult(usize),
@@ -127,7 +129,9 @@ pub fn start_event_loop_thread() -> mpsc::Receiver<Event> {
 
 #[track_caller]
 pub fn send_event(event: Event) {
-    SENDER.get().unwrap().clone().send(event).unwrap()
+    if let Some(sender) = SENDER.get() {
+        sender.clone().send(event).unwrap()
+    }
 }
 
 pub fn send_success(text: String) {

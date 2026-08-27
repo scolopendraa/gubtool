@@ -8,8 +8,11 @@ anyhow = { workspace = true }
 chrono = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
+wayclip-global-hotkey = { workspace = true }
+linkme = { workspace = true }
 
 gubtool-core = { version = "0.1.0", path = "../gubtool-core" }
+const-str = "1.1.0"
 
 [lints]
 workspace = true

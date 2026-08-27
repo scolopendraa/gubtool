@@ -41,8 +41,6 @@ pub enum DarkSouls2Version {
     Scholar1_0_1,
     Scholar1_0_2,
     Scholar1_0_3,
-    VanillaUnknown,
-    ScholarUnknown,
 }
 
 impl Version for DarkSouls2Version {
@@ -65,17 +63,15 @@ impl Display for DarkSouls2Version {
             Self::Vanilla1_0_10 => "Dark Souls II v1.0.10",
             Self::Vanilla1_0_11 => "Dark Souls II v1.0.11",
             Self::Vanilla1_0_12 => "Dark Souls II v1.0.12",
-            Self::VanillaUnknown => "Unknown",
             Self::Scholar1_0_1 => "Dark Souls II SOTFS v1.0.1",
             Self::Scholar1_0_2 => "Dark Souls II SOTFS v1.0.2",
             Self::Scholar1_0_3 => "Dark Souls II SOTFS v1.0.3",
-            Self::ScholarUnknown => "Unknown",
         };
         write!(f, "{}", name)
     }
 }
 
-#[derive(PartialEq, Clone, Copy, Debug)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Debug, Default)]
 pub enum EldenRingVersion {
     Version1_2_0,
     Version1_2_1,
@@ -103,7 +99,8 @@ pub enum EldenRingVersion {
     Version2_6_0,
     Version2_6_1,
     Version2_6_2,
-    VersionUnknown,
+    #[default]
+    Version2_7_0,
 }
 
 impl Version for EldenRingVersion {
@@ -144,7 +141,7 @@ impl Display for EldenRingVersion {
             Self::Version2_6_0 => "Elden Ring v1.16",
             Self::Version2_6_1 => "Elden Ring v1.16.1",
             Self::Version2_6_2 => "Elden Ring v1.16.2",
-            Self::VersionUnknown => "Unknown",
+            Self::Version2_7_0 => "Elden Ring v1.17",
         };
         write!(f, "{}", name)
     }

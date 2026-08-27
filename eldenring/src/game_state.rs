@@ -1,7 +1,6 @@
 use {
     crate::{
         chr_ins::ChrIns,
-        emevd,
         mem::*,
         offsets::{
             ChainReadExt,
@@ -108,13 +107,10 @@ impl StateFlags {
 
     pub fn on_loaded(&self) {
         if self.is_flag(StateFlag::PlayerNoDamage) {
-            let _ = player::NoDamage.set_in_game(true);
-        }
-        if self.is_flag(StateFlag::TitleCards) {
-            let _ = emevd::disable_title_card();
+            let _ = player::set_no_damage(true);
         }
         if self.is_flag(StateFlag::RuneArc) {
-            let _ = player::RuneArc.set_in_game(true);
+            let _ = player::set_rune_arc(true);
         }
         if self.is_flag(StateFlag::StutterFix) {
             let _ = utility::StutterFix.set_in_game(true);
@@ -126,10 +122,10 @@ impl StateFlags {
 
     pub fn on_load_delayed(&self) {
         if self.is_flag(StateFlag::Rfbs) {
-            let _ = player::SetRfbsOnLoad.apply_in_game();
+            let _ = player::set_rfbs_hp();
         }
         if self.is_flag(StateFlag::TorrentNoDeath) {
-            let _ = player::TorrentNoDeath.set_in_game(true);
+            let _ = player::set_torrent_no_death(true);
         }
     }
 
@@ -164,11 +160,10 @@ fn restore_target() -> anyhow::Result<()> {
 pub enum StateFlag {
     PlayerNoDamage = 0x0,
     Rfbs           = 0x1,
-    TitleCards     = 0x2,
-    RuneArc        = 0x3,
-    TorrentNoDeath = 0x4,
-    StutterFix     = 0x5,
-    Hitboxes       = 0x6,
+    RuneArc        = 0x2,
+    TorrentNoDeath = 0x3,
+    StutterFix     = 0x4,
+    Hitboxes       = 0x5,
 }
 
 fn is_loaded() -> bool {

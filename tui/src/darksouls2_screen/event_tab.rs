@@ -48,7 +48,7 @@ impl Screen for EventTab {
 }
 
 const COMMANDS: [Command; 17] = [
-    Command::Toggle(&event::KingsRingAquired),
+    Command::Toggle(&event::KingsRingAcquired),
     Command::Toggle(&event::NashandraUnlocked),
     Command::Toggle(&event::AldiaUnlocked),
     Command::Toggle(&event::FlexileShipDocked),

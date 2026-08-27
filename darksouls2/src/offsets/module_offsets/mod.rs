@@ -34,6 +34,9 @@ pub enum Function {
     ChrSetAction,
     EzStateExternalEventCtor,
     EzStateExecuteEvent,
+    ApplySpeffect,
+    TriggerNewGame,
+    ResetEnemy,
 }
 
 #[derive(Clone, Copy)]
@@ -45,6 +48,7 @@ pub enum Hook {
     FasterMenu,
     SetSharedFlag,
     EventLog,
+    DisableAi,
 }
 
 #[derive(Clone, Copy)]
@@ -79,7 +83,7 @@ pub enum ExternalFunctionPointer {
 
 impl Address for BasePointer {
     fn addr(&self) -> u64 {
-        let f = &module_offsets().base_ptrs;
+        let f = module_offsets();
         let offset = match self {
             Self::GameManagerImp => f.game_manager_imp,
             Self::KatanaMainApp => f.katana_main_app,
@@ -90,7 +94,7 @@ impl Address for BasePointer {
 
 impl Address for Function {
     fn addr(&self) -> u64 {
-        let f = &module_offsets().functions;
+        let f = module_offsets();
         let offset = match self {
             Self::GiveSouls => f.give_souls,
             Self::Warp => f.warp,
@@ -111,6 +115,9 @@ impl Address for Function {
             Self::ChrSetAction => f.chr_set_action,
             Self::EzStateExternalEventCtor => f.ez_state_external_event_ctor,
             Self::EzStateExecuteEvent => f.ez_state_execute_event,
+            Self::ApplySpeffect => f.apply_speffect,
+            Self::TriggerNewGame => f.trigger_ng,
+            Self::ResetEnemy => f.reset_enemy,
         };
         module_base() + offset
     }
@@ -118,7 +125,7 @@ impl Address for Function {
 
 impl Address for Hook {
     fn addr(&self) -> u64 {
-        let f = &module_offsets().hooks;
+        let f = module_offsets();
         let offset = match self {
             Self::LockedTargetPointer => f.locked_target_pointer,
             Self::PlayerNoDamage => f.player_no_damage,
@@ -127,6 +134,7 @@ impl Address for Hook {
             Self::FasterMenu => f.faster_menu,
             Self::SetSharedFlag => f.set_shared_flag,
             Self::EventLog => f.event_log,
+            Self::DisableAi => f.disable_ai,
         };
         module_base() + offset
     }
@@ -134,8 +142,7 @@ impl Address for Hook {
 
 impl Address for Patch {
     fn addr(&self) -> u64 {
-        let f = &module_offsets().patches;
-
+        let f = module_offsets();
         let offset = match self {
             Self::InfiniteStamina => f.infinite_stamina,
             Self::InfiniteConsumables => f.infinite_consumables,
@@ -157,7 +164,7 @@ impl Address for Patch {
 
 impl Address for Data {
     fn addr(&self) -> u64 {
-        let f = &module_offsets().data;
+        let f = module_offsets();
         let offset = match self {
             Self::MapId => f.map_id,
         };
@@ -167,7 +174,7 @@ impl Address for Data {
 
 impl Address for ExternalFunctionPointer {
     fn addr(&self) -> u64 {
-        let f = &module_offsets().external_fn_ptrs;
+        let f = module_offsets();
         let offset = match self {
             Self::Kernel32CreateThread => f.kernel32_create_thread,
             Self::Kernel32CloseHandle => f.kernel32_close_handle,

@@ -39,7 +39,7 @@ impl Screen for EventTab {
 
         self.pane_manager.draw(frame, &layout);
 
-        let enabled = event::EventLogHook.is().unwrap_or_default();
+        let enabled = event::StartEventLogger.is().unwrap_or_default();
         draw_logging_enabled_line(frame, layout[1], enabled);
     }
 

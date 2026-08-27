@@ -13,6 +13,7 @@ use {
         },
         pointer_cache::ResolvedPtr,
         resources::asm_function,
+        speffect,
         utils::player_loaded_check,
     },
     gubtool_core::{
@@ -26,8 +27,10 @@ use {
         },
     },
     shared::{
-        command::{StatCommand, ToggleCommand, ValueCommand},
-        declare_command,
+        command::{StatCommand, ToggleCommand, UnitCommand, ValueCommand},
+        toggle_command,
+        unit_command,
+        value_command,
     },
     std::sync::{LazyLock, Mutex, MutexGuard, RwLock},
     strum::Display,
@@ -81,31 +84,16 @@ impl Player {
     }
 }
 
-declare_command!(
-    NoDeath,
-    NoDamage,
-    InfinitePoise,
-    InfiniteConsumables,
-    InfiniteStamina,
-    InfiniteDurability,
-    NoHollowing,
-    NoSoulLoss,
-    NoSoulGain,
-    Hidden,
-    Silent,
-    Souls,
-    Health,
-);
-
-impl ValueCommand<u32> for Souls {
-    fn get(&self) -> SysResult<u32> {
+value_command!(Souls, u32 {
+    get: {
         player()
             .chr_ctrl()?
             .get_ptr(ResolvedChrPtr::Stats)
             .add_offset(stats_offsets::SOULS)
             .read::<u32>()
     }
-    fn set(&self, val: u32) -> anyhow::Result<()> {
+
+    set(val): {
         let souls_loc = player()
             .chr_ctrl()?
             .get_ptr(ResolvedChrPtr::Stats)
@@ -115,45 +103,45 @@ impl ValueCommand<u32> for Souls {
         if diff < 0 {
             souls_loc.write::<i32>(current + diff)?;
         } else {
-            Self::give(diff)?;
+            give_souls(diff)?;
         }
         Ok(())
     }
+});
+
+fn give_souls(amount: i32) -> anyhow::Result<()> {
+    let args = [
+        FfiValue::pointer(player().chr_ctrl()?.get_ptr(ResolvedChrPtr::Stats)?),
+        FfiValue::sint32(amount),
+    ];
+
+    run_game_function(Function::GiveSouls, &args, X86CallingConvention::__fastcall)
 }
 
-impl Souls {
-    fn give(amount: i32) -> anyhow::Result<()> {
-        let args = [
-            FfiValue::pointer(player().chr_ctrl()?.get_ptr(ResolvedChrPtr::Stats)?),
-            FfiValue::sint32(amount),
-        ];
-
-        run_game_function(Function::GiveSouls, &args, X86CallingConvention::__fastcall)
-    }
-}
-
-impl ToggleCommand for NoDeath {
-    fn is(&self) -> SysResult<bool> {
+toggle_command!(NoDeath {
+    is: {
         Ok(game_state::is_flag(StateFlag::PlayerNoDeath))
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         game_state::set_flag(StateFlag::PlayerNoDeath, state)?;
         let _ = player().chr_ctrl().and_then(|chr| chr.set_no_death(state));
         Ok(())
     }
-}
+});
 
 const VANILLA_NO_DAMAGE_ORIGINAL: [u8; 6] = [0x89, 0x8e, 0xfc, 0x00, 0x00, 0x00];
 const SCHOLAR_NO_DAMAGE_ORIGINAL: [u8; 6] = [0x89, 0x83, 0x68, 0x01, 0x00, 0x00];
-impl ToggleCommand for NoDamage {
-    fn is(&self) -> SysResult<bool> {
+toggle_command!(NoDamage {
+    is: {
         let bytes: &[u8] = match is_32() {
             true => &VANILLA_NO_DAMAGE_ORIGINAL,
             false => &SCHOLAR_NO_DAMAGE_ORIGINAL,
         };
         read::<[u8; 6]>(Hook::PlayerNoDamage).map(|val| val != bytes)
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         let hook_loc = Hook::PlayerNoDamage;
         let cave_loc = CaveAddr::PlayerNoDamageHook;
 
@@ -173,19 +161,20 @@ impl ToggleCommand for NoDamage {
         }
         Ok(())
     }
-}
+});
 
 const VANILLA_INFINITE_POISE_ORIGINAL: [u8; 7] = [0x83, 0xbb, 0xec, 0x05, 0x00, 0x00, 0x00];
 const SCHOLAR_INFINITE_POISE_ORIGINAL: [u8; 6] = [0x39, 0x9d, 0xec, 0x05, 0x00, 0x00];
-impl ToggleCommand for InfinitePoise {
-    fn is(&self) -> SysResult<bool> {
+toggle_command!(InfinitePoise {
+    is: {
         if is_32() {
             read::<[u8; 7]>(Hook::InfinitePoise).map(|val| val != VANILLA_INFINITE_POISE_ORIGINAL)
         } else {
             read::<[u8; 6]>(Hook::InfinitePoise).map(|val| val != SCHOLAR_INFINITE_POISE_ORIGINAL)
         }
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         if state {
             let orig_instr_len = if is_32() { 7 } else { 6 };
 
@@ -214,112 +203,120 @@ impl ToggleCommand for InfinitePoise {
         }
         Ok(())
     }
-}
+});
 
-impl ToggleCommand for InfiniteStamina {
-    fn is(&self) -> SysResult<bool> {
-        read::<u8>(Patch::InfiniteStamina).map(|val| val != 0x83)
+toggle_command!(InfiniteStamina {
+    is: {
+        read::<u8>(Patch::InfiniteStamina)
+            .map(|val| val != 0x83)
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         let byte = if state { 0x82 } else { 0x83 };
-        write::<u8>(Patch::InfiniteStamina, byte)?;
-        Ok(())
+        Ok(write::<u8>(Patch::InfiniteStamina, byte)?)
     }
-}
+});
 
-impl ToggleCommand for InfiniteDurability {
-    fn is(&self) -> SysResult<bool> {
-        read::<[u8; 5]>(Patch::InfiniteDurability).map(|val| val == [0x90; 5])
+toggle_command!(InfiniteDurability {
+    is: {
+        read::<[u8; 5]>(Patch::InfiniteDurability)
+            .map(|val| val == [0x90; 5])
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         let bytes: &[u8] = match (state, is_32()) {
             (true, true) => &[0x90; 5],
             (true, false) => &[0x90; 9],
             (false, true) => &[0xf3, 0x0f, 0x11, 0x47, 0x6c],
             (false, false) => &[0xf3, 0x0f, 0x11, 0xb4, 0xc3, 0x94, 0x00, 0x00, 0x00],
         };
-        write_bytes(Patch::InfiniteDurability, bytes)?;
-        Ok(())
+        Ok(write_bytes(Patch::InfiniteDurability, bytes)?)
     }
-}
+});
 
-impl ToggleCommand for InfiniteConsumables {
-    fn is(&self) -> SysResult<bool> {
-        read::<[u8; 4]>(Patch::InfiniteConsumables).map(|val| val == [0x90; 4])
+toggle_command!(InfiniteConsumables {
+    is: {
+        read::<[u8; 4]>(Patch::InfiniteConsumables)
+            .map(|val| val == [0x90; 4])
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         let bytes: &[u8] = match (state, is_32()) {
             (true, true) | (true, false) => &[0x90; 4],
             (false, true) => &[0x66, 0x29, 0x5e, 0x18],
             (false, false) => &[0x66, 0x29, 0x73, 0x20],
         };
-        write_bytes(Patch::InfiniteConsumables, bytes)?;
-        Ok(())
+        Ok(write_bytes(Patch::InfiniteConsumables, bytes)?)
     }
-}
+});
 
-impl ToggleCommand for NoHollowing {
-    fn is(&self) -> SysResult<bool> {
-        read::<[u8; 6]>(Patch::NoHollowing).map(|val| val == [0x90; 6])
+toggle_command!(NoHollowing {
+    is: {
+        read::<[u8; 6]>(Patch::NoHollowing)
+            .map(|val| val == [0x90; 6])
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         let bytes: &[u8] = match (state, is_32()) {
             (true, true) | (true, false) => &[0x90; 6],
             (false, true) => &[0x88, 0x91, 0xa8, 0x01, 0x00, 0x00],
             (false, false) => &[0x88, 0x81, 0xac, 0x01, 0x00, 0x00],
         };
-        write_bytes(Patch::NoHollowing, bytes)?;
-        Ok(())
+        Ok(write_bytes(Patch::NoHollowing, bytes)?)
     }
-}
+});
 
-impl ToggleCommand for NoSoulLoss {
-    fn is(&self) -> SysResult<bool> {
-        read::<[u8; 6]>(Patch::NoSoulLoss).map(|val| val == [0x90; 6])
+toggle_command!(NoSoulLoss {
+    is: {
+        read::<[u8; 6]>(Patch::NoSoulLoss)
+            .map(|val| val == [0x90; 6])
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         let bytes: &[u8] = match (state, is_32()) {
             (true, true) => &[0x90; 10],
             (true, false) => &[0x90; 6],
             (false, true) => &[0xc7, 0x80, 0xe8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
             (false, false) => &[0x89, 0x90, 0xec, 0x00, 0x00, 0x00],
         };
-        write_bytes(Patch::NoSoulLoss, bytes)?;
-        Ok(())
+        Ok(write_bytes(Patch::NoSoulLoss, bytes)?)
     }
-}
+});
 
-impl ToggleCommand for NoSoulGain {
-    fn is(&self) -> SysResult<bool> {
-        read::<[u8; 5]>(Patch::NoSoulGain).map(|val| val == [0x90; 5])
+toggle_command!(NoSoulGain {
+    is: {
+        read::<[u8; 5]>(Patch::NoSoulGain)
+            .map(|val| val == [0x90; 5])
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+
+    set(state): {
         let bytes: &[u8] = match (state, is_32()) {
             (true, true) | (true, false) => &[0x90; 5],
             (false, true) => &[0xe8, 0xf7, 0xf5, 0xff, 0xff],
             (false, false) => &[0xe8, 0x71, 0x01, 0x00, 0x00],
         };
-        write_bytes(Patch::NoSoulGain, bytes)?;
-        Ok(())
+        Ok(write_bytes(Patch::NoSoulGain, bytes)?)
     }
-}
+});
 
-impl ToggleCommand for Hidden {
-    fn is(&self) -> SysResult<bool> {
+toggle_command!(Hidden {
+    is: {
         read::<u8>(Patch::PlayerHidden).map(|val| val != 0x84)
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
-        let byte = if state { 0x85 } else { 0x84 };
-        write::<u8>(Patch::PlayerHidden, byte)?;
-        Ok(())
-    }
-}
 
-impl ToggleCommand for Silent {
-    fn is(&self) -> SysResult<bool> {
-        read::<[u8; 5]>(Patch::PlayerSilent).map(|val| val == [0x90; 5])
+    set(state): {
+        let byte = if state { 0x85 } else { 0x84 };
+        Ok(write::<u8>(Patch::PlayerHidden, byte)?)
     }
-    fn set(&self, state: bool) -> anyhow::Result<()> {
+});
+
+toggle_command!(Silent {
+    is: {
+        read::<[u8; 5]>(Patch::PlayerSilent)
+            .map(|val| val == [0x90; 5])
+    }
+
+    set(state): {
         match is_32() {
             true => {
                 let push_op_neg_offset = match version() {
@@ -361,17 +358,27 @@ impl ToggleCommand for Silent {
         }
         Ok(())
     }
-}
+});
 
-impl ValueCommand<i32> for Health {
-    fn get(&self) -> SysResult<i32> {
+value_command!(Health, i32 {
+    get: {
         player().chr_ctrl()?.get_hp()
     }
-    fn set(&self, val: i32) -> anyhow::Result<()> {
-        player().chr_ctrl()?.set_hp(val)?;
-        Ok(())
+
+    set(val): {
+        Ok(player().chr_ctrl()?.set_hp(val)?)
     }
-}
+});
+
+unit_command!(RestoreHumanity {
+    let speffect = speffect::RESTORE_HUMANITY;
+    player().chr_ctrl()?.apply_speffect(speffect)
+});
+
+unit_command!(Rest {
+    let speffect = speffect::REST;
+    player().chr_ctrl()?.apply_speffect(speffect)
+});
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy, Default)]
@@ -385,19 +392,6 @@ pub(crate) struct Stats {
     pub intelligence: u16,
     pub faith:        u16,
     pub adaptability: u16,
-    // unk1: u16,
-    // unk2: u16,
-    // effective_vigor: u16,
-    // effective_endurance: u16,
-    // effective_vitality: u16,
-    // effective_attunement: u16,
-    // effective_strength: u16,
-    // effective_dexterity: u16,
-    // effective_intelligence: u16,
-    // effective_faith: u16,
-    // effective_adaptability: u16,
-    // unk3: u16,
-    // unk4: u16,
 }
 
 impl Stats {
@@ -534,8 +528,8 @@ impl StatCommand for Stat {
         let new_souls = player_stats_entity
             .add_offset(stats_offsets::SOULS)
             .read::<i32>()?;
-        Souls::give(current_souls - new_souls)?;
-        Ok(())
+
+        give_souls(current_souls - new_souls)
     }
 }
 
