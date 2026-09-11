@@ -2,7 +2,10 @@ push esi
 push edi
 push ebp
 push ebx
-mov ebx, OFFSET bonfire_manager
+mov ebx, OFFSET game_manager_imp
+mov ebx, DWORD PTR [ebx]
+mov ebx, DWORD PTR [ebx+0x44]
+mov ebx, DWORD PTR [ebx+0x2c]
 mov esi, OFFSET fn_bonfire_unlock
 mov edi, DWORD PTR [ebx+0x14]
 test edi, edi

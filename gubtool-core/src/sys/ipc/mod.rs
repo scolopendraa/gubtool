@@ -6,7 +6,7 @@ use {
     crate::{
         address::{Address, POINTER},
         attached::{self, AddressSize},
-        sys::{ASM32, ASM64, dll::Dll, ipc::ipc_error::IpcError, write_bytes_unsafe},
+        sys::{ASM32, ASM64, dll::Dll, ipc::ipc_error::IpcError, write_bytes},
     },
     anyhow::Result,
     std::{net::UdpSocket, time::Duration},
@@ -58,21 +58,25 @@ pub fn worker_thread_dll_load_code(
     }
 
     let path_bytes = dll.get_win_path_bytes()?;
-    write_bytes_unsafe(path_loc, &path_bytes)?;
+    write_bytes(path_loc, &path_bytes)?;
 
     let mut fun = match attached::address_size()? {
         AddressSize::Bits32 => ASM32.get_function("load_library"),
         AddressSize::Bits64 => ASM64.get_function("load_library"),
     };
 
-    fun.patch::<POINTER>("path_loc", path_loc.addr());
-    fun.patch::<POINTER>("load_library_w_loc", load_library_w_pointer_loc.addr());
+    fun.patch::<POINTER>("path_loc", path_loc.u64_address());
+    fun.patch::<POINTER>("load_library_w_loc", load_library_w_pointer_loc.u64_address());
 
     Ok(fun.bytes)
 }
 
 pub fn send_dll_request(port: u16, path_loc: impl Address) -> Result<(), IpcError> {
-    send_request(port, WorkerThreadRequest::LoadLibrary, Some(&path_loc.addr().to_le_bytes()))
+    send_request(
+        port,
+        WorkerThreadRequest::LoadLibrary,
+        Some(&path_loc.u64_address().to_le_bytes()),
+    )
 }
 
 fn send_request(

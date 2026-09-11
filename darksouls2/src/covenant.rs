@@ -1,10 +1,6 @@
 use {
-    crate::{
-        chr_ctrl::ResolvedChrPtr,
-        offsets::{ChainReadExt, chr_ctrl::stats_offsets},
-        player::player,
-    },
-    gubtool_core::sys::sys_error::SysResult,
+    crate::{chr_ctrl::ResolvedChrPtr, offsets::chr_ctrl::stats_offsets, player::player},
+    gubtool_core::{address::ChainReadExt, sys::sys_error::SysResult},
     shared::command::EmptyCommand,
     strum::Display,
 };
@@ -21,8 +17,7 @@ pub struct CovenantData {
 impl CovenantData {
     pub fn read() -> Self {
         player()
-            .chr_ctrl()
-            .and_then(|chr| {
+            .and_then(|mut chr| {
                 chr.get_ptr(ResolvedChrPtr::Stats)
                     .add_offset(stats_offsets::COVENANT)
                     .read::<Self>()
@@ -55,8 +50,7 @@ impl std::fmt::Display for Covenant {
 
 impl Covenant {
     pub fn get(&self) -> SysResult<CovenantKind> {
-        player()
-            .chr_ctrl()?
+        player()?
             .get_ptr(ResolvedChrPtr::Stats)
             .add_offset(stats_offsets::COVENANT)
             .read::<u8>()
@@ -64,8 +58,7 @@ impl Covenant {
     }
 
     pub fn set(&self, covenant: CovenantKind) -> SysResult {
-        player()
-            .chr_ctrl()?
+        player()?
             .get_ptr(ResolvedChrPtr::Stats)
             .add_offset(stats_offsets::COVENANT)
             .write::<u8>(covenant as u8)

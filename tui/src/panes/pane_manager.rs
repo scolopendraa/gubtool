@@ -42,6 +42,7 @@ impl PaneManager {
 
     pub fn handle_keys(&mut self, ctx: &mut KeyContext) {
         let layout: &[Neighbours] = match self.panes.len() {
+            1 => &ONE_PANE,
             2 => &TWO_PANES,
             3 => &THREE_PANES,
             4 => &FOUR_PANES,
@@ -86,6 +87,13 @@ struct Neighbours {
     up:    Option<usize>,
     down:  Option<usize>,
 }
+
+const ONE_PANE: [Neighbours; 1] = [Neighbours {
+    left:  None,
+    right: None,
+    up:    None,
+    down:  None,
+}];
 
 const TWO_PANES: [Neighbours; 2] = [
     Neighbours {

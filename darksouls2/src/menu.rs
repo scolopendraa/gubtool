@@ -9,7 +9,11 @@ use {
     gubtool_core::{
         address::Address,
         attached::is_32,
-        sys::ipc::{FfiValue, X86CallingConvention},
+        sys::{
+            ipc::{FfiValue, X86CallingConvention},
+            write,
+            write_address,
+        },
     },
     std::{thread, time::Duration},
 };
@@ -29,23 +33,22 @@ pub fn open_trade(trade: Trade) -> anyhow::Result<()> {
 pub fn open_menu(menu_type: MenuType) -> anyhow::Result<()> {
     player_loaded_check()?;
 
-    let args_loc = CaveAddr::OpenMenuArgs.addr();
-    let npc_args_loc = CaveAddr::NpcTalkArgs.addr();
+    let args_loc = CaveAddr::OpenMenuArgs.ptr();
+    let npc_args_loc = CaveAddr::NpcTalkArgs.ptr();
 
+    write_address(args_loc, npc_args_loc)?;
     if is_32() {
-        write::<u32>(args_loc, npc_args_loc as u32)?;
         write::<u8>(args_loc + 0x4, menu_type as u8)?;
         write::<u32>(args_loc + 0x20, 0x1)?;
     } else {
-        write::<u64>(args_loc, npc_args_loc)?;
         write::<u8>(args_loc + 0x8, menu_type as u8)?;
         write::<u64>(args_loc + 0x28, 0x1)?;
     }
 
     let args = [
         FfiValue::pointer(ResolvedPtr::WindowManager.get()?),
-        FfiValue::pointer(args_loc),
-        FfiValue::pointer(CaveAddr::NpcPos.addr()),
+        FfiValue::pointer(args_loc.ptr()),
+        FfiValue::pointer(CaveAddr::NpcPos.ptr()),
     ];
 
     set_menu_open_chr_state(true)?;
@@ -60,8 +63,10 @@ pub fn open_menu(menu_type: MenuType) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn is_menu_open() -> bool {
-    follow_pointers(&game_manager_imp::fe_item_select_menu_chain(), true).is_ok()
+pub fn is_menu_open() -> bool {
+    game_manager_imp::fe_item_select_menu_chain()
+        .follow_pointers()
+        .is_ok()
 }
 
 fn set_menu_open_chr_state(state: bool) -> anyhow::Result<()> {

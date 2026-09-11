@@ -60,6 +60,7 @@ pub struct ModuleOffsets {
     pub kernel32_close_handle:          u64,
     pub kernel32_load_library_w:        u64,
     pub lua_event_system:               u64,
+    pub bad_quit_message:               u64,
 }
 
 #[inline(always)]
@@ -92,6 +93,7 @@ pub(super) fn module_offsets() -> &'static ModuleOffsets {
         Some(Version2_6_1) => &versions::OFFSETS_2_6_1,
         Some(Version2_6_2) => &versions::OFFSETS_2_6_2,
         Some(Version2_7_0) => &versions::OFFSETS_2_7_0,
-        _ => &versions::OFFSETS_2_6_2,
+        Some(Version2_7_1) => &versions::OFFSETS_2_7_1,
+        _ => &versions::OFFSETS_2_7_1,
     }
 }

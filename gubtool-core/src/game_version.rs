@@ -5,15 +5,17 @@ use {
 
 #[derive(PartialEq, Clone, Copy, Debug)]
 pub enum GameVersion {
-    EldenRing(EldenRingVersion),
     DarkSouls2(DarkSouls2Version),
+    DarkSouls3(DarkSouls3Version),
+    EldenRing(EldenRingVersion),
 }
 
 impl GameVersion {
     pub fn game(&self) -> Game {
         match self {
-            Self::EldenRing(_) => Game::EldenRing,
             Self::DarkSouls2(_) => Game::DarkSouls2,
+            Self::DarkSouls3(_) => Game::DarkSouls3,
+            Self::EldenRing(_) => Game::EldenRing,
         }
     }
 }
@@ -24,8 +26,9 @@ pub trait Version: Copy + Sized {
 
 #[derive(PartialEq, Clone, Copy, Serialize, Deserialize, Debug)]
 pub enum Game {
-    EldenRing,
     DarkSouls2,
+    DarkSouls3,
+    EldenRing,
 }
 
 #[derive(PartialEq, Clone, Copy, Debug)]
@@ -71,6 +74,67 @@ impl Display for DarkSouls2Version {
     }
 }
 
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Debug)]
+pub enum DarkSouls3Version {
+    Version1_1_1,
+    Version1_3_1,
+    Version1_3_2,
+    Version1_4_1,
+    Version1_4_2,
+    Version1_4_3,
+    Version1_5_0,
+    Version1_5_1,
+    Version1_6_0,
+    Version1_7_0,
+    Version1_8_0,
+    Version1_9_0,
+    Version1_10_0,
+    Version1_11_0,
+    Version1_12_0,
+    Version1_13_0,
+    Version1_14_0,
+    Version1_15_0,
+    Version1_15_1,
+    Version1_15_2,
+}
+
+impl Version for DarkSouls3Version {
+    fn from_game_version(game_version: &GameVersion) -> Option<Self> {
+        match game_version {
+            GameVersion::DarkSouls3(version) => Some(*version),
+            _ => None,
+        }
+    }
+}
+
+impl Display for DarkSouls3Version {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let name = match self {
+            Self::Version1_1_1 => "Dark Souls III v1.01",
+            Self::Version1_3_1 => "Dark Souls III v1.03",
+            Self::Version1_3_2 => "Dark Souls III v1.03.1",
+            Self::Version1_4_1 => "Dark Souls III v1.04",
+            Self::Version1_4_2 => "Dark Souls III v1.04.1",
+            Self::Version1_4_3 => "Dark Souls III v1.04.2",
+            Self::Version1_5_0 => "Dark Souls III v1.05",
+            Self::Version1_5_1 => "Dark Souls III v1.05.1",
+            Self::Version1_6_0 => "Dark Souls III v1.06",
+            Self::Version1_7_0 => "Dark Souls III v1.07",
+            Self::Version1_8_0 => "Dark Souls III v1.08",
+            Self::Version1_9_0 => "Dark Souls III v1.09",
+            Self::Version1_10_0 => "Dark Souls III v1.10",
+            Self::Version1_11_0 => "Dark Souls III v1.11",
+            Self::Version1_12_0 => "Dark Souls III v1.12",
+            Self::Version1_13_0 => "Dark Souls III v1.13",
+            Self::Version1_14_0 => "Dark Souls III v1.14",
+            Self::Version1_15_0 => "Dark Souls III v1.15",
+            Self::Version1_15_1 => "Dark Souls III v1.15.1",
+            Self::Version1_15_2 => "Dark Souls III v1.15.2",
+        };
+        write!(f, "{}", name)
+    }
+}
+
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Debug, Default)]
 pub enum EldenRingVersion {
     Version1_2_0,
@@ -99,8 +163,9 @@ pub enum EldenRingVersion {
     Version2_6_0,
     Version2_6_1,
     Version2_6_2,
-    #[default]
     Version2_7_0,
+    #[default]
+    Version2_7_1,
 }
 
 impl Version for EldenRingVersion {
@@ -142,6 +207,7 @@ impl Display for EldenRingVersion {
             Self::Version2_6_1 => "Elden Ring v1.16.1",
             Self::Version2_6_2 => "Elden Ring v1.16.2",
             Self::Version2_7_0 => "Elden Ring v1.17",
+            Self::Version2_7_1 => "Elden Ring v1.17.1",
         };
         write!(f, "{}", name)
     }
@@ -150,8 +216,9 @@ impl Display for EldenRingVersion {
 impl Display for Game {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            Self::EldenRing => write!(f, "Elden Ring"),
             Self::DarkSouls2 => write!(f, "Dark Souls II"),
+            Self::DarkSouls3 => write!(f, "Dark Souls III"),
+            Self::EldenRing => write!(f, "Elden Ring"),
         }
     }
 }
@@ -159,8 +226,9 @@ impl Display for Game {
 impl Display for GameVersion {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            Self::EldenRing(version) => write!(f, "{version}"),
             Self::DarkSouls2(version) => write!(f, "{version}"),
+            Self::DarkSouls3(version) => write!(f, "{version}"),
+            Self::EldenRing(version) => write!(f, "{version}"),
         }
     }
 }

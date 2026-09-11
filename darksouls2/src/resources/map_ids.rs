@@ -12,7 +12,7 @@ pub enum MapId {
     HarvestValley           = 0xa110000,  // m10_17_00_00
     NoMansWharf             = 0xa120000,  // m10_18_00_00
     IronKeep                = 0xa130000,  // m10_19_00_00
-    HuntsmansCorpse         = 0xa170000,  // m10_23_00_00
+    HuntsmansCopse          = 0xa170000,  // m10_23_00_00
     TheGutter               = 0xa190000,  // m10_25_00_00
     DragonAerie             = 0xa1b0000,  // m10_27_00_00
     PathToShadedWoods       = 0xa1d0000,  // m10_29_00_00
@@ -45,7 +45,7 @@ impl Display for MapId {
             Self::HarvestValley => "Harvest Valley",
             Self::NoMansWharf => "No-Man's Wharf",
             Self::IronKeep => "Iron Keep",
-            Self::HuntsmansCorpse => "Huntsman's Copse",
+            Self::HuntsmansCopse => "Huntsman's Copse",
             Self::TheGutter => "The Gutter",
             Self::DragonAerie => "Dragon Aerie",
             Self::PathToShadedWoods => "Path to Shaded Woods",

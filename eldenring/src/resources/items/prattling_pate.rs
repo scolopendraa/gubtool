@@ -3,7 +3,7 @@ use super::Item;
 impl Item {
     const fn default_prattling_pate() -> Self {
         Self {
-            category: super::Categories::PrattlingPate,
+            category: super::ItemCategory::PrattlingPate,
             max_storage: 600,
             ..Item::default()
         }

@@ -1,18 +1,4 @@
-use {
-    crate::offsets::Offset,
-    gubtool_core::{address::Address, attached::module_base, impl_address_patch},
-    strum::{EnumIter, IntoEnumIterator},
-};
-
-pub const SIZE: usize = 0x5000;
-
-pub const BASE: Offset = Offset {
-    vanilla: 0x1250000,
-    scholar: 0x1800000,
-};
-
-#[repr(u64)]
-#[derive(Clone, Copy, Debug, EnumIter)]
+#[macros::code_cave(x86 = 0x1250000, x64 = 0x1800000)]
 pub enum CaveAddr {
     WorkerThreadPort       = 0x0, // u16
 
@@ -63,20 +49,4 @@ pub enum CaveAddr {
 
     EventLogWriteIdx       = 0x3750, // i32
     EventLogBuffer         = 0x3754, // 0x1000
-}
-
-impl Address for CaveAddr {
-    fn addr(&self) -> u64 {
-        module_base()
-            .saturating_add(BASE.resolve())
-            .saturating_add(*self as u64)
-    }
-}
-
-impl_address_patch!(CaveAddr);
-
-pub fn pointers() -> Vec<(String, u64)> {
-    CaveAddr::iter()
-        .map(|addr| (format!("{:?}", addr), addr.addr()))
-        .collect()
 }

@@ -99,6 +99,7 @@ impl GameProcess {
         if self.handle.is_invalid() || self.handle.0.is_null() {
             return false;
         }
+
         unsafe {
             let mut exit_code: u32 = 0;
             let _ = GetExitCodeProcess(self.handle, &mut exit_code);

@@ -1,27 +1,24 @@
 use {
     crate::{
-        event::set_event_flag,
-        mem::{install_hook, read, read_address, run_custom_function, write},
+        event::{self, set_event_flag},
+        game_state,
+        mem::run_custom_function,
         offsets::{
-            ChainReadExt,
             code_cave::CaveAddr,
-            game_manager_imp,
             module_offsets::{BasePointer, Function, Hook},
         },
-        pointer_cache::ResolvedPtr,
         resources::{asm_function, bosses::Boss},
     },
     assemble::patch::{DWORD, WORD},
     gubtool_core::{
-        address::{Address, POINTER},
+        address::{Address, POINTER, Pointer},
         attached::is_32,
         slice_ops::{read_from_slice, write_to_slice},
-        sys::sys_error::SysResult,
+        sys::{install_hook, read, sys_error::SysResult, write},
     },
     std::{
         collections::HashMap,
         sync::{LazyLock, Mutex, MutexGuard},
-        time::Duration,
     },
 };
 
@@ -79,7 +76,7 @@ pub fn install_act_logger_hook() -> SysResult {
     install_hook(&fun.bytes, CaveAddr::TargetActHook, Function::ChrSetAction, 7)
 }
 
-pub fn is_chr_ai_disabled(chr_ai: u64) -> SysResult<bool> {
+pub fn is_chr_ai_disabled(chr_ai: Pointer) -> SysResult<bool> {
     let buffer = read::<[u8; 0x104]>(CaveAddr::DisabledEnemies)?;
     let count = read_from_slice::<u32>(&buffer, 0)?;
 
@@ -93,7 +90,7 @@ pub fn is_chr_ai_disabled(chr_ai: u64) -> SysResult<bool> {
     Ok(false)
 }
 
-pub fn set_disable_chr_ai(chr_ai: u64, state: bool) -> SysResult {
+pub fn set_disable_chr_ai(chr_ai: Pointer, state: bool) -> SysResult {
     let mut buffer = read::<[u8; 0x104]>(CaveAddr::DisabledEnemies)?;
     let mut count = read_from_slice::<u32>(&buffer, 0)?;
 
@@ -129,7 +126,7 @@ pub fn set_disable_chr_ai(chr_ai: u64, state: bool) -> SysResult {
 }
 
 pub fn clear_disabled_targets() -> SysResult {
-    write::<[u8; 0x104]>(CaveAddr::DisabledEnemies, [0u8; 0x104])
+    write::<[u8; 0x104]>(CaveAddr::DisabledEnemies, [0x0; 0x104])
 }
 
 pub fn install_disable_ai_hook() -> SysResult {
@@ -163,27 +160,23 @@ impl Boss {
     pub async fn revive(&self) -> anyhow::Result<()> {
         set_event_flag(self.death_flag, false)?;
 
-        self.warp()?;
+        tokio::try_join!(self.warp(), async {
+            game_state::wait_for_reload().await;
 
-        let player_ctrl = ResolvedPtr::GameManagerImp
-            .get()
-            .add_offset(game_manager_imp::PLAYER_CTRL)?;
+            for flag in self.revive_flags {
+                set_event_flag(*flag, false)?;
+            }
 
-        while read_address(player_ctrl)? != 0x0 {
-            tokio::time::sleep(Duration::from_millis(5)).await;
-        }
+            for id in self.obj_ids {
+                reset_enemy(*id, self.bonfire_id)?;
+            }
 
-        while read_address(player_ctrl)? == 0x0 {
-            tokio::time::sleep(Duration::from_millis(5)).await;
-        }
+            if self.name == "Elana, the Squalid Queen" {
+                event::close_elana_door()?;
+            }
 
-        for flag in self.revive_flags {
-            set_event_flag(*flag, false)?;
-        }
-
-        for id in self.obj_ids {
-            reset_enemy(*id, self.bonfire_id)?;
-        }
+            Ok(())
+        })?;
 
         Ok(())
     }

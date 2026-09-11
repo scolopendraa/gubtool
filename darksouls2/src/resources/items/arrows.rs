@@ -3,14 +3,14 @@ use super::Item;
 impl Item {
     const fn default_arrow() -> Self {
         Self {
-            category: super::Categories::Arrows,
+            category: super::ItemCategory::Arrows,
             stack_size: 999,
             ..Item::default()
         }
     }
 }
 
-pub static ARROWS: &[Item; 18] = &[
+pub static ARROWS: [Item; 18] = [
     Item {
         id: 60760000,
         name: "Wood Arrow",

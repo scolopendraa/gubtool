@@ -3,7 +3,7 @@ use super::Item;
 impl Item {
     const fn default_cookbook() -> Self {
         Self {
-            category: super::Categories::Cookbooks,
+            category: super::ItemCategory::Cookbooks,
             ..Item::default()
         }
     }

@@ -5,6 +5,7 @@ pub mod emevd;
 pub mod event;
 pub mod game_state;
 pub mod item;
+mod obj_refs;
 mod offsets;
 mod phase_transition;
 pub mod player;
@@ -18,7 +19,8 @@ pub mod utils;
 use {
     crate::{
         game_state::{GAME_STATE, STATE_FLAGS},
-        pointer_cache::POINTER_CACHE,
+        obj_refs::{PLAYER, TARGET, TORRENT},
+        pointer_cache::pointer_cache,
     },
     shared::command_registry::{CommandRegistration, CommandRegistry},
     std::sync::atomic::Ordering,
@@ -26,11 +28,17 @@ use {
 pub use {
     attach::attach,
     offsets::code_cave::pointers as cave_pointers,
-    pointer_cache::{get_pointers, load_all_pointers},
+    pointer_cache::{
+        global_pointers,
+        load_all_pointers,
+        player_pointers,
+        target_pointers,
+        torrent_pointers,
+    },
 };
 
 mod mem {
-    gubtool_core::declare_mem_functions!(Game::EldenRing);
+    gubtool_core::declare_mem_functions!(EldenRing);
     gubtool_core::declare_x64_specifics!();
 }
 
@@ -51,16 +59,16 @@ pub fn init() {
 }
 
 pub fn reset() {
-    POINTER_CACHE.reset_pointers();
-    player::player().update();
-    player::torrent().update();
+    pointer_cache().clear_pointers();
+    PLAYER.update();
+    TORRENT.update();
     STATE_FLAGS.reset();
 }
 
 pub fn update() {
     STATE_FLAGS.update();
     GAME_STATE.update();
-    target::target().update();
+    TARGET.update();
     player::player_game_data().read();
 }
 

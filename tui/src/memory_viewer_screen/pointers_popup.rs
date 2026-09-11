@@ -20,6 +20,7 @@ const CONTROLS: [Control; 1] = [Control::new("r", "Load Pointers")];
 pub(super) struct PointersPopup {
     popup_state: PopupState,
     ds2_tabs:    TabPane,
+    ds3_tabs:    TabPane,
     er_tabs:     TabPane,
 }
 
@@ -32,6 +33,13 @@ impl PointersPopup {
                 TablePane::new_static(&Ds2Player),
                 TablePane::new_static(&Ds2Target),
                 TablePane::new_static(&Ds2CodeCave),
+            ])
+            .with_controls(&CONTROLS),
+            ds3_tabs:    TabPane::new(&["Globals", "Player", "Target", "Code Cave"], vec![
+                TablePane::new_static(&Ds3Globals),
+                TablePane::new_static(&Ds3Player),
+                TablePane::new_static(&Ds3Target),
+                TablePane::new_static(&Ds3CodeCave),
             ])
             .with_controls(&CONTROLS),
             er_tabs:     TabPane::new(
@@ -57,7 +65,7 @@ macro_rules! declare_pointers_table {
             fn make_table_view(&self) -> TableView {
                 let rows = $pointers
                     .into_iter()
-                    .map(|(name, addr)| Row::new([name, format!("{:#X?}", addr)]))
+                    .map(|(name, addr)| Row::new([name, format!("{:#x?}", addr)]))
                     .collect();
 
                 TableView::new(rows).with_widths(&[Constraint::Min(30), Constraint::Fill(1)])
@@ -93,6 +101,12 @@ impl Screen for PointersPopup {
                 }
                 self.ds2_tabs.draw(frame, rect);
             }
+            Ok(Game::DarkSouls3) => {
+                if self.ds3_tabs.selected().is_none() {
+                    self.ds3_tabs.select(0);
+                }
+                self.ds3_tabs.draw(frame, rect);
+            }
             Ok(Game::EldenRing) => {
                 if self.er_tabs.selected().is_none() {
                     self.er_tabs.select(0);
@@ -102,6 +116,7 @@ impl Screen for PointersPopup {
             _ => (),
         }
     }
+
     fn handle_keys(&mut self, ctx: &mut KeyContext) {
         match attached::game() {
             Ok(Game::DarkSouls2) => {
@@ -109,6 +124,12 @@ impl Screen for PointersPopup {
                     darksouls2::load_all_pointers();
                 }
                 self.ds2_tabs.handle_keys(ctx);
+            }
+            Ok(Game::DarkSouls3) => {
+                if ctx.key_char('r') {
+                    darksouls3::load_all_pointers();
+                }
+                self.ds3_tabs.handle_keys(ctx);
             }
             Ok(Game::EldenRing) => {
                 if ctx.key_char('r') {
@@ -121,12 +142,18 @@ impl Screen for PointersPopup {
     }
 }
 
-declare_pointers_table!(ErGlobals, eldenring::get_pointers());
-declare_pointers_table!(ErPlayer, eldenring::player::player().pointers());
-declare_pointers_table!(ErTarget, eldenring::target::target().pointers());
-declare_pointers_table!(ErCodeCave, eldenring::cave_pointers());
-declare_pointers_table!(ErTorrent, eldenring::player::torrent().pointers());
-declare_pointers_table!(Ds2Globals, darksouls2::get_pointers());
-declare_pointers_table!(Ds2Player, darksouls2::player::player().pointers());
-declare_pointers_table!(Ds2Target, darksouls2::target::target().pointers());
+declare_pointers_table!(Ds2Globals, darksouls2::global_pointers());
+declare_pointers_table!(Ds2Player, darksouls2::player_pointers());
+declare_pointers_table!(Ds2Target, darksouls2::target_pointers());
 declare_pointers_table!(Ds2CodeCave, darksouls2::cave_pointers());
+
+declare_pointers_table!(Ds3Globals, darksouls3::global_pointers());
+declare_pointers_table!(Ds3Player, darksouls3::player_pointers());
+declare_pointers_table!(Ds3Target, darksouls3::target_pointers());
+declare_pointers_table!(Ds3CodeCave, darksouls3::cave_pointers());
+
+declare_pointers_table!(ErGlobals, eldenring::global_pointers());
+declare_pointers_table!(ErPlayer, eldenring::player_pointers());
+declare_pointers_table!(ErTarget, eldenring::target_pointers());
+declare_pointers_table!(ErTorrent, eldenring::torrent_pointers());
+declare_pointers_table!(ErCodeCave, eldenring::cave_pointers());

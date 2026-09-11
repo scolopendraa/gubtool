@@ -1,9 +1,8 @@
 use {
     crate::{
         chr_ins::ChrIns,
-        mem::*,
+        obj_refs::{PLAYER, TORRENT},
         offsets::{
-            ChainReadExt,
             code_cave::CaveAddr,
             cs_dlc_imp,
             game_data_man,
@@ -12,11 +11,15 @@ use {
             world_chr_man,
         },
         player,
-        pointer_cache::POINTER_CACHE,
+        pointer_cache::pointer_cache,
         target::target,
         utility,
     },
-    gubtool_core::{address::Address, slice_ops::*, sys::sys_error::SysResult},
+    gubtool_core::{
+        address::{Address, ChainReadExt},
+        slice_ops::*,
+        sys::{read, read_pointer, sys_error::SysResult, write, write_address},
+    },
     std::sync::{
         LazyLock,
         Mutex,
@@ -74,9 +77,9 @@ impl GameState {
     fn on_loaded(&self) {
         self.dlc.store(is_dlc_available(), Ordering::Relaxed);
         STATE_FLAGS.on_loaded();
-        POINTER_CACHE.reset_pointers();
-        player::player().update();
-        player::torrent().update();
+        pointer_cache().clear_pointers();
+        PLAYER.update();
+        TORRENT.update();
         let _ = restore_target();
     }
 
@@ -85,9 +88,9 @@ impl GameState {
     }
 
     fn on_unloaded(&self) {
-        POINTER_CACHE.reset_pointers();
-        player::player().update();
-        player::torrent().update();
+        pointer_cache().clear_pointers();
+        PLAYER.update();
+        TORRENT.update();
         let _ = save_target();
     }
 
@@ -140,18 +143,18 @@ pub fn is_flag(flag_offset: StateFlag) -> bool {
 }
 
 pub fn set_flag(flag_offset: StateFlag, state: bool) -> SysResult {
-    write::<u8>(CaveAddr::StateHandlerFlags.add(flag_offset as u64), state as u8)
+    write::<u8>(CaveAddr::StateHandlerFlags.ptr() + flag_offset as u64, state as u8)
 }
 
 fn save_target() -> SysResult {
-    let handle = target().chr_ins()?.handle()?;
-    write::<u64>(CaveAddr::SavedHandle, handle)
+    let handle = target()?.handle()?;
+    write_address(CaveAddr::SavedHandle, handle)
 }
 
 fn restore_target() -> anyhow::Result<()> {
-    let handle = read::<u64>(CaveAddr::SavedHandle)?;
+    let handle = read_pointer(CaveAddr::SavedHandle)?;
     if let Some(chr_ins) = ChrIns::from_handle(handle) {
-        chr_ins.set_as_target(&mut target())?;
+        chr_ins.set_as_target()?;
     }
     Ok(())
 }
@@ -167,22 +170,22 @@ pub enum StateFlag {
 }
 
 fn is_loaded() -> bool {
-    read::<u64>(BasePointer::WorldChrMan)
-        .read_offset(world_chr_man::player_ins())
+    read_pointer(BasePointer::WorldChrMan)
+        .read_ptr(world_chr_man::player_ins())
         .map(|val| val != 0)
         .unwrap_or_default()
 }
 
 fn is_faded_in() -> bool {
-    read::<u64>(BasePointer::MenuMan)
+    read_pointer(BasePointer::MenuMan)
         .add_offset(menu_man::is_fading())
         .read::<u8>()
-        .map(|val| val == 0x0)
+        .map(|val| val == 0)
         .unwrap_or_default()
 }
 
 fn is_new_game() -> bool {
-    read::<u64>(BasePointer::GameDataMan)
+    read_pointer(BasePointer::GameDataMan)
         .add_offset(game_data_man::IGT)
         .read::<u64>()
         .map(|val| val < 5000)
@@ -190,7 +193,7 @@ fn is_new_game() -> bool {
 }
 
 fn is_dlc_available() -> bool {
-    read::<u64>(BasePointer::CsDlcImp)
+    read_pointer(BasePointer::CsDlcImp)
         .add_offset(cs_dlc_imp::BYTE_FLAGS)
         .add_offset(cs_dlc_imp::flags::DLC_CHECK)
         .read::<u8>()

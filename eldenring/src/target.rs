@@ -1,90 +1,27 @@
+pub use crate::obj_refs::target;
 use {
     crate::{
-        chr_ins::{ChrIns, ResolvedChrPtr},
-        mem::*,
-        offsets::{ChainReadExt, code_cave::CaveAddr, lock_tgt_man_imp, module_offsets::Hook},
+        offsets::{code_cave::CaveAddr, lock_tgt_man_imp, module_offsets::Hook},
         phase_transition,
         pointer_cache::ResolvedPtr,
         resources::ASM,
     },
     assemble::patch::DWORD,
     gubtool_core::{
-        address::{Address, POINTER},
+        address::{Address, ChainReadExt, POINTER},
         attached::version,
-        game_version::{EldenRingVersion, EldenRingVersion::*},
-        sys::sys_error::{PointerType, SysError, SysResult},
+        game_version::EldenRingVersion::{self, *},
+        sys::{install_hook, read, sys_error::SysResult, write, write_bytes},
     },
     shared::{
         act_array::ActArray,
-        command::{ToggleCommand, UnitCommand, ValueCommand},
+        command::ValueCommand,
         toggle_command,
         unit_command,
         value_command,
         value_command_set,
     },
-    std::sync::{LazyLock, Mutex, MutexGuard},
 };
-
-static TARGET: LazyLock<Mutex<Target>> = LazyLock::new(|| Mutex::new(Target::new()));
-
-pub fn target() -> MutexGuard<'static, Target> {
-    TARGET.lock().unwrap()
-}
-
-#[derive(Debug)]
-pub struct Target {
-    chr_ins: Option<ChrIns>,
-}
-
-impl Target {
-    fn new() -> Self {
-        let mut target = Self {
-            chr_ins: None,
-        };
-        target.update();
-        target
-    }
-
-    pub fn update(&mut self) {
-        match read::<u64>(CaveAddr::SavedTargetPointer) {
-            Ok(new_target) => {
-                let same_target = self
-                    .chr_ins
-                    .as_ref()
-                    .and_then(|chr| chr.resolved_pointers.get(&ResolvedChrPtr::ChrIns))
-                    .is_some_and(|ptr| *ptr == new_target);
-
-                if !same_target {
-                    if new_target != 0 {
-                        self.chr_ins = Some(ChrIns::new(new_target))
-                    } else {
-                        self.chr_ins = None;
-                    }
-                }
-            }
-            Err(_) => {
-                self.chr_ins = None;
-            }
-        }
-    }
-
-    pub fn chr_ins(&mut self) -> SysResult<&mut ChrIns> {
-        self.chr_ins
-            .as_mut()
-            .ok_or(SysError::null_pointer(PointerType::Target))
-    }
-
-    pub fn set(&mut self, chr_ins: ChrIns) {
-        self.chr_ins = Some(chr_ins)
-    }
-
-    pub fn pointers(&self) -> Vec<(String, u64)> {
-        self.chr_ins
-            .as_ref()
-            .map(|c| c.pointers())
-            .unwrap_or_default()
-    }
-}
 
 pub fn unlock() -> SysResult {
     ResolvedPtr::LockTgtMan
@@ -96,7 +33,7 @@ pub fn unlock() -> SysResult {
 const TARGET_HOOK_BYTES_ORIGINAL: [u8; 7] = [0x48, 0x8b, 0x8f, 0x88, 0x00, 0x00, 0x00];
 toggle_command!(SaveTargetHook {
     is: {
-        read::<[u8; 7]>(Hook::SaveTarget)
+        read::<[u8; 7]>(Hook::LockedTargetPointer)
             .map(|val| val != TARGET_HOOK_BYTES_ORIGINAL)
     }
 
@@ -104,10 +41,10 @@ toggle_command!(SaveTargetHook {
         if state {
             let mut fun = ASM.get_function("save_target_hook");
             fun.patch::<POINTER>("saved_pointer_loc", CaveAddr::SavedTargetPointer);
-            fun.patch_rel32("hook_loc", CaveAddr::SaveTargetHook, Hook::SaveTarget.add(7), 4);
-            install_hook(&fun.bytes, CaveAddr::SaveTargetHook, Hook::SaveTarget, 7)?;
+            fun.patch_rel32("hook_loc", CaveAddr::SaveTargetHook, Hook::LockedTargetPointer.add(7), 4);
+            install_hook(&fun.bytes, CaveAddr::SaveTargetHook, Hook::LockedTargetPointer, 7)?;
         } else {
-            write_bytes(Hook::SaveTarget, &TARGET_HOOK_BYTES_ORIGINAL)?;
+            write_bytes(Hook::LockedTargetPointer, &TARGET_HOOK_BYTES_ORIGINAL)?;
         }
         Ok(())
     }
@@ -115,27 +52,27 @@ toggle_command!(SaveTargetHook {
 
 value_command!(Health, i32 (cli_name = "target-health") {
     get: {
-        target().chr_ins()?.get_current_hp()
+        target()?.get_current_hp()
     }
 
     set(val): {
-        Ok(target().chr_ins()?.set_hp(val)?)
+        Ok(target()?.set_hp(val)?)
     }
 
 });
 
 value_command!(HealthPercentage, f32 (display = "Health %") (cli_name = "target-health-percentage") {
     get: {
-        target().chr_ins()?.get_hp_pct()
+        target()?.get_hp_pct()
     }
 
     set(val): {
-        target().chr_ins()?.set_hp_pct(val)
+        target()?.set_hp_pct(val)
     }
 });
 
 unit_command!(Kill (cli_name = "target-kill") {
-    Ok(target().chr_ins()?.set_hp(0)?)
+    Ok(target()?.set_hp(0)?)
 });
 
 unit_command!(NextPhase (cli_name = "target-next-phase") {
@@ -144,7 +81,7 @@ unit_command!(NextPhase (cli_name = "target-next-phase") {
 
 value_command_set!(RepeatAction, u8 (cli_name = "target-repeat-action") {
     set(val): {
-        Ok(target().chr_ins()?.repeat_act(val)?)
+        Ok(target()?.repeat_act(val)?)
     }
 });
 
@@ -158,7 +95,7 @@ value_command_set!(ForceActSequence, ActArray (cli_name = "target-force-act-sequ
         };
 
         let location = CaveAddr::ForceActSequenceHook;
-        let npc_think_param_id = target().chr_ins()?.npc_think_param_id()?;
+        let npc_think_param_id = target()?.npc_think_param_id()?;
 
         let mut fun = ASM.get_function("force_act_sequence_hook");
 
@@ -177,16 +114,16 @@ value_command_set!(ForceActSequence, ActArray (cli_name = "target-force-act-sequ
 });
 
 unit_command!(ResetPosition (cli_name = "target-reset-position") {
-    target().chr_ins()?.reset_position()
+    target()?.reset_position()
 });
 
 toggle_command!(NoDamage (cli_name = "target-no-damage") {
     is: {
-        target().chr_ins()?.is_no_damage()
+        target()?.is_no_damage()
     }
 
     set(state): {
-        Ok(target().chr_ins()?.set_no_damage(state)?)
+        Ok(target()?.set_no_damage(state)?)
     }
 });
 
@@ -194,7 +131,7 @@ const TARGET_STAGGER_HOOK_BYTES_ORIGINAL: [u8; 8] =
     [0x48, 0x8b, 0x41, 0x08, 0x83, 0x48, 0x2c, 0x08];
 toggle_command!(NoStagger (cli_name = "target-no-stagger") {
     is: {
-        read::<[u8; 8]>(Hook::TargetStagger)
+        read::<[u8; 8]>(Hook::TargetNoStagger)
             .map(|val| val != TARGET_STAGGER_HOOK_BYTES_ORIGINAL)
     }
 
@@ -202,10 +139,10 @@ toggle_command!(NoStagger (cli_name = "target-no-stagger") {
         if state {
             let mut fun = ASM.get_function("target_stagger_hook");
             fun.patch::<POINTER>("target_ptr_loc", CaveAddr::SavedTargetPointer);
-            fun.patch_rel32("hook_loc", CaveAddr::TargetStaggerHook, Hook::TargetStagger.add(8), 4);
-            install_hook(&fun.bytes, CaveAddr::TargetStaggerHook, Hook::TargetStagger, 8)?;
+            fun.patch_rel32("hook_loc", CaveAddr::TargetStaggerHook, Hook::TargetNoStagger.add(8), 4);
+            install_hook(&fun.bytes, CaveAddr::TargetStaggerHook, Hook::TargetNoStagger, 8)?;
         } else {
-            write_bytes(Hook::TargetStagger, &TARGET_STAGGER_HOOK_BYTES_ORIGINAL)?;
+            write_bytes(Hook::TargetNoStagger, &TARGET_STAGGER_HOOK_BYTES_ORIGINAL)?;
         }
         Ok(())
     }
@@ -213,20 +150,20 @@ toggle_command!(NoStagger (cli_name = "target-no-stagger") {
 
 toggle_command!(DisableAi (cli_name = "target-disable-ai") {
     is: {
-        target().chr_ins()?.is_disable_ai()
+        target()?.is_disable_ai()
     }
 
     set(state): {
-        Ok(target().chr_ins()?.set_disable_ai(state)?)
+        Ok(target()?.set_disable_ai(state)?)
     }
 });
 
 toggle_command!(RepeatLastAction (cli_name = "target-repeat-last-action") {
     is: {
-        target().chr_ins()?.is_repeat_act()
+        target()?.is_repeat_act()
     }
 
     set(state): {
-        Ok(target().chr_ins()?.set_repeat_last_act(state)?)
+        Ok(target()?.set_repeat_last_act(state)?)
     }
 });

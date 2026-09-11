@@ -80,7 +80,7 @@ const ACTIONS: [Command; 5] = [
     Command::Value(ValCmd::F32(&utility::FpsCap)),
     Command::Value(ValCmd::F32(&utility::GameSpeed)),
     Command::Unit(&utility::Quitout),
-    Command::Value(ValCmd::I32(&utility::ClearCount)),
+    Command::Value(ValCmd::U32(&utility::ClearCount)),
     Command::Unit(&utility::TriggerNewGame),
 ];
 

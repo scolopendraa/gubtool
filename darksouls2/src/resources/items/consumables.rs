@@ -3,14 +3,14 @@ use super::Item;
 impl Item {
     const fn default_consumable() -> Self {
         Self {
-            category: super::Categories::Consumables,
+            category: super::ItemCategory::Consumables,
             stack_size: 99,
             ..Item::default()
         }
     }
 }
 
-pub static CONSUMABLES: &[Item; 116] = &[
+pub static CONSUMABLES: [Item; 116] = [
     Item {
         id: 60010000,
         name: "Lifegem",

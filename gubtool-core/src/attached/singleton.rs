@@ -9,8 +9,8 @@ use {
 
 static mut ATTACHED_PROCESS: Option<GameProcess> = None;
 
-#[expect(static_mut_refs)]
 #[inline(always)]
+#[expect(static_mut_refs)]
 fn attached_process() -> &'static Option<GameProcess> {
     unsafe { &ATTACHED_PROCESS }
 }

@@ -39,8 +39,8 @@ macro_rules! toggle_command {
     ) => {
         $crate::declare_command!($struct_name $(=> $display_name)?);
 
-        impl ToggleCommand for $struct_name {
-            fn is(&self) -> SysResult<bool> $is
+        impl $crate::command::ToggleCommand for $struct_name {
+            fn is(&self) -> gubtool_core::sys::sys_error::SysResult<bool> $is
 
             fn set(&self, $state: bool) -> anyhow::Result<()> {
                 crate::mem::ensure_game()?;
@@ -73,7 +73,7 @@ macro_rules! unit_command {
     ) => {
         $crate::declare_command!($struct_name $(=> $display_name)?);
 
-        impl UnitCommand for $struct_name {
+        impl $crate::command::UnitCommand for $struct_name {
             fn execute(&self) -> anyhow::Result<()> {
                 crate::mem::ensure_game()?;
                 $execute
@@ -109,7 +109,7 @@ macro_rules! value_command {
     ) => {
         $crate::declare_command!($struct_name $(=> $display_name)?);
 
-        impl ValueCommand<$t> for $struct_name {
+        impl $crate::command::ValueCommand<$t> for $struct_name {
             fn get(&self) -> SysResult<$t> $get
             fn set(&self, $val: $t) -> anyhow::Result<()> {
                 crate::mem::ensure_game()?;

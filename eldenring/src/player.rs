@@ -1,15 +1,15 @@
-pub use crate::offsets::{chr_dbg_flags::ChrDbgOffset, game_data_man::PlayerGameDataOffset};
+pub use crate::{
+    obj_refs::{player, torrent},
+    offsets::{chr_dbg_flags::ChrDbgOffset, game_data_man::PlayerGameDataOffset},
+};
 use {
     crate::{
-        chr_ins::{ChrIns, ResolvedChrPtr},
         emevd,
         game_state::{self, StateFlag},
         is_player_loaded,
         mem::*,
         offsets::{
-            ChainReadExt,
             code_cave::CaveAddr,
-            game_data_man,
             game_man,
             module_offsets::{BasePointer, Data, Function, Hook, Patch},
             world_chr_man,
@@ -20,118 +20,23 @@ use {
     },
     assemble::patch::{BYTE, DWORD},
     gubtool_core::{
-        address::{Address, POINTER},
+        address::{Address, ChainReadExt, POINTER},
         attached::version,
         game_version::{EldenRingVersion, EldenRingVersion::*},
         slice_ops::write_to_slice,
-        sys::{
-            ipc::FfiValue,
-            sys_error::{PointerType, SysError, SysResult},
-        },
+        sys::{install_hook, ipc::FfiValue, read, sys_error::SysResult, write, write_bytes},
     },
-    shared::{
-        command::{StatCommand, ToggleCommand, UnitCommand, ValueCommand},
-        toggle_command,
-        unit_command,
-        value_command,
-    },
+    shared::{command::StatCommand, toggle_command, unit_command, value_command},
     std::sync::{LazyLock, Mutex, MutexGuard},
     strum::Display,
 };
 
-static PLAYER: LazyLock<Mutex<Player>> = LazyLock::new(|| Mutex::new(Player::new()));
-
-pub fn player() -> MutexGuard<'static, Player> {
-    PLAYER.lock().unwrap()
-}
-
-pub struct Player {
-    chr_ins: Option<ChrIns>,
-}
-
-impl Player {
-    fn new() -> Self {
-        let mut player = Self {
-            chr_ins: None,
-        };
-        player.update();
-        player
-    }
-    pub fn update(&mut self) {
-        let ptr = ResolvedPtr::WorldChrMan
-            .get()
-            .read_offset(world_chr_man::player_ins());
-        match ptr {
-            Ok(pointer) => {
-                if pointer != 0x0 {
-                    self.chr_ins = Some(ChrIns::new(pointer));
-                } else {
-                    self.chr_ins = None;
-                }
-            }
-            Err(_) => {
-                self.chr_ins = None;
-            }
-        }
-    }
-    pub fn chr_ins(&mut self) -> SysResult<&mut ChrIns> {
-        self.chr_ins
-            .as_mut()
-            .ok_or(SysError::null_pointer(PointerType::Player))
-    }
-    pub fn pointers(&self) -> Vec<(String, u64)> {
-        self.chr_ins
-            .as_ref()
-            .map(|c| c.pointers())
-            .unwrap_or_default()
-    }
-}
-
-static TORRENT: LazyLock<Mutex<Torrent>> = LazyLock::new(|| Mutex::new(Torrent::new()));
-
-pub fn torrent() -> MutexGuard<'static, Torrent> {
-    TORRENT.lock().unwrap()
-}
-
-pub struct Torrent {
-    chr_ins: Option<ChrIns>,
-}
-
-impl Torrent {
-    fn new() -> Self {
-        let mut torrent = Self {
-            chr_ins: None,
-        };
-        torrent.update();
-        torrent
-    }
-    pub fn update(&mut self) {
-        let handle = ResolvedPtr::PlayerGameData
-            .get()
-            .read_offset(game_data_man::torrent_handle())
-            .unwrap_or_default();
-
-        self.chr_ins = ChrIns::from_handle(handle);
-    }
-    pub fn chr_ins(&mut self) -> SysResult<&mut ChrIns> {
-        self.chr_ins
-            .as_mut()
-            .ok_or(SysError::null_pointer(PointerType::Torrent))
-    }
-    pub fn pointers(&self) -> Vec<(String, u64)> {
-        self.chr_ins
-            .as_ref()
-            .map(|c| c.pointers())
-            .unwrap_or_default()
-    }
-}
-
 fn is_chr_dbg_flag(offset: ChrDbgOffset) -> SysResult<bool> {
-    read::<u8>(Data::ChrDbgFlags.add(offset as u64)).map(|val| val == 1)
+    read::<u8>(Data::ChrDbgFlags.ptr() + offset as u64).map(|val| val == 1)
 }
 
 fn set_chr_dbg_flag(offset: ChrDbgOffset, state: bool) -> anyhow::Result<()> {
-    Ok(write::<u8>(Data::ChrDbgFlags.add(offset as u64), state as u8)?)
+    Ok(write::<u8>(Data::ChrDbgFlags.ptr() + offset as u64, state as u8)?)
 }
 
 macro_rules! impl_chr_dbg {
@@ -171,30 +76,30 @@ toggle_command!(NoDamage {
 });
 
 pub fn set_no_damage(state: bool) -> SysResult {
-    player().chr_ins()?.set_no_damage(state)
+    player()?.set_no_damage(state)
 }
 
 value_command!(Health, i32 {
     get: {
-        player().chr_ins()?.get_current_hp()
+        player()?.get_current_hp()
     }
 
     set(val): {
-        Ok(player().chr_ins()?.set_hp(val)?)
+        Ok(player()?.set_hp(val)?)
     }
 });
 
 unit_command!(Die {
-    Ok(player().chr_ins()?.set_hp(0)?)
+    Ok(player()?.set_hp(0)?)
 });
 
 value_command!(AnimationSpeed, f32 {
     get: {
-        player().chr_ins()?.get_animation_speed()
+        player()?.get_animation_speed()
     }
 
     set(val): {
-        Ok(player().chr_ins()?.set_animation_speed(val)?)
+        Ok(player()?.set_animation_speed(val)?)
     }
 });
 
@@ -217,7 +122,7 @@ toggle_command!(RuneArc {
 pub fn set_rune_arc(state: bool) -> SysResult {
     ResolvedPtr::PlayerGameData
         .get()
-        .add_offset(PlayerGameDataOffset::RuneArc as u64)
+        .add_offset(PlayerGameDataOffset::RuneArc as i32)
         .write::<u8>(state as u8)
 }
 
@@ -232,8 +137,8 @@ toggle_command!(SetRfbsOnLoad {
 });
 
 pub fn set_rfbs_hp() -> SysResult {
-    let max_hp = player().chr_ins()?.get_max_hp()?;
-    player().chr_ins()?.set_hp((max_hp * 20) / 100 - 1)
+    let max_hp = player()?.get_max_hp()?;
+    player()?.set_hp((max_hp * 20) / 100 - 1)
 }
 
 value_command!(Runes, u32 (cli_name = "souls") {
@@ -352,7 +257,7 @@ toggle_command!(TorrentNoDeath {
 });
 
 pub fn set_torrent_no_death(state: bool) -> SysResult {
-    torrent().chr_ins()?.set_no_death(state)
+    torrent()?.set_no_death(state)
 }
 
 toggle_command!(InfinitePoise {
@@ -415,19 +320,11 @@ fn set_no_grab_hook(state: bool) -> SysResult {
 }
 
 pub fn map_coords() -> SysResult<[f32; 3]> {
-    player()
-        .chr_ins()?
-        .get_ptr(ResolvedChrPtr::ChrIns)
-        .add_offset(world_chr_man::player_ins_offsets::current_map_coords())
-        .read::<[f32; 3]>()
+    read::<[f32; 3]>(player()?.base + world_chr_man::player_ins_offsets::current_map_coords())
 }
 
 pub fn map_angle() -> SysResult<f32> {
-    player()
-        .chr_ins()?
-        .get_ptr(ResolvedChrPtr::ChrIns)
-        .add_offset(world_chr_man::player_ins_offsets::current_map_angle())
-        .read::<f32>()
+    read::<f32>(player()?.base + world_chr_man::player_ins_offsets::current_map_angle())
 }
 
 #[repr(C)]
@@ -531,7 +428,7 @@ impl PlayerGameData {
     }
 }
 
-#[repr(u64)]
+#[repr(i32)]
 #[derive(Debug, Clone, Copy, Display)]
 #[strum(serialize_all = "title_case")]
 pub enum Stat {
@@ -578,7 +475,7 @@ fn set_stat(stat: Stat, val: i32) -> anyhow::Result<()> {
 
             ResolvedPtr::PlayerGameData
                 .get()
-                .add_offset(stat as u64)
+                .add_offset(stat as i32)
                 .write::<u8>((val as u8).clamp(0, 20))?;
         }
         _ => {

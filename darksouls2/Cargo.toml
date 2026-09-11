@@ -18,6 +18,7 @@ linkme = { workspace = true }
 
 gubtool-core = { version = "0.1.0", path = "../gubtool-core" }
 shared = { version = "0.1.0", path = "../shared" }
+macros = { version = "0.1.0", path = "../shared/macros" }
 assemble = { version = "0.1.0", path = "../assemble" }
 config = { version = "0.1.0", path = "../config" }
 

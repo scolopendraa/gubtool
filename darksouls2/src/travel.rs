@@ -1,5 +1,7 @@
 use {
     crate::{
+        event,
+        game_state,
         mem::*,
         offsets::{code_cave::CaveAddr, module_offsets::Function},
         pointer_cache::ResolvedPtr,
@@ -8,8 +10,12 @@ use {
     },
     gubtool_core::{
         address::Address,
-        sys::ipc::{FfiValue, X86CallingConvention},
+        sys::{
+            ipc::{FfiValue, X86CallingConvention},
+            write,
+        },
     },
+    shared::command::ToggleCommand,
 };
 
 const DEFAULT_TRANSITION_MODE: u32 = 6;
@@ -67,7 +73,7 @@ impl Default for WarpRequest {
 }
 
 impl Boss {
-    pub fn warp(&self) -> anyhow::Result<()> {
+    pub async fn warp(&self) -> anyhow::Result<()> {
         player_loaded_check()?;
 
         let request = WarpRequest {
@@ -80,6 +86,12 @@ impl Boss {
             ..Default::default()
         };
         warp(request)?;
+
+        if self.name == "Flexile Sentry" {
+            game_state::wait_for_reload().await;
+            event::FlexileShipDocked.set(true)?;
+        }
+
         Ok(())
     }
 }
@@ -96,8 +108,7 @@ impl Bonfire {
             },
             ..Default::default()
         };
-        warp(request)?;
-        Ok(())
+        warp(request)
     }
 }
 
@@ -106,7 +117,7 @@ fn warp(request: WarpRequest) -> anyhow::Result<()> {
 
     let args = [
         FfiValue::pointer(ResolvedPtr::WarpManager.get()?),
-        FfiValue::pointer(CaveAddr::WarpRequestStruct.addr()),
+        FfiValue::pointer(CaveAddr::WarpRequestStruct.ptr()),
     ];
 
     run_game_function(Function::Warp, &args, X86CallingConvention::__thiscall)

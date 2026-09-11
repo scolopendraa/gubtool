@@ -2,7 +2,7 @@ use {
     crate::{
         event,
         mem::*,
-        offsets::{ChainReadExt, code_cave::CaveAddr, module_offsets::Function},
+        offsets::{code_cave::CaveAddr, module_offsets::Function},
         player,
         pointer_cache::ResolvedPtr,
         resources::{
@@ -16,13 +16,23 @@ use {
     anyhow::ensure,
     assemble::patch::DWORD,
     gubtool_core::{
-        address::{Address, POINTER},
+        address::{Address, ChainReadExt, POINTER},
         slice_ops::*,
-        sys::{ipc::FfiValue, sys_error::SysResult},
+        sys::{
+            install_hook,
+            ipc::FfiValue,
+            is_bit_set,
+            read,
+            set_bit,
+            sys_error::SysResult,
+            write,
+            write_bytes,
+        },
     },
     shared::{
-        command::{ToggleCommand, UnitCommand},
-        event_log::{EventLog, EventLogger},
+        command::ToggleCommand,
+        event_log::EventLog,
+        impl_event_logger,
         toggle_command,
         unit_command,
     },
@@ -163,7 +173,7 @@ impl TalkCommand {
             dlc_check()?;
         }
         let handle = match self.handle {
-            Some(function) => function()?,
+            Some(function) => function()?.address,
             None => 0,
         };
         if self.command_id == 24 {
@@ -176,35 +186,7 @@ impl TalkCommand {
     }
 }
 
-#[derive(Default)]
-pub struct ErEventLogger {
-    event_log: EventLog,
-}
-
-impl EventLogger for ErEventLogger {
-    fn event_log(&self) -> &EventLog {
-        &self.event_log
-    }
-    fn event_log_mut(&mut self) -> &mut EventLog {
-        &mut self.event_log
-    }
-    fn file_prefix(&self) -> &'static str {
-        "eldenring"
-    }
-    fn write_idx(&self) -> SysResult<i32> {
-        read::<i32>(CaveAddr::EventLogWriteIdx.addr())
-    }
-    fn read_buffer(&self) -> SysResult<[u8; 0x1000]> {
-        read::<[u8; 0x1000]>(CaveAddr::EventLogBuffer.addr())
-    }
-    fn clear_cave(&self) -> SysResult {
-        write::<i32>(CaveAddr::EventLogWriteIdx.addr(), 0x0)?;
-        write_bytes(CaveAddr::EventLogBuffer.addr(), &[0x0; 0x1000])
-    }
-    fn toggle_hook(&self) -> anyhow::Result<()> {
-        StartEventLogger.toggle()
-    }
-}
+impl_event_logger!(ErEventLogger, "eldenring");
 
 const EVENT_LOG_HOOK_ORIGINAL: [u8; 5] = [0x48, 0x89, 0x5c, 0x24, 0x08];
 toggle_command!(StartEventLogger {
@@ -350,7 +332,7 @@ unit_command!(UnlockAllGraces {
 fn general_area_check(area_id: u32) -> anyhow::Result<()> {
     player_loaded_check()?;
     ensure!(
-        matches!(player::player().chr_ins()?.block_id(), Ok(id) if id == area_id),
+        matches!(player::player()?.block_id(), Ok(id) if id == area_id),
         "Must be in general area"
     );
     Ok(())

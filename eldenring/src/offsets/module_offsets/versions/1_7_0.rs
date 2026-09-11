@@ -54,4 +54,5 @@ pub const OFFSETS_1_7_0: ModuleOffsets = ModuleOffsets {
     kernel32_close_handle:          0x48c55e4,
     kernel32_load_library_w:        0x48c5774,
     lua_event_system:               0x3c4d8d8,
+    bad_quit_message:               0x7fe706,
 };

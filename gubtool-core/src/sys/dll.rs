@@ -34,8 +34,7 @@ impl Dll {
             std::fs::create_dir_all(parent)?;
         }
 
-        std::fs::write(path, self.data)?;
-        Ok(())
+        Ok(std::fs::write(path, self.data)?)
     }
 
     pub fn get_win_path_bytes(&self) -> Result<Vec<u8>, AppDataError> {
@@ -47,14 +46,13 @@ impl Dll {
         #[cfg(unix)]
         let string = format!("Z:{}", self.std_path()?.to_string_lossy().replace('/', r"\"));
 
-        let bytes = string
+        let mut bytes: Vec<u8> = string
             .encode_utf16()
             .chain(std::iter::once(0))
             .flat_map(|unit| unit.to_le_bytes())
             .collect();
 
+        bytes.extend([0, 0]);
         Ok(bytes)
     }
-
-    pub fn inject_by_request(&self) {}
 }

@@ -1,11 +1,11 @@
 use crate::{
-    address::Address,
-    sys::ipc::{WorkerThreadRequest, ipc_error::IpcError, send_request},
+    address::{Address, Pointer},
+    sys::ipc::{WorkerThreadRequest, send_request},
 };
 
 #[allow(non_camel_case_types)]
 pub enum FfiValue {
-    pointer(u64),
+    pointer(Pointer),
     uint8(u8),
     uint16(u16),
     uint32(u32),
@@ -31,10 +31,12 @@ pub fn request_parameterized_function(
     function_address: impl Address,
     args: &[FfiValue],
     calling_convention: Option<X86CallingConvention>,
-) -> Result<(), IpcError> {
+) -> anyhow::Result<()> {
+    function_address.validate_game()?;
+
     let mut payload = vec![args.len() as u8];
 
-    payload.extend_from_slice(&function_address.addr().to_le_bytes());
+    payload.extend_from_slice(&function_address.u64_address().to_le_bytes());
 
     for arg in args {
         payload.extend_from_slice(&arg.protocol_code().to_le_bytes());
@@ -45,23 +47,30 @@ pub fn request_parameterized_function(
         payload.extend_from_slice(&[calling_convention.protocol_code()]);
     }
 
-    send_request(port, WorkerThreadRequest::ParameterizedFunction, Some(&payload))
+    send_request(port, WorkerThreadRequest::ParameterizedFunction, Some(&payload))?;
+    Ok(())
 }
 
-pub fn request_nullary_function(port: u16, function_address: impl Address) -> Result<(), IpcError> {
+pub fn request_nullary_function(port: u16, function_address: impl Address) -> anyhow::Result<()> {
+    function_address.validate_game()?;
+
     send_request(
         port,
         WorkerThreadRequest::NullaryFunction,
-        Some(&function_address.addr().to_le_bytes()),
-    )
+        Some(&function_address.u64_address().to_le_bytes()),
+    )?;
+    Ok(())
 }
 
-pub fn request_thread_function(port: u16, function_address: impl Address) -> Result<(), IpcError> {
+pub fn request_thread_function(port: u16, function_address: impl Address) -> anyhow::Result<()> {
+    function_address.validate_game()?;
+
     send_request(
         port,
         WorkerThreadRequest::ThreadFunction,
-        Some(&function_address.addr().to_le_bytes()),
-    )
+        Some(&function_address.u64_address().to_le_bytes()),
+    )?;
+    Ok(())
 }
 
 fn zero_extend<const N: usize>(value: [u8; N]) -> [u8; 8] {
@@ -73,7 +82,7 @@ fn zero_extend<const N: usize>(value: [u8; N]) -> [u8; 8] {
 impl FfiValue {
     fn to_zero_extended_bytes(&self) -> [u8; 8] {
         match self {
-            Self::pointer(val) => zero_extend(val.to_le_bytes()),
+            Self::pointer(val) => zero_extend(val.address.to_le_bytes()),
             Self::uint8(val) => zero_extend(val.to_le_bytes()),
             Self::uint16(val) => zero_extend(val.to_le_bytes()),
             Self::uint32(val) => zero_extend(val.to_le_bytes()),

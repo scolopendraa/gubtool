@@ -2,19 +2,21 @@ use {
     crate::{
         mem::*,
         offsets::{
-            ChainReadExt,
             game_manager_imp::event_manager_offsets::{self, bonfire_manager_offsets},
-            module_offsets::Function,
+            module_offsets::{BasePointer, Function},
         },
         pointer_cache::ResolvedPtr,
         resources::{asm_function, bonfires::Bonfire},
     },
     gubtool_core::{
-        address::POINTER,
+        address::{ChainReadExt, POINTER, Pointer},
         attached::is_32,
         sys::{
             ipc::{FfiValue, X86CallingConvention},
+            read,
+            read_pointer,
             sys_error::SysResult,
+            write,
         },
     },
 };
@@ -44,7 +46,7 @@ pub fn get_last_bonfire_id() -> SysResult<u32> {
 pub fn light_all_bonfires() -> anyhow::Result<()> {
     let mut fun = asm_function("bonfire_unlock_all");
 
-    fun.patch::<POINTER>("bonfire_manager", ResolvedPtr::BonfireManager.get()?);
+    fun.patch::<POINTER>("game_manager_imp", BasePointer::GameManagerImp);
     fun.patch::<POINTER>("fn_bonfire_unlock", Function::BonfireUnlock);
 
     run_custom_function(fun)
@@ -69,11 +71,11 @@ fn is_bonfire_lit(bonfire_id: u32) -> SysResult<bool> {
     read::<u8>(addr + 0x2).map(|val| val != 0)
 }
 
-fn bonfire_handle_from_id(bonfire_id: u32) -> SysResult<Option<u64>> {
+fn bonfire_handle_from_id(bonfire_id: u32) -> SysResult<Option<Pointer>> {
     let bonfire_manager = ResolvedPtr::BonfireManager.get()?;
     let size = if is_32() { 0x10 } else { 0x18 };
 
-    let array_ptr = read_address(bonfire_manager + bonfire_manager_offsets::ARRAY_BASE.resolve())?;
+    let array_ptr = read_pointer(bonfire_manager + bonfire_manager_offsets::ARRAY_BASE.resolve())?;
     let mut high = read::<i32>(bonfire_manager + bonfire_manager_offsets::COUNT.resolve())? - 1;
     let mut low = 0;
 

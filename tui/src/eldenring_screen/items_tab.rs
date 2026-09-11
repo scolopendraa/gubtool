@@ -11,7 +11,7 @@ use {
     },
     eldenring::{
         item::{self, ItemSpawnRequest},
-        resources::items::{Categories, ITEMS},
+        resources::items::{ITEMS, ItemCategory},
     },
     nucleo_matcher::Utf32String,
     ratatui::{
@@ -202,7 +202,7 @@ impl SearchRequest for AffinitySearch {
 struct MassSpawnList;
 impl TableController for MassSpawnList {
     fn make_table_view(&self) -> TableView {
-        let rows = Categories::ARRAY
+        let rows = ItemCategory::ARRAY
             .iter()
             .map(|item| Row::new([item.to_string()]))
             .collect();
@@ -215,7 +215,7 @@ impl TableController for MassSpawnList {
             let upgrade = item.upgrade;
 
             thread::spawn(move || {
-                item::mass_spawn(Categories::ARRAY[selected], quantity, upgrade).send_error();
+                item::mass_spawn(ItemCategory::ARRAY[selected], quantity, upgrade).send_error();
             });
         }
     }

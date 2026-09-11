@@ -55,36 +55,31 @@ pub fn dbg_lines() -> Vec<String> {
         format!(
             "target chr id: {}",
             target::target()
-                .chr_ins()
-                .and_then(|chr| chr.chr_id())
+                .and_then(|mut chr| chr.chr_id())
                 .unwrap_or_default()
         ),
         format!(
             "target entity id: {}",
             target::target()
-                .chr_ins()
-                .and_then(|chr| chr.entity_id())
+                .and_then(|mut chr| chr.entity_id())
                 .unwrap_or_default()
         ),
         format!(
             "player block: {}",
             player::player()
-                .chr_ins()
-                .and_then(|chr| chr.block_id())
+                .and_then(|mut chr| chr.block_id())
                 .unwrap_or_default()
         ),
         format!(
             "target block: {}",
             target::target()
-                .chr_ins()
-                .and_then(|chr| chr.block_id())
+                .and_then(|mut chr| chr.block_id())
                 .unwrap_or_default()
         ),
         format!(
             "target cool times: {:?}",
             target::target()
-                .chr_ins()
-                .and_then(|chr| chr.get_cool_times())
+                .and_then(|mut chr| chr.get_cool_times())
                 .unwrap_or_default()
         ),
     ]

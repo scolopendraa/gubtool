@@ -3,7 +3,7 @@ use super::Item;
 impl Item {
     const fn default_arrow() -> Self {
         Self {
-            category: super::Categories::Arrows,
+            category: super::ItemCategory::Arrows,
             stack_size: 99,
             max_storage: 600,
             ..Item::default()

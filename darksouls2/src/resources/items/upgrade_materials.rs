@@ -3,14 +3,14 @@ use super::Item;
 impl Item {
     const fn default_upgrade_material() -> Self {
         Self {
-            category: super::Categories::UpgradeMaterials,
+            category: super::ItemCategory::UpgradeMaterials,
             stack_size: 99,
             ..Item::default()
         }
     }
 }
 
-pub static UPGRADE_MATERIALS: &[Item; 16] = &[
+pub static UPGRADE_MATERIALS: [Item; 16] = [
     Item {
         id: 60970000,
         name: "Titanite Shard",

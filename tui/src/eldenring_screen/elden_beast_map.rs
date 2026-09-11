@@ -25,8 +25,7 @@ pub(super) struct EldenBeastMap {
 impl EldenBeastMap {
     fn draw(&mut self, frame: &mut Frame) {
         let map = player::player()
-            .chr_ins()
-            .and_then(|chr| chr.block_id())
+            .and_then(|mut chr| chr.block_id())
             .unwrap_or_default();
 
         let correct_map = map == ELDEN_BEAST_MAP_ID;

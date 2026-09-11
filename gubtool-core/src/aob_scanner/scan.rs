@@ -143,7 +143,7 @@ impl AobScanner {
                 Ok(buf)
             }
             ScanLocation::Memory => {
-                let bytes = crate::sys::read_unsafe::<[u8; N]>(offset)?;
+                let bytes = crate::sys::read::<[u8; N]>(offset)?;
                 Ok(bytes)
             }
         }

@@ -169,3 +169,38 @@ impl From<std::io::Error> for ExportError {
         }
     }
 }
+
+#[macro_export]
+macro_rules! impl_event_logger {
+    ($struct:ident, $file_prefix:literal) => {
+        #[derive(Default)]
+        pub struct $struct {
+            event_log: $crate::event_log::EventLog,
+        }
+
+        impl $crate::event_log::EventLogger for $struct {
+            fn event_log(&self) -> &EventLog {
+                &self.event_log
+            }
+            fn event_log_mut(&mut self) -> &mut EventLog {
+                &mut self.event_log
+            }
+            fn file_prefix(&self) -> &'static str {
+                $file_prefix
+            }
+            fn write_idx(&self) -> SysResult<i32> {
+                read::<i32>(crate::offsets::code_cave::CaveAddr::EventLogWriteIdx)
+            }
+            fn read_buffer(&self) -> SysResult<[u8; 0x1000]> {
+                read::<[u8; 0x1000]>(CaveAddr::EventLogBuffer)
+            }
+            fn clear_cave(&self) -> SysResult {
+                write::<i32>(crate::offsets::code_cave::CaveAddr::EventLogWriteIdx, 0x0)?;
+                write_bytes(crate::offsets::code_cave::CaveAddr::EventLogBuffer, &[0x0; 0x1000])
+            }
+            fn toggle_hook(&self) -> anyhow::Result<()> {
+                StartEventLogger.toggle()
+            }
+        }
+    };
+}

@@ -8,8 +8,7 @@ use {
         pointer_cache::ResolvedPtr,
         resources::map_ids::MapId,
     },
-    gubtool_core::sys::sys_error::SysResult,
-    shared::{command::ToggleCommand, toggle_command},
+    shared::toggle_command,
 };
 
 const MYTHA_POISON_WATER_ON: EsdEventScript = EsdEventScript {
@@ -96,6 +95,15 @@ const CLOSE_BELFRY_GATE: EsdEventScript = EsdEventScript {
         DisableWhiteDoorKeyGuide(10160620, 1),
     ],
 };
+
+const CLOSE_ELANA_DOOR: EsdEventScript = EsdEventScript {
+    map_id:    MapId::ShulvaSanctumCity,
+    functions: &[InitializeObj(50351500), AddNavimeshAttribute(3002000, 2)],
+};
+
+pub fn close_elana_door() -> anyhow::Result<()> {
+    CLOSE_ELANA_DOOR.execute()
+}
 
 toggle_command!(FlexileShipDocked {
     is: {

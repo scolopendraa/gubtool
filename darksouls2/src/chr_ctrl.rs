@@ -1,48 +1,37 @@
 use {
     crate::{
         enemy::{self, act_logger},
-        mem::{read, write},
         offsets::{
             self,
-            ChainReadExt,
             chr_ctrl::{boss_operator_offsets, chr_ai_manipulator_offsets},
             code_cave::CaveAddr,
         },
         speffect::{SpEffect, apply_speffect},
     },
     anyhow::ensure,
-    gubtool_core::{address::Address, sys::sys_error::SysResult},
-    std::collections::HashMap,
+    gubtool_core::{
+        address::{ChainReadExt, Pointer},
+        sys::{read, read_pointer, sys_error::SysResult, write, write_address},
+    },
+    macros::GameObject,
+    shared::pointer_cache::{PointerCache, PointerKey},
+    strum::EnumIter,
 };
 
-#[derive(Debug)]
+#[derive(GameObject)]
 pub struct ChrCtrl {
-    pub resolved_pointers: HashMap<ResolvedChrPtr, u64>,
-}
-
-#[derive(Debug, Hash, Eq, PartialEq, Clone, Copy)]
-pub enum ResolvedChrPtr {
-    ChrCtrl,
-    Stats,
-    Params,
-    BossOperator,
-    ChrAiManipulator,
-    ChrAi,
-    SpEffectCtrl,
+    pub base:     Pointer,
+    pub pointers: PointerCache<ResolvedChrPtr>,
 }
 
 impl ChrCtrl {
     pub fn get_hp(&mut self) -> SysResult<i32> {
-        self.get_ptr(ResolvedChrPtr::ChrCtrl)
-            .add_offset(offsets::chr_ctrl::HEALTH)
-            .read::<i32>()
+        read::<i32>(self.base + offsets::chr_ctrl::HEALTH)
     }
 
     pub fn set_hp(&mut self, val: i32) -> SysResult {
         let max = self.max_hp()?;
-        self.get_ptr(ResolvedChrPtr::ChrCtrl)
-            .add_offset(offsets::chr_ctrl::HEALTH)
-            .write::<i32>(val.min(max))
+        write::<i32>(self.base + offsets::chr_ctrl::HEALTH, val.min(max))
     }
 
     pub fn get_hp_pct(&mut self) -> SysResult<f32> {
@@ -62,21 +51,15 @@ impl ChrCtrl {
     }
 
     pub fn get_min_hp(&mut self) -> SysResult<i32> {
-        self.get_ptr(ResolvedChrPtr::ChrCtrl)
-            .add_offset(offsets::chr_ctrl::MIN_HEALTH)
-            .read::<i32>()
+        read::<i32>(self.base + offsets::chr_ctrl::MIN_HEALTH)
     }
 
     pub fn set_min_hp(&mut self, val: i32) -> SysResult {
-        self.get_ptr(ResolvedChrPtr::ChrCtrl)
-            .add_offset(offsets::chr_ctrl::MIN_HEALTH)
-            .write::<i32>(val)
+        write::<i32>(self.base + offsets::chr_ctrl::MIN_HEALTH, val)
     }
 
     pub fn max_hp(&mut self) -> SysResult<i32> {
-        self.get_ptr(ResolvedChrPtr::ChrCtrl)
-            .add_offset(offsets::chr_ctrl::MAX_HEALTH)
-            .read::<i32>()
+        read::<i32>(self.base + offsets::chr_ctrl::MAX_HEALTH)
     }
 
     pub fn is_no_death(&mut self) -> bool {
@@ -89,9 +72,7 @@ impl ChrCtrl {
     }
 
     pub fn coords(&mut self) -> SysResult<[f32; 3]> {
-        self.get_ptr(ResolvedChrPtr::ChrCtrl)
-            .add_offset(offsets::chr_ctrl::COORDS)
-            .read::<[f32; 3]>()
+        read::<[f32; 3]>(self.base + offsets::chr_ctrl::COORDS)
     }
 
     pub fn get_distance(&mut self, other: &mut ChrCtrl) -> SysResult<f32> {
@@ -110,34 +91,24 @@ impl ChrCtrl {
     }
 
     pub fn poise(&mut self) -> SysResult<f32> {
-        self.get_ptr(ResolvedChrPtr::ChrCtrl)
-            .add_offset(offsets::chr_ctrl::POISE)
-            .read::<f32>()
+        read::<f32>(self.base + offsets::chr_ctrl::POISE)
     }
 
     pub fn max_poise(&mut self) -> SysResult<f32> {
-        self.get_ptr(ResolvedChrPtr::ChrCtrl)
-            .add_offset(offsets::chr_ctrl::MAX_POISE)
-            .read::<f32>()
+        read::<f32>(self.base + offsets::chr_ctrl::MAX_POISE)
     }
 
     pub fn posture(&mut self) -> SysResult<f32> {
-        self.get_ptr(ResolvedChrPtr::ChrCtrl)
-            .add_offset(offsets::chr_ctrl::POSTURE)
-            .read::<f32>()
+        read::<f32>(self.base + offsets::chr_ctrl::POSTURE)
     }
 
     pub fn max_posture(&mut self) -> SysResult<f32> {
-        self.get_ptr(ResolvedChrPtr::ChrCtrl)
-            .add_offset(offsets::chr_ctrl::MAX_POSTURE)
-            .read::<f32>()
+        read::<f32>(self.base + offsets::chr_ctrl::MAX_POSTURE)
     }
 
     pub fn rot_quaternion(&mut self) -> SysResult<[f32; 4]> {
-        let [m00, m01, m02, _, m10, m11, m12, _, m20, m21, m22, _] = self
-            .get_ptr(ResolvedChrPtr::ChrCtrl)
-            .add_offset(offsets::chr_ctrl::ROTATION)
-            .read::<[f32; 12]>()?;
+        let [m00, m01, m02, _, m10, m11, m12, _, m20, m21, m22, _] =
+            read::<[f32; 12]>(self.base + offsets::chr_ctrl::ROTATION)?;
 
         let matrix = glam::Mat3::from_cols(
             glam::Vec3::new(m00, m01, m02),
@@ -157,12 +128,12 @@ impl ChrCtrl {
 
     pub fn last_act(&mut self) -> Option<i32> {
         let chr_ai = self.get_ptr(ResolvedChrPtr::ChrAi).ok()?;
-        act_logger().get(chr_ai)
+        act_logger().get(chr_ai.address)
     }
 
     pub fn repeat_action(&mut self, act_id: i32) -> SysResult {
         let chr_ai = self.get_ptr(ResolvedChrPtr::ChrAi)?;
-        write::<u64>(CaveAddr::ForceActChrAi, chr_ai)?;
+        write_address(CaveAddr::ForceActChrAi, chr_ai)?;
         write::<i32>(CaveAddr::ForceActId, act_id)?;
         write::<u8>(CaveAddr::ForceActFlag, 0x1)
     }
@@ -201,22 +172,18 @@ impl ChrCtrl {
 }
 
 impl ChrCtrl {
-    pub fn new(pointer: impl Address) -> Self {
-        let resolved_pointers = HashMap::new();
-        let mut s = Self {
-            resolved_pointers,
-        };
-        s.resolved_pointers
-            .insert(ResolvedChrPtr::ChrCtrl, pointer.addr());
-        s
+    pub fn new(pointer: Pointer) -> Self {
+        ChrCtrl {
+            base:     pointer,
+            pointers: PointerCache::new_with_base(pointer),
+        }
     }
 
     pub fn is_valid_chr(&mut self) -> SysResult<bool> {
-        if let Ok(ptr) = self.get_ptr(ResolvedChrPtr::ChrCtrl)
-            && ptr == 0x0
-        {
+        if self.base == 0 {
             return Ok(false);
         }
+
         let health = self.get_hp()?;
         let max_health = self.max_hp()?;
         Ok(health >= 0
@@ -226,51 +193,48 @@ impl ChrCtrl {
             && (health as f32) < (max_health as f32) * 1.5)
     }
 
-    pub fn pointers(&self) -> Vec<(String, u64)> {
-        self.resolved_pointers
-            .iter()
-            .map(|(name, addr)| (format!("{:?}", name), *addr))
-            .collect()
+    pub fn get_ptr(&mut self, pointer: ResolvedChrPtr) -> SysResult<Pointer> {
+        self.pointers.lookup(pointer)
     }
+}
 
-    pub fn get_ptr(&mut self, pointer: ResolvedChrPtr) -> SysResult<u64> {
-        if let Some(&val) = self.resolved_pointers.get(&pointer) {
-            return Ok(val);
-        }
+#[derive(Debug, Hash, Eq, PartialEq, Clone, Copy, EnumIter)]
+pub enum ResolvedChrPtr {
+    Stats,
+    Params,
+    BossOperator,
+    ChrAiManipulator,
+    ChrAi,
+    SpEffectCtrl,
+}
 
-        let resolved_pointer = match pointer {
-            ResolvedChrPtr::ChrCtrl => {
-                unreachable!("ChrCtrl struct without base pointer")
-            }
-            ResolvedChrPtr::Stats => {
-                self.get_ptr(ResolvedChrPtr::ChrCtrl)
-                    .read_offset(offsets::chr_ctrl::STATS_PTR)
-            }
-            ResolvedChrPtr::Params => {
-                self.get_ptr(ResolvedChrPtr::ChrCtrl)
-                    .read_offset(offsets::chr_ctrl::PARAMS_PTR)
-            }
+impl PointerKey for ResolvedChrPtr {
+    fn lookup(
+        cache: &mut PointerCache<Self>,
+        key: Self,
+        base: Option<Pointer>,
+    ) -> SysResult<Pointer>
+    where
+        Self: Sized,
+    {
+        let base = base.unwrap();
+        match key {
+            ResolvedChrPtr::Stats => read_pointer(base + offsets::chr_ctrl::STATS_PTR),
+            ResolvedChrPtr::Params => read_pointer(base + offsets::chr_ctrl::PARAMS_PTR),
             ResolvedChrPtr::SpEffectCtrl => {
-                self.get_ptr(ResolvedChrPtr::ChrCtrl)
-                    .read_offset(offsets::chr_ctrl::CHR_SPEFFECT_CTRL)
+                read_pointer(base + offsets::chr_ctrl::CHR_SPEFFECT_CTRL)
             }
-            ResolvedChrPtr::BossOperator => {
-                self.get_ptr(ResolvedChrPtr::ChrCtrl)
-                    .read_offset(offsets::chr_ctrl::BOSS_OPERATOR)
-            }
+            ResolvedChrPtr::BossOperator => read_pointer(base + offsets::chr_ctrl::BOSS_OPERATOR),
             ResolvedChrPtr::ChrAiManipulator => {
-                self.get_ptr(ResolvedChrPtr::BossOperator)
-                    .read_offset(boss_operator_offsets::CHR_AI_MANIPULATOR)
+                cache
+                    .lookup(ResolvedChrPtr::BossOperator)
+                    .read_ptr(boss_operator_offsets::CHR_AI_MANIPULATOR)
             }
             ResolvedChrPtr::ChrAi => {
-                self.get_ptr(ResolvedChrPtr::ChrAiManipulator)
-                    .read_offset(chr_ai_manipulator_offsets::CHR_AI)
+                cache
+                    .lookup(ResolvedChrPtr::ChrAiManipulator)
+                    .read_ptr(chr_ai_manipulator_offsets::CHR_AI)
             }
-        }?;
-
-        if resolved_pointer != 0x0 {
-            self.resolved_pointers.insert(pointer, resolved_pointer);
         }
-        Ok(resolved_pointer)
     }
 }

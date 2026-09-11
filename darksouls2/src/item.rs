@@ -8,8 +8,8 @@ use {
         resources::{
             asm_function,
             items::{
-                Categories,
                 Item,
+                ItemCategory,
                 armor::ARMOR,
                 arrows::ARROWS,
                 consumables::CONSUMABLES,
@@ -24,7 +24,7 @@ use {
         },
         utils::{ScholarError, player_loaded_check, scholar_check},
     },
-    gubtool_core::address::POINTER,
+    gubtool_core::{address::POINTER, sys::write},
     std::{thread, time::Duration},
 };
 
@@ -132,21 +132,21 @@ fn itemspawn(
 }
 
 pub fn mass_spawn(
-    category: Categories,
+    category: ItemCategory,
     quantity: u32,
     upgrade: u32,
     infusion: Infusion,
 ) -> anyhow::Result<()> {
     let items: &'static [Item] = match category {
-        Categories::Armor => ARMOR,
-        Categories::Arrows => ARROWS,
-        Categories::Consumables => CONSUMABLES,
-        Categories::Gestures => GESTURES,
-        Categories::KeyItems => KEY_ITEMS,
-        Categories::Rings => RINGS,
-        Categories::Spells => SPELLS,
-        Categories::UpgradeMaterials => UPGRADE_MATERIALS,
-        Categories::Weapons => WEAPONS,
+        ItemCategory::Armor => &ARMOR,
+        ItemCategory::Arrows => &ARROWS,
+        ItemCategory::Consumables => &CONSUMABLES,
+        ItemCategory::Gestures => &GESTURES,
+        ItemCategory::KeyItems => &KEY_ITEMS,
+        ItemCategory::Rings => &RINGS,
+        ItemCategory::Spells => &SPELLS,
+        ItemCategory::UpgradeMaterials => &UPGRADE_MATERIALS,
+        ItemCategory::Weapons => &WEAPONS,
     };
     for item in items {
         let mut spawn_request = ItemSpawnRequest {

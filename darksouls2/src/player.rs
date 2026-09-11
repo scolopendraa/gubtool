@@ -1,101 +1,48 @@
+pub use crate::obj_refs::player;
 use {
     crate::{
-        chr_ctrl::{ChrCtrl, ResolvedChrPtr},
+        chr_ctrl::ResolvedChrPtr,
         game_state::{self, StateFlag},
         mem::*,
         offsets::{
-            ChainReadExt,
-            Offset,
             chr_ctrl::stats_offsets::{self},
             code_cave::CaveAddr,
             game_manager_imp,
             module_offsets::{BasePointer, Function, Hook, Patch},
         },
-        pointer_cache::ResolvedPtr,
         resources::asm_function,
         speffect,
         utils::player_loaded_check,
     },
     gubtool_core::{
-        address::{Address, POINTER},
+        address::{Address, ChainReadExt, Offset, POINTER},
         attached::{is_32, version},
         game_version::DarkSouls2Version,
         slice_ops::*,
         sys::{
+            install_hook,
             ipc::{FfiValue, X86CallingConvention},
-            sys_error::{PointerType, SysError, SysResult},
+            read,
+            sys_error::SysResult,
+            write,
+            write_bytes,
         },
     },
-    shared::{
-        command::{StatCommand, ToggleCommand, UnitCommand, ValueCommand},
-        toggle_command,
-        unit_command,
-        value_command,
-    },
-    std::sync::{LazyLock, Mutex, MutexGuard, RwLock},
+    shared::{command::StatCommand, toggle_command, unit_command, value_command},
+    std::sync::{LazyLock, RwLock},
     strum::Display,
 };
 
-static PLAYER: LazyLock<Mutex<Player>> = LazyLock::new(|| Mutex::new(Player::new()));
-
-pub fn player() -> MutexGuard<'static, Player> {
-    PLAYER.lock().unwrap()
-}
-
-pub struct Player {
-    chr_ctrl: Option<ChrCtrl>,
-}
-
-impl Player {
-    fn new() -> Self {
-        let mut player = Self {
-            chr_ctrl: None,
-        };
-        player.update();
-        player
-    }
-    pub fn update(&mut self) {
-        let ptr = ResolvedPtr::GameManagerImp
-            .get()
-            .read_offset(game_manager_imp::PLAYER_CTRL);
-        match ptr {
-            Ok(pointer) => {
-                if pointer != 0x0 {
-                    self.chr_ctrl = Some(ChrCtrl::new(pointer));
-                } else {
-                    self.chr_ctrl = None;
-                }
-            }
-            Err(_) => {
-                self.chr_ctrl = None;
-            }
-        }
-    }
-    pub fn chr_ctrl(&mut self) -> SysResult<&mut ChrCtrl> {
-        self.chr_ctrl
-            .as_mut()
-            .ok_or(SysError::null_pointer(PointerType::Player))
-    }
-    pub fn pointers(&self) -> Vec<(String, u64)> {
-        self.chr_ctrl
-            .as_ref()
-            .map(|c| c.pointers())
-            .unwrap_or_default()
-    }
-}
-
 value_command!(Souls, u32 {
     get: {
-        player()
-            .chr_ctrl()?
+        player()?
             .get_ptr(ResolvedChrPtr::Stats)
             .add_offset(stats_offsets::SOULS)
             .read::<u32>()
     }
 
     set(val): {
-        let souls_loc = player()
-            .chr_ctrl()?
+        let souls_loc = player()?
             .get_ptr(ResolvedChrPtr::Stats)
             .add_offset(stats_offsets::SOULS);
         let current = souls_loc.read::<i32>()?;
@@ -111,7 +58,7 @@ value_command!(Souls, u32 {
 
 fn give_souls(amount: i32) -> anyhow::Result<()> {
     let args = [
-        FfiValue::pointer(player().chr_ctrl()?.get_ptr(ResolvedChrPtr::Stats)?),
+        FfiValue::pointer(player()?.get_ptr(ResolvedChrPtr::Stats)?),
         FfiValue::sint32(amount),
     ];
 
@@ -125,7 +72,7 @@ toggle_command!(NoDeath {
 
     set(state): {
         game_state::set_flag(StateFlag::PlayerNoDeath, state)?;
-        let _ = player().chr_ctrl().and_then(|chr| chr.set_no_death(state));
+        let _ = player().and_then(|mut chr| chr.set_no_death(state));
         Ok(())
     }
 });
@@ -184,7 +131,7 @@ toggle_command!(InfinitePoise {
             fun.patch_rel32(
                 "hook_loc",
                 CaveAddr::InfinitePoiseHook,
-                Hook::InfinitePoise.add(orig_instr_len),
+                Hook::InfinitePoise.ptr() + orig_instr_len,
                 4,
             );
 
@@ -319,13 +266,13 @@ toggle_command!(Silent {
     set(state): {
         match is_32() {
             true => {
-                let push_op_neg_offset = match version() {
-                    Some(DarkSouls2Version::Vanilla1_0_12) => 4,
-                    _ => 1,
+                let push_op_offset: i32 = match version() {
+                    Some(DarkSouls2Version::Vanilla1_0_12) => -4,
+                    _ => -1,
                 };
                 if state {
                     write_bytes(Patch::PlayerSilent, &[0x90; 15])?;
-                    write::<u8>(Patch::PlayerSilent.sub(push_op_neg_offset), 0x90)?;
+                    write::<u8>(Patch::PlayerSilent.ptr().add(push_op_offset), 0x90)?;
                 } else {
                     let mut bytes = match version() {
                         Some(DarkSouls2Version::Vanilla1_0_12) => {
@@ -343,7 +290,7 @@ toggle_command!(Silent {
                     };
                     write_rel_i32(&mut bytes, Patch::PlayerSilent, 11, Function::MakeSound, 4)?;
                     write_bytes(Patch::PlayerSilent, &bytes)?;
-                    write::<u8>(Patch::PlayerSilent.sub(push_op_neg_offset), 0x51)?;
+                    write::<u8>(Patch::PlayerSilent.ptr().add(push_op_offset), 0x51)?;
                 }
             }
             false => {
@@ -362,22 +309,22 @@ toggle_command!(Silent {
 
 value_command!(Health, i32 {
     get: {
-        player().chr_ctrl()?.get_hp()
+        player()?.get_hp()
     }
 
     set(val): {
-        Ok(player().chr_ctrl()?.set_hp(val)?)
+        Ok(player()?.set_hp(val)?)
     }
 });
 
 unit_command!(RestoreHumanity {
     let speffect = speffect::RESTORE_HUMANITY;
-    player().chr_ctrl()?.apply_speffect(speffect)
+    player()?.apply_speffect(speffect)
 });
 
 unit_command!(Rest {
     let speffect = speffect::REST;
-    player().chr_ctrl()?.apply_speffect(speffect)
+    player()?.apply_speffect(speffect)
 });
 
 #[repr(C)]
@@ -397,8 +344,7 @@ pub(crate) struct Stats {
 impl Stats {
     pub fn read(&mut self) {
         let val = player()
-            .chr_ctrl()
-            .and_then(|chr| {
+            .and_then(|mut chr| {
                 chr.get_ptr(ResolvedChrPtr::Stats)
                     .add_offset(stats_offsets::STATS)
                     .read::<Self>()
@@ -444,7 +390,7 @@ impl StatCommand for Stat {
     fn set(&self, val: u32) -> anyhow::Result<()> {
         player_loaded_check()?;
 
-        let player_stats_entity = player().chr_ctrl()?.get_ptr(ResolvedChrPtr::Stats);
+        let player_stats_entity = player()?.get_ptr(ResolvedChrPtr::Stats);
 
         let stats_base = player_stats_entity.add_offset(stats_offsets::STATS);
 
@@ -477,7 +423,7 @@ impl StatCommand for Stat {
         let stat_bytes = stats_base.read::<[u8; 22]>()?;
 
         let negative_flag_loc = CaveAddr::NegativeFlag;
-        let buffer_loc = CaveAddr::LevelUpBuffer.addr();
+        let buffer_loc = CaveAddr::LevelUpBuffer.ptr();
 
         let mut buffer = [0x0; 0x100];
 
@@ -492,8 +438,8 @@ impl StatCommand for Stat {
         write::<u8>(negative_flag_loc, is_negative as u8)?;
 
         const NEGATIVE_LEVEL_PATCH: Offset = Offset {
-            vanilla: 0x32,
-            scholar: 0x39,
+            x86: 0x32,
+            x64: 0x39,
         };
 
         let negative_patch_loc = Function::LevelUp.add(NEGATIVE_LEVEL_PATCH.resolve());
@@ -534,6 +480,6 @@ impl StatCommand for Stat {
 }
 
 pub fn position() -> SysResult<[f32; 16]> {
-    let pointer = follow_pointers(&game_manager_imp::player_coords_chain(), false)?;
+    let pointer = game_manager_imp::player_coords_chain().follow_pointers()?;
     read::<[f32; 16]>(pointer)
 }

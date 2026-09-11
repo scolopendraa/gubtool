@@ -3,13 +3,13 @@ use super::Item;
 impl Item {
     const fn default_key_item() -> Self {
         Self {
-            category: super::Categories::KeyItems,
+            category: super::ItemCategory::KeyItems,
             ..Item::default()
         }
     }
 }
 
-pub static KEY_ITEMS: [Item; 213] = [
+pub static KEY_ITEMS: [Item; 216] = [
     Item {
         id: 0x40001fad,
         name: "Academy Glintstone Key (Player)",
@@ -1766,6 +1766,33 @@ pub static KEY_ITEMS: [Item; 213] = [
         stack_size: 1,
         max_storage: 1,
         event_id: Some(400091),
+        ..Item::default_key_item()
+    },
+    Item {
+        id: 0x401eaa00,
+        name: "Spectral Steed Regalia: Tree Sentinel",
+        stack_size: 1,
+        max_storage: 1,
+        event_id: Some(60101),
+        tarnished_pack: true,
+        ..Item::default_key_item()
+    },
+    Item {
+        id: 0x401eaa0a,
+        name: "Spectral Steed Regalia: Carian Silver",
+        stack_size: 1,
+        max_storage: 1,
+        event_id: Some(60102),
+        tarnished_pack: true,
+        ..Item::default_key_item()
+    },
+    Item {
+        id: 0x401eaa14,
+        name: "Spectral Steed Regalia: Funeral Night",
+        stack_size: 1,
+        max_storage: 1,
+        event_id: Some(60103),
+        tarnished_pack: true,
         ..Item::default_key_item()
     },
 ];

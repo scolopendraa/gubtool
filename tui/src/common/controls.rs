@@ -12,11 +12,13 @@ use {
         text::{Line, Span},
         widgets::{Cell, Row},
     },
+    shared::command::ToggleCommand,
 };
 
 pub struct Control {
     key:    &'static str,
     action: &'static str,
+    toggle: Option<&'static dyn ToggleCommand>,
 }
 
 impl Control {
@@ -24,7 +26,12 @@ impl Control {
         Self {
             key,
             action,
+            toggle: None,
         }
+    }
+    pub const fn with_toggle(mut self, command: &'static dyn ToggleCommand) -> Self {
+        self.toggle = Some(command);
+        self
     }
 }
 
@@ -38,21 +45,30 @@ pub fn draw_controls(frame: &mut Frame, rect: Rect, controls: &[Control]) {
 }
 
 fn controls_line(controls: &[Control]) -> Line<'static> {
+    let fg = theme().fg;
     let mut spans: Vec<Span> = controls
         .iter()
         .flat_map(|control| {
-            vec![
-                Span::raw("[").style(theme().fg),
+            let mut ctrl = vec![
+                Span::raw("[").style(fg),
                 Span::raw(control.key.to_string()).style(theme().info),
-                Span::raw("→ ").style(theme().fg),
-                Span::raw(control.action.to_string()).style(theme().fg),
-                Span::raw("] ").style(theme().fg),
-            ]
+                Span::raw("→ ").style(fg),
+                Span::raw(control.action.to_string()).style(fg),
+            ];
+
+            if let Some(toggle) = control.toggle {
+                let state = toggle.is().unwrap_or_default();
+                let state_str = if state { "[X]" } else { "[ ]" };
+                ctrl.push(Span::raw(state_str).style(theme().secondary));
+            }
+
+            ctrl.push(Span::raw("] ").style(fg));
+            ctrl
         })
         .collect();
 
     spans.pop();
-    spans.push(Span::raw("]").style(theme().fg));
+    spans.push(Span::raw("]").style(fg));
     Line::from(spans).alignment(Alignment::Center)
 }
 

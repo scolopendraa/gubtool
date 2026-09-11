@@ -1,0 +1,29 @@
+[package]
+name = "darksouls3"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = { workspace = true }
+phf = { workspace = true }
+pelite = { workspace = true }
+thiserror = { workspace = true }
+bincode = { workspace = true }
+once_cell = { workspace = true }
+rayon = { workspace = true }
+glam = { workspace = true }
+tokio = { workspace = true }
+strum = { workspace = true }
+linkme = { workspace = true }
+
+gubtool-core = { version = "0.1.0", path = "../gubtool-core" }
+shared = { version = "0.1.0", path = "../shared" }
+macros = { version = "0.1.0", path = "../shared/macros" }
+assemble = { version = "0.1.0", path = "../assemble" }
+config = { version = "0.1.0", path = "../config" }
+
+[build-dependencies]
+assemble = { version = "0.1.0", path = "../assemble" }
+
+[lints]
+workspace = true

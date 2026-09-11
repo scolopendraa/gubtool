@@ -10,8 +10,8 @@ use {
             ASM,
             aow::{AFFINITIES, AOW, Affinity, Aow},
             items::{
-                Categories,
                 Item,
+                ItemCategory,
                 armor::ARMOR,
                 arrows::ARROWS,
                 ashes_of_war::ASHES_OF_WAR,
@@ -31,9 +31,21 @@ use {
                 weapons::WEAPONS,
             },
         },
-        utils::{DlcError, VersionError, dlc_check, player_loaded_check, version_check},
+        utils::{
+            DlcError,
+            DlcVersionError,
+            TarnishedPackError,
+            dlc_check,
+            dlc_version_check,
+            player_loaded_check,
+            tarnised_pack_version_check,
+        },
     },
-    gubtool_core::{address::POINTER, slice_ops::*},
+    gubtool_core::{
+        address::POINTER,
+        slice_ops::*,
+        sys::{write, write_bytes},
+    },
 };
 
 pub struct ItemSpawnRequest {
@@ -67,10 +79,14 @@ impl ItemSpawnRequest {
 
         if self.item.dlc || self.aow.dlc {
             if !self.item.requires_activated_dlc() {
-                version_check()?;
+                dlc_version_check()?;
             } else {
                 dlc_check()?;
             }
+        }
+
+        if self.item.tarnished_pack {
+            tarnised_pack_version_check()?;
         }
 
         self.clamp_values();
@@ -89,16 +105,16 @@ impl ItemSpawnRequest {
         self.quantity = self.quantity.clamp(1, self.item.stack_size as i64);
 
         let new_upgrade = match self.item.category {
-            Categories::Weapons
+            ItemCategory::Weapons
                 if self.upgrade > 25 && matches!(self.item.gem_mount_type, Some(1) | Some(2)) =>
             {
                 Some(25)
             }
-            Categories::Weapons if self.upgrade > 10 && self.item.upgrade_type == Some(1) => {
+            ItemCategory::Weapons if self.upgrade > 10 && self.item.upgrade_type == Some(1) => {
                 Some(10)
             }
-            Categories::SpiritAshes if self.upgrade > 10 => Some(10),
-            Categories::Weapons | Categories::SpiritAshes => None,
+            ItemCategory::SpiritAshes if self.upgrade > 10 => Some(10),
+            ItemCategory::Weapons | ItemCategory::SpiritAshes => None,
             _ => Some(0),
         };
         if let Some(v) = new_upgrade {
@@ -118,7 +134,7 @@ impl ItemSpawnRequest {
     }
 
     pub fn can_upgrade(&self) -> bool {
-        matches!(self.item.category, Categories::Weapons | Categories::SpiritAshes)
+        matches!(self.item.category, ItemCategory::Weapons | ItemCategory::SpiritAshes)
     }
 
     pub fn can_aow(&self) -> bool {
@@ -156,25 +172,25 @@ fn itemspawn(
     run_custom_function(fun)
 }
 
-pub fn mass_spawn(category: Categories, quantity: i64, upgrade: i64) -> anyhow::Result<()> {
+pub fn mass_spawn(category: ItemCategory, quantity: i64, upgrade: i64) -> anyhow::Result<()> {
     let items: &'static [Item] = match category {
-        Categories::Armor => &ARMOR,
-        Categories::Arrows => &ARROWS,
-        Categories::AshesOfWar => &ASHES_OF_WAR,
-        Categories::BellBearings => &BELL_BEARINGS,
-        Categories::Consumables => &CONSUMABLES,
-        Categories::Cookbooks => &COOKBOOKS,
-        Categories::CraftingMaterials => &CRAFTING_MATERIALS,
-        Categories::CrystalTears => &CRYSTAL_TEARS,
-        Categories::Incantations => &INCANTATIONS,
-        Categories::KeyItems => &KEY_ITEMS,
-        Categories::PotsAndPerfumes => &POTS_AND_PERFUMES,
-        Categories::PrattlingPate => &PRATTLING_PATE,
-        Categories::Sorceries => &SORCERIES,
-        Categories::SpiritAshes => &SPIRIT_ASHES,
-        Categories::Talismans => &TALISMANS,
-        Categories::UpgradeMaterials => &UPGRADE_MATERIALS,
-        Categories::Weapons => &WEAPONS,
+        ItemCategory::Armor => &ARMOR,
+        ItemCategory::Arrows => &ARROWS,
+        ItemCategory::AshesOfWar => &ASHES_OF_WAR,
+        ItemCategory::BellBearings => &BELL_BEARINGS,
+        ItemCategory::Consumables => &CONSUMABLES,
+        ItemCategory::Cookbooks => &COOKBOOKS,
+        ItemCategory::CraftingMaterials => &CRAFTING_MATERIALS,
+        ItemCategory::CrystalTears => &CRYSTAL_TEARS,
+        ItemCategory::Incantations => &INCANTATIONS,
+        ItemCategory::KeyItems => &KEY_ITEMS,
+        ItemCategory::PotsAndPerfumes => &POTS_AND_PERFUMES,
+        ItemCategory::PrattlingPate => &PRATTLING_PATE,
+        ItemCategory::Sorceries => &SORCERIES,
+        ItemCategory::SpiritAshes => &SPIRIT_ASHES,
+        ItemCategory::Talismans => &TALISMANS,
+        ItemCategory::UpgradeMaterials => &UPGRADE_MATERIALS,
+        ItemCategory::Weapons => &WEAPONS,
     };
     for item in items {
         let mut request = ItemSpawnRequest::new(*item)
@@ -182,7 +198,9 @@ pub fn mass_spawn(category: Categories, quantity: i64, upgrade: i64) -> anyhow::
             .with_upgrade(upgrade);
 
         if let Err(err) = request.spawn()
-            && !(err.is::<DlcError>() || err.is::<VersionError>())
+            && !(err.is::<DlcError>()
+                || err.is::<DlcVersionError>()
+                || err.is::<TarnishedPackError>())
         {
             return Err(err);
         }
@@ -199,16 +217,16 @@ impl Item {
     pub fn requires_activated_dlc(&self) -> bool {
         matches!(
             self.category,
-            Categories::BellBearings
-                | Categories::Consumables
-                | Categories::Cookbooks
-                | Categories::CraftingMaterials
-                | Categories::CrystalTears
-                | Categories::Incantations
-                | Categories::KeyItems
-                | Categories::PotsAndPerfumes
-                | Categories::PrattlingPate
-                | Categories::Sorceries
+            ItemCategory::BellBearings
+                | ItemCategory::Consumables
+                | ItemCategory::Cookbooks
+                | ItemCategory::CraftingMaterials
+                | ItemCategory::CrystalTears
+                | ItemCategory::Incantations
+                | ItemCategory::KeyItems
+                | ItemCategory::PotsAndPerfumes
+                | ItemCategory::PrattlingPate
+                | ItemCategory::Sorceries
         )
     }
 }

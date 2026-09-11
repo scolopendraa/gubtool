@@ -3,14 +3,14 @@ use super::Item;
 impl Item {
     const fn default_spell() -> Self {
         Self {
-            category: super::Categories::Spells,
+            category: super::ItemCategory::Spells,
             stack_size: 1,
             ..Item::default()
         }
     }
 }
 
-pub static SPELLS: &[Item; 106] = &[
+pub static SPELLS: [Item; 106] = [
     Item {
         id: 31010000,
         name: "Soul Arrow",

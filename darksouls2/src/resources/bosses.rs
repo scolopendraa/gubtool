@@ -55,8 +55,8 @@ pub const BOSSES: &[Boss; 41] = &[
     Boss {
         name:         "Flexile Sentry",
         map_id:       MapId::NoMansWharf,
-        pos:          [3.32, -65.40, 516.11, 0.00],
-        quaternion:   [3.41e-8, 0.111, 3.20e-7, 0.994],
+        pos:          [23.65, -71.62, 519.68, 0.00],
+        quaternion:   [-3.27e-13, -0.66, -1.14e-13, 0.75],
         death_flag:   100961,
         obj_ids:      &[844, 5220, 5221],
         revive_flags: &[118000081, 118020082],
@@ -94,7 +94,7 @@ pub const BOSSES: &[Boss; 41] = &[
     },
     Boss {
         name:         "Executioner's Chariot",
-        map_id:       MapId::HuntsmansCorpse,
+        map_id:       MapId::HuntsmansCopse,
         pos:          [-247.85, 47.66, -41.33, 0.00],
         quaternion:   [3.81e-13, 0.986, 2.26e-13, -0.164],
         death_flag:   100953,
@@ -104,7 +104,7 @@ pub const BOSSES: &[Boss; 41] = &[
     },
     Boss {
         name:         "Skeleton Lords",
-        map_id:       MapId::HuntsmansCorpse,
+        map_id:       MapId::HuntsmansCopse,
         pos:          [-404.14, 35.35, 225.87, 0.00],
         quaternion:   [-6.40e-8, -0.195, 5.58e-7, 0.981],
         death_flag:   100954,

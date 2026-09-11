@@ -3,13 +3,13 @@ use super::Item;
 impl Item {
     const fn default_key_item() -> Self {
         Self {
-            category: super::Categories::KeyItems,
+            category: super::ItemCategory::KeyItems,
             ..Item::default()
         }
     }
 }
 
-pub static KEY_ITEMS: &[Item; 67] = &[
+pub static KEY_ITEMS: [Item; 67] = [
     Item {
         id: 60355000,
         name: "Aged Feather",

@@ -12,7 +12,7 @@ use {
     ratatui::{Frame, layout::Rect, widgets::Row},
 };
 
-const GAMES: [Game; 2] = [Game::DarkSouls2, Game::EldenRing];
+const GAMES: [Game; 3] = [Game::DarkSouls2, Game::DarkSouls3, Game::EldenRing];
 
 pub struct GameScreenSelector {
     list:        TablePane,

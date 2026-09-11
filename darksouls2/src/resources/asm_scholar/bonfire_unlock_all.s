@@ -1,4 +1,7 @@
-movabs r12, OFFSET bonfire_manager
+movabs r12, OFFSET game_manager_imp
+mov r12, QWORD PTR [r12]
+mov r12, QWORD PTR [r12+0x70]
+mov r12, QWORD PTR [r12+0x58]
 movabs r14, OFFSET fn_bonfire_unlock
 mov r13d, DWORD PTR [r12+0x28]
 test r13d, r13d

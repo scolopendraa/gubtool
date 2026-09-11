@@ -11,19 +11,23 @@ use {
     },
     anyhow::anyhow,
     gubtool_core::{
-        address::{Address, POINTER},
+        address::{Address, POINTER, Pointer},
         attached::is_32,
+        game_version::Game::DarkSouls2,
         slice_ops::*,
         sys::{
+            install_hook,
             ipc::{FfiValue, X86CallingConvention},
+            is_bit_set,
+            read,
+            read_pointer,
+            set_bit,
             sys_error::SysResult,
+            write,
+            write_bytes,
         },
     },
-    shared::{
-        command::ToggleCommand,
-        event_log::{EventLog, EventLogger},
-        toggle_command,
-    },
+    shared::{command::ToggleCommand, event_log::EventLog, impl_event_logger, toggle_command},
 };
 
 pub fn set_event_flag(flag_id: u32, state: bool) -> anyhow::Result<()> {
@@ -47,35 +51,41 @@ pub fn get_event_flag(flag_id: u32) -> SysResult<bool> {
 
 #[derive(Debug)]
 struct Node {
-    bitmap_ptr: u64,
+    bitmap_ptr: Pointer,
     size:       u32,
     key:        u32,
-    next_node:  u64,
+    next_node:  Pointer,
 }
 
 impl Node {
-    fn read_at(address: u64) -> SysResult<Self> {
+    fn read_at(address: Pointer) -> SysResult<Self> {
         if is_32() {
             let bytes = read::<[u8; 0x10]>(address)?;
             Ok(Self {
-                bitmap_ptr: read_from_slice::<u32>(&bytes, 0x0)? as u64,
+                bitmap_ptr: Pointer::new(
+                    read_from_slice::<u32>(&bytes, 0x0)? as u64,
+                    Some(DarkSouls2),
+                ),
                 size:       read_from_slice::<u32>(&bytes, 0x4)?,
                 key:        read_from_slice::<u32>(&bytes, 0x8)?,
-                next_node:  read_from_slice::<u32>(&bytes, 0xc)? as u64,
+                next_node:  Pointer::new(
+                    read_from_slice::<u32>(&bytes, 0xc)? as u64,
+                    Some(DarkSouls2),
+                ),
             })
         } else {
             let bytes = read::<[u8; 0x18]>(address)?;
             Ok(Self {
-                bitmap_ptr: read_from_slice::<u64>(&bytes, 0x0)?,
+                bitmap_ptr: Pointer::new(read_from_slice::<u64>(&bytes, 0x0)?, Some(DarkSouls2)),
                 size:       read_from_slice::<u32>(&bytes, 0x8)?,
                 key:        read_from_slice::<u32>(&bytes, 0xc)?,
-                next_node:  read_from_slice::<u64>(&bytes, 0x10)?,
+                next_node:  Pointer::new(read_from_slice::<u64>(&bytes, 0x10)?, Some(DarkSouls2)),
             })
         }
     }
 }
 
-fn event_flag_lookup(flag_id: u32) -> SysResult<Option<(u64, u8)>> {
+fn event_flag_lookup(flag_id: u32) -> SysResult<Option<(Pointer, u8)>> {
     let event_flag_man = ResolvedPtr::EventFlagManager.get()?;
 
     let group = flag_id / 10000;
@@ -89,7 +99,7 @@ fn event_flag_lookup(flag_id: u32) -> SysResult<Option<(u64, u8)>> {
         0x20 + (hash % 0x1f) as u64 * 8
     };
 
-    let mut node_ptr = read_address(event_flag_man + first_node_offset)?;
+    let mut node_ptr = read_pointer(event_flag_man + first_node_offset)?;
 
     while node_ptr != 0x0 {
         let node = Node::read_at(node_ptr)?;
@@ -110,35 +120,7 @@ impl Boss {
     }
 }
 
-#[derive(Default)]
-pub struct Ds2EventLogger {
-    event_log: EventLog,
-}
-
-impl EventLogger for Ds2EventLogger {
-    fn event_log(&self) -> &EventLog {
-        &self.event_log
-    }
-    fn event_log_mut(&mut self) -> &mut EventLog {
-        &mut self.event_log
-    }
-    fn file_prefix(&self) -> &'static str {
-        "darksouls2"
-    }
-    fn write_idx(&self) -> SysResult<i32> {
-        read::<i32>(CaveAddr::EventLogWriteIdx)
-    }
-    fn read_buffer(&self) -> SysResult<[u8; 0x1000]> {
-        read::<[u8; 0x1000]>(CaveAddr::EventLogBuffer)
-    }
-    fn clear_cave(&self) -> SysResult {
-        write::<i32>(CaveAddr::EventLogWriteIdx, 0x0)?;
-        write_bytes(CaveAddr::EventLogBuffer, &[0x0; 0x1000])
-    }
-    fn toggle_hook(&self) -> anyhow::Result<()> {
-        StartEventLogger.toggle()
-    }
-}
+impl_event_logger!(Ds2EventLogger, "darksouls2");
 
 const EVENT_LOG_HOOK_ORIGINAL: [u8; 5] = [0xb8, 0x59, 0x17, 0xb7, 0xd1];
 toggle_command!(StartEventLogger {
@@ -187,7 +169,7 @@ toggle_command!(SkipIvoryKingGauntlet {
             fun.patch_rel32(
                 "hook_loc",
                 CaveAddr::IvorySkipHook,
-                Function::SetEvent.add(orig_instr_len),
+                Function::SetEvent.ptr() + orig_instr_len,
                 4,
             );
 
@@ -227,7 +209,7 @@ toggle_command!(DisableLoyceKnights {
             fun.patch_rel32(
                 "hook_loc",
                 CaveAddr::IvoryKnightsHook,
-                Hook::SetSharedFlag.add(orig_instr_len),
+                Hook::SetSharedFlag.ptr() + orig_instr_len,
                 4,
             );
             install_hook(

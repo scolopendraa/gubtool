@@ -4,7 +4,6 @@ use {
         event,
         mem::*,
         offsets::{
-            ChainReadExt,
             code_cave::CaveAddr,
             menu_man,
             module_offsets::{BasePointer, Function, Hook},
@@ -15,9 +14,9 @@ use {
     },
     assemble::patch::{DWORD, QWORD},
     gubtool_core::{
-        address::{Address, POINTER},
+        address::{Address, ChainReadExt, POINTER},
         slice_ops::*,
-        sys::ipc::FfiValue,
+        sys::{install_hook, ipc::FfiValue, is_bit_set, write, write_bytes},
     },
     std::time::Duration,
 };
@@ -67,6 +66,7 @@ async fn hook_warp_coord(coords: [f32; 3], angle: f32, is_night: bool) -> anyhow
 
     let mut fun = ASM.get_function("warp_coord_angle_hook");
     let code_loc = CaveAddr::WarpCoordsHook;
+
     fun.patch_rel32("new_val", code_loc, CaveAddr::WarpCoords, 4);
     fun.patch::<DWORD>("property_offset", 0xaa0);
     fun.patch_rel32("hook_loc", code_loc, Hook::WarpCoordWrite.add(7), 4);

@@ -98,7 +98,7 @@ pub fn write_rel_i32(
     write_to_slice::<i32>(
         asm,
         offset,
-        rel_i32(target.addr(), location.addr() + offset + bytes_to_next_instr)?,
+        rel_i32(target.u64_address(), location.u64_address() + offset + bytes_to_next_instr)?,
     )
 }
 
@@ -118,9 +118,9 @@ pub fn write_addr_to_slice(
     addr: impl Address,
 ) -> Result<(), SliceError> {
     if is_32() {
-        write_to_slice::<u32>(array, offset, addr.addr())
+        write_to_slice::<u32>(array, offset, addr.u64_address())
     } else {
-        write_to_slice::<u64>(array, offset, addr.addr())
+        write_to_slice::<u64>(array, offset, addr.u64_address())
     }
 }
 

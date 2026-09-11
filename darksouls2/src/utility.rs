@@ -3,7 +3,6 @@ use {
         game_state::{self, StateFlag},
         mem::*,
         offsets::{
-            ChainReadExt,
             code_cave::CaveAddr,
             game_manager_imp::{self, game_data_manager_offsets::clearcount_ptr_offsets},
             module_offsets::{Data, Function, Hook, Patch},
@@ -13,16 +12,18 @@ use {
         utils::player_loaded_check,
     },
     gubtool_core::{
-        address::{Address, POINTER},
+        address::{Address, ChainReadExt, POINTER},
         attached::is_32,
-        sys::{ipc::X86CallingConvention, sys_error::SysResult},
+        sys::{
+            install_hook,
+            ipc::X86CallingConvention,
+            read,
+            sys_error::SysResult,
+            write,
+            write_bytes,
+        },
     },
-    shared::{
-        command::{ToggleCommand, UnitCommand, ValueCommand},
-        toggle_command,
-        unit_command,
-        value_command,
-    },
+    shared::{toggle_command, unit_command, value_command},
 };
 
 unit_command!(Quitout {
@@ -51,7 +52,7 @@ value_command!(NewGameCycle, u8 {
 });
 
 unit_command!(TriggerNewGame {
-    run_game_function(Function::TriggerNewGame, &[], X86CallingConvention::__cdecl)
+    run_game_function(Function::TriggerNg, &[], X86CallingConvention::__cdecl)
 });
 
 const VANILLA_MENU_PATCH_ORIGINAL: [u8; 2] = [0x0f, 0x85];
@@ -86,7 +87,7 @@ impl FastQuitout {
             fun.patch_rel32(
                 "hook_loc",
                 CaveAddr::FasterMenuHook,
-                Hook::FasterMenu.add(orig_instr_len),
+                Hook::FasterMenu.ptr() + orig_instr_len,
                 4,
             );
             install_hook(&fun.bytes, CaveAddr::FasterMenuHook, Hook::FasterMenu, orig_instr_len)
@@ -130,7 +131,7 @@ toggle_command!(SkipCredits {
             fun.patch_rel32(
                 "hook_loc",
                 CaveAddr::CreditsSkipHook,
-                Hook::CreditsSkip.add(orig_instr_len),
+                Hook::CreditsSkip.u64_address() + orig_instr_len,
                 4,
             );
 

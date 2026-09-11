@@ -3,7 +3,7 @@ use super::Item;
 impl Item {
     const fn default_pots_and_perfumes() -> Self {
         Self {
-            category: super::Categories::PotsAndPerfumes,
+            category: super::ItemCategory::PotsAndPerfumes,
             stack_size: 10,
             max_storage: 600,
             ..Item::default()

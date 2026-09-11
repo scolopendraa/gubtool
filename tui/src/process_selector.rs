@@ -35,7 +35,7 @@ impl TableController for ProcessTable {
         let rows: Vec<Row> = processes
             .iter()
             .map(|process| {
-                let comm = if attached::pid() == Ok(process.pid) {
+                let comm = if matches!(attached::pid(), Ok(pid) if pid == process.pid) {
                     format!("*{}", process.comm)
                 } else {
                     format!(" {}", process.comm)

@@ -123,6 +123,7 @@ pub fn display_cli_command(command: Command, game_screen: Game) {
     if let Some(key) = command.key() {
         let game_flag = match game_screen {
             Game::DarkSouls2 => "--ds2",
+            Game::DarkSouls3 => "--ds3",
             Game::EldenRing => "--er",
         };
 

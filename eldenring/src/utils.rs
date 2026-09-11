@@ -19,7 +19,11 @@ pub struct DlcError;
 
 #[derive(Error, Debug)]
 #[error("Requires version 1.12 or above")]
-pub struct VersionError;
+pub struct DlcVersionError;
+
+#[derive(Error, Debug)]
+#[error("Requires version 1.17 or above")]
+pub struct TarnishedPackError;
 
 #[derive(Error, std::fmt::Debug)]
 #[error("Player not loaded")]
@@ -31,12 +35,24 @@ pub fn dlc_check() -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn is_version_dlc_compat() -> bool {
+pub fn is_version_tarnished_pack_compat() -> bool {
     matches!(version::<EldenRingVersion>(), Some(v) if v <= Version2_0_1)
 }
 
-pub fn version_check() -> Result<(), VersionError> {
-    if !is_version_dlc_compat() { Err(VersionError) } else { Ok(()) }
+pub fn dlc_version_check() -> Result<(), DlcVersionError> {
+    if matches!(version::<EldenRingVersion>(), Some(v) if v < Version2_2_0) {
+        Err(DlcVersionError)
+    } else {
+        Ok(())
+    }
+}
+
+pub fn tarnised_pack_version_check() -> Result<(), TarnishedPackError> {
+    if matches!(version::<EldenRingVersion>(), Some(v) if v < Version2_7_0) {
+        Err(TarnishedPackError)
+    } else {
+        Ok(())
+    }
 }
 
 pub fn player_loaded_check() -> anyhow::Result<()> {

@@ -4,6 +4,7 @@ use {
         command::display_cli_command,
         common::controls::{Control, HelpPopup},
         darksouls2_screen::DarkSouls2Screen,
+        darksouls3_screen::DarkSouls3Screen,
         debug_screen::DebugPopup,
         eldenring_screen::EldenRingScreen,
         event::{
@@ -64,8 +65,9 @@ pub struct App {
     pub attach_options:       AttachOptions,
     pub memory_viewer_screen: MemoryViewerScreen,
 
-    elden_ring:   LazyCell<EldenRingScreen>,
     dark_souls_2: LazyCell<DarkSouls2Screen>,
+    dark_souls_3: LazyCell<DarkSouls3Screen>,
+    elden_ring:   LazyCell<EldenRingScreen>,
 }
 
 impl App {
@@ -89,8 +91,9 @@ impl App {
             attach_options:       AttachOptions::new(Rc::clone(&game_screen)),
             memory_viewer_screen: MemoryViewerScreen::new(),
 
-            elden_ring:   LazyCell::new(EldenRingScreen::new),
             dark_souls_2: LazyCell::new(DarkSouls2Screen::new),
+            dark_souls_3: LazyCell::new(DarkSouls3Screen::new),
+            elden_ring:   LazyCell::new(EldenRingScreen::new),
         }
     }
 
@@ -119,8 +122,9 @@ impl App {
                     detach_if_invalid();
 
                     match attached::game() {
-                        Ok(Game::EldenRing) => eldenring::update(),
                         Ok(Game::DarkSouls2) => darksouls2::update(),
+                        Ok(Game::DarkSouls3) => darksouls3::update(),
+                        Ok(Game::EldenRing) => eldenring::update(),
                         Err(_) => try_auto_attach(),
                     }
                 }
@@ -144,6 +148,10 @@ impl App {
                                 Game::DarkSouls2 => {
                                     darksouls2::reset();
                                     darksouls2::attach().await
+                                }
+                                Game::DarkSouls3 => {
+                                    darksouls3::reset();
+                                    darksouls3::attach().await
                                 }
                                 Game::EldenRing => {
                                     eldenring::reset();
@@ -277,8 +285,9 @@ impl App {
 
     pub fn current_screen(&mut self) -> &mut dyn GameScreen {
         match *self.game_screen.borrow() {
-            Game::EldenRing => &mut *self.elden_ring,
             Game::DarkSouls2 => &mut *self.dark_souls_2,
+            Game::DarkSouls3 => &mut *self.dark_souls_3,
+            Game::EldenRing => &mut *self.elden_ring,
         }
     }
 }
@@ -309,7 +318,7 @@ fn version_paragraph() -> Paragraph<'static> {
     .alignment(Alignment::Right)
 }
 
-impl_game_screen!(DarkSouls2Screen, EldenRingScreen);
+impl_game_screen!(DarkSouls2Screen, DarkSouls3Screen, EldenRingScreen);
 
 const HELP_ENTRIES: [Control; 18] = [
     Control::new("hjkl, ← ↑ ↓ → ", "Navigate list"),

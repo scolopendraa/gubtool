@@ -1,11 +1,14 @@
 use {
     crate::{
-        mem::{run_game_function, write},
+        mem::run_game_function,
         offsets::{code_cave::CaveAddr, module_offsets::Function},
     },
     gubtool_core::{
-        address::Address,
-        sys::ipc::{FfiValue, X86CallingConvention},
+        address::{Address, Pointer},
+        sys::{
+            ipc::{FfiValue, X86CallingConvention},
+            write,
+        },
     },
 };
 
@@ -20,12 +23,12 @@ pub struct SpEffect {
     param_3:     u8,
 }
 
-pub fn apply_speffect(chr_speffect_ctrl: u64, speffect: SpEffect) -> anyhow::Result<()> {
+pub fn apply_speffect(chr_speffect_ctrl: Pointer, speffect: SpEffect) -> anyhow::Result<()> {
     write::<SpEffect>(CaveAddr::SpEffectStruct, speffect)?;
 
     let args = [
         FfiValue::pointer(chr_speffect_ctrl),
-        FfiValue::pointer(CaveAddr::SpEffectStruct.addr()),
+        FfiValue::pointer(CaveAddr::SpEffectStruct.ptr()),
     ];
 
     run_game_function(Function::ApplySpeffect, &args, X86CallingConvention::__thiscall)

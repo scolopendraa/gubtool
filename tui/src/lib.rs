@@ -3,6 +3,7 @@ mod attach_options;
 mod command;
 mod common;
 mod darksouls2_screen;
+mod darksouls3_screen;
 mod debug_screen;
 mod eldenring_screen;
 mod event;

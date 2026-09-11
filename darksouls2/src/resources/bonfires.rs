@@ -95,22 +95,22 @@ pub const BONFIRES: &[Bonfire; 77] = &[
     Bonfire {
         name:       "Undead Refuge",
         bonfire_id: 23650,
-        map_id:     MapId::HuntsmansCorpse,
+        map_id:     MapId::HuntsmansCopse,
     },
     Bonfire {
         name:       "Bridge Approach",
         bonfire_id: 23655,
-        map_id:     MapId::HuntsmansCorpse,
+        map_id:     MapId::HuntsmansCopse,
     },
     Bonfire {
         name:       "Undead Lockaway",
         bonfire_id: 23660,
-        map_id:     MapId::HuntsmansCorpse,
+        map_id:     MapId::HuntsmansCopse,
     },
     Bonfire {
         name:       "Undead Purgatory",
         bonfire_id: 23665,
-        map_id:     MapId::HuntsmansCorpse,
+        map_id:     MapId::HuntsmansCopse,
     },
     Bonfire {
         name:       "Poison Pool",

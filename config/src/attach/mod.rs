@@ -1,6 +1,7 @@
 pub mod attach_config_error;
-pub mod ds2_attach;
-pub mod er_attach;
+mod ds2_attach;
+mod ds3_attach;
+mod er_attach;
 
 use {
     crate::{
@@ -8,6 +9,7 @@ use {
         attach::{
             attach_config_error::ApplyAttachError,
             ds2_attach::Ds2AttachConfig,
+            ds3_attach::Ds3AttachConfig,
             er_attach::ErAttachConfig,
         },
     },
@@ -38,11 +40,9 @@ pub fn read_config() -> RwLockReadGuard<'static, AttachConfig> {
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct AttachConfig {
-    #[serde(rename = "dark_souls_2")]
     pub dark_souls_2: Ds2AttachConfig,
-
-    #[serde(rename = "elden_ring")]
-    pub elden_ring: ErAttachConfig,
+    pub dark_souls_3: Ds3AttachConfig,
+    pub elden_ring:   ErAttachConfig,
 }
 
 impl Config for AttachConfig {

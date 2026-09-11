@@ -142,10 +142,12 @@ impl AobScanner {
         let bytes = self.read_block::<4>(offset)?;
         Ok(i32::from_le_bytes(bytes))
     }
+
     fn read_u32(&self, offset: u64) -> Result<u32, ScanError> {
         let bytes = self.read_block::<4>(offset)?;
         Ok(u32::from_le_bytes(bytes))
     }
+
     fn read_u64(&self, offset: u64) -> Result<u64, ScanError> {
         let bytes = self.read_block::<8>(offset)?;
         Ok(u64::from_le_bytes(bytes))

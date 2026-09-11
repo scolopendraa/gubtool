@@ -47,12 +47,13 @@ pub struct Item {
     pub name:           &'static str,
     pub stack_size:     i32,
     pub max_storage:    i32,
-    pub category:       Categories,
+    pub category:       ItemCategory,
     pub weapon_type:    Option<u8>,
     pub gem_mount_type: Option<u8>,
     pub upgrade_type:   Option<u8>,
     pub event_id:       Option<u32>,
     pub dlc:            bool,
+    pub tarnished_pack: bool,
 }
 
 impl Item {
@@ -62,12 +63,13 @@ impl Item {
             name:           "",
             stack_size:     1,
             max_storage:    1,
-            category:       Categories::Armor,
+            category:       ItemCategory::Armor,
             weapon_type:    None,
             gem_mount_type: None,
             upgrade_type:   None,
             event_id:       None,
             dlc:            false,
+            tarnished_pack: false,
         }
     }
 }
@@ -96,7 +98,7 @@ pub static ITEMS: Lazy<Vec<Item>> = Lazy::new(|| {
 });
 
 #[derive(Clone, Copy, PartialEq, ValueEnum)]
-pub enum Categories {
+pub enum ItemCategory {
     Armor,
     Arrows,
     AshesOfWar,
@@ -116,33 +118,33 @@ pub enum Categories {
     Weapons,
 }
 
-impl fmt::Display for Categories {
+impl fmt::Display for ItemCategory {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let name = match self {
-            Categories::Armor => "Armor",
-            Categories::Arrows => "Arrows",
-            Categories::AshesOfWar => "Ashes of War",
-            Categories::BellBearings => "Bell Bearings",
-            Categories::Consumables => "Consumables",
-            Categories::Cookbooks => "Cookbooks",
-            Categories::CraftingMaterials => "Crafting Materials",
-            Categories::CrystalTears => "Crystal Tears",
-            Categories::Incantations => "Incantations",
-            Categories::KeyItems => "Key Items",
-            Categories::PotsAndPerfumes => "Pots and Perfumes",
-            Categories::PrattlingPate => "Prattling Pate",
-            Categories::Sorceries => "Sorceries",
-            Categories::SpiritAshes => "Spirit Ashes",
-            Categories::Talismans => "Talismans",
-            Categories::UpgradeMaterials => "Upgrade Materials",
-            Categories::Weapons => "Weapons",
+            ItemCategory::Armor => "Armor",
+            ItemCategory::Arrows => "Arrows",
+            ItemCategory::AshesOfWar => "Ashes of War",
+            ItemCategory::BellBearings => "Bell Bearings",
+            ItemCategory::Consumables => "Consumables",
+            ItemCategory::Cookbooks => "Cookbooks",
+            ItemCategory::CraftingMaterials => "Crafting Materials",
+            ItemCategory::CrystalTears => "Crystal Tears",
+            ItemCategory::Incantations => "Incantations",
+            ItemCategory::KeyItems => "Key Items",
+            ItemCategory::PotsAndPerfumes => "Pots and Perfumes",
+            ItemCategory::PrattlingPate => "Prattling Pate",
+            ItemCategory::Sorceries => "Sorceries",
+            ItemCategory::SpiritAshes => "Spirit Ashes",
+            ItemCategory::Talismans => "Talismans",
+            ItemCategory::UpgradeMaterials => "Upgrade Materials",
+            ItemCategory::Weapons => "Weapons",
         };
         write!(f, "{}", name)
     }
 }
 
-impl Categories {
-    pub const ARRAY: &[Categories] = &[
+impl ItemCategory {
+    pub const ARRAY: &[ItemCategory] = &[
         Self::Armor,
         Self::Arrows,
         Self::AshesOfWar,

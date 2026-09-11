@@ -3,7 +3,7 @@ use super::Item;
 impl Item {
     const fn default_aow() -> Self {
         Self {
-            category: super::Categories::AshesOfWar,
+            category: super::ItemCategory::AshesOfWar,
             max_storage: 0,
             ..Item::default()
         }

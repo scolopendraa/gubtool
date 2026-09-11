@@ -1,5 +1,5 @@
 use {
-    crate::{offsets::module_offsets::structs::ModuleOffsets, resources::scan_patterns::*},
+    crate::{offsets::module_offsets::r#struct::ModuleOffsets, resources::scan_patterns::*},
     gubtool_core::{
         aob_scanner::{ScanStrategy, scan_error::ScanError},
         parallel_scan,
@@ -71,6 +71,7 @@ fn scan(strategy: ScanStrategy) -> Result<ModuleOffsets, ScanError> {
             kernel32_close_handle: KERNEL32_CLOSE_HANDLE,
             kernel32_load_library_w: KERNEL32_LOAD_LIBRARY_W,
             lua_event_system: LUA_EVENT_SYSTEM,
+            bad_quit_message: BAD_QUIT_MESSAGE,
         }
     );
 
@@ -130,6 +131,7 @@ fn scan(strategy: ScanStrategy) -> Result<ModuleOffsets, ScanError> {
         kernel32_close_handle,
         kernel32_load_library_w,
         lua_event_system,
+        bad_quit_message,
     };
 
     Ok(offsets)

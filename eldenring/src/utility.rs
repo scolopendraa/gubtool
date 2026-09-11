@@ -2,9 +2,7 @@ use {
     crate::{
         event,
         game_state::{self, StateFlag},
-        mem::*,
         offsets::{
-            ChainReadExt,
             code_cave::CaveAddr,
             cs_flipper_imp,
             damage_manager,
@@ -19,32 +17,32 @@ use {
         utils::player_loaded_check,
     },
     gubtool_core::{
-        address::{Address, POINTER},
-        sys::sys_error::SysResult,
+        address::{Address, ChainReadExt, POINTER},
+        sys::{install_hook, read, sys_error::SysResult, write, write_bytes},
     },
-    shared::{
-        command::{ToggleCommand, UnitCommand, ValueCommand},
-        toggle_command,
-        unit_command,
-        value_command,
-    },
+    shared::{toggle_command, unit_command, value_command},
 };
 
 unit_command!(Quitout {
     player_loaded_check()?;
+    patch_bad_quit_message()?;
     Ok(ResolvedPtr::GameMan
         .get()
         .add_offset(game_man::QUITOUT)
         .write::<u8>(0x1)?)
 });
 
+fn patch_bad_quit_message() -> SysResult {
+    write::<[u8; 2]>(Patch::BadQuitMessage, [0x90; 2])
+}
+
 const NG_EVENT_IDS: [u32; 8] = [50, 51, 52, 53, 54, 55, 56, 57];
-value_command!(ClearCount, i32 {
+value_command!(ClearCount, u32 {
     get: {
         ResolvedPtr::GameDataMan
             .get()
             .add_offset(game_data_man::NEW_GAME)
-            .read::<i32>()
+            .read::<u32>()
     }
 
     set(val): {
@@ -52,7 +50,7 @@ value_command!(ClearCount, i32 {
         ResolvedPtr::GameDataMan
             .get()
             .add_offset(game_data_man::NEW_GAME)
-            .write::<i32>(val)?;
+            .write::<u32>(val)?;
 
         let current_ng = ClearCount.get()?.clamp(0, 7);
         NG_EVENT_IDS
@@ -282,9 +280,9 @@ macro_rules! impl_control_toggle {
     };
 }
 
-impl_control_toggle!(DisableRoll, ControlFlag::Roll);
-impl_control_toggle!(DisableJump, ControlFlag::Jump);
-impl_control_toggle!(DisableBackstep, ControlFlag::Backstep);
+impl_control_toggle!(DisableRoll, CaveAddr::DisableRollFlag);
+impl_control_toggle!(DisableJump, CaveAddr::DisableJumpFlag);
+impl_control_toggle!(DisableBackstep, CaveAddr::DisableBackstepFlag);
 
 fn install_action_hook() -> SysResult {
     let location = CaveAddr::ActionHook;
@@ -298,28 +296,11 @@ fn install_action_hook() -> SysResult {
     install_hook(&fun.bytes, location, Hook::SetRequestedAction, 5)
 }
 
-#[derive(Clone, Copy)]
-enum ControlFlag {
-    Roll,
-    Jump,
-    Backstep,
-}
-
-impl Address for ControlFlag {
-    fn addr(&self) -> u64 {
-        match self {
-            Self::Roll => CaveAddr::DisableRollFlag.addr(),
-            Self::Jump => CaveAddr::DisableJumpFlag.addr(),
-            Self::Backstep => CaveAddr::DisableBackstepFlag.addr(),
-        }
-    }
-}
-
-fn is_control_disabled(flag: ControlFlag) -> SysResult<bool> {
+fn is_control_disabled(flag: impl Address) -> SysResult<bool> {
     read::<u8>(flag).map(|val| val != 0x0)
 }
 
-fn set_control(flag: ControlFlag, state: bool) -> anyhow::Result<()> {
+fn set_control(flag: impl Address, state: bool) -> anyhow::Result<()> {
     if state {
         install_action_hook()?;
     }

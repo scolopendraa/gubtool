@@ -1,7 +1,7 @@
 use {
     crate::{
         attached::{AddressSize, ParseState},
-        game_version::{DarkSouls2Version, EldenRingVersion, Game, GameVersion},
+        game_version::{DarkSouls2Version, DarkSouls3Version, EldenRingVersion, Game, GameVersion},
         pe::PeParser,
     },
     std::path::PathBuf,
@@ -16,11 +16,13 @@ mod win;
 #[cfg(windows)]
 pub use win::*;
 
-pub const VALID_COMMS: &[(&str, Game); 4] = &[
+pub const VALID_COMMS: &[(&str, Game); 6] = &[
+    ("DarkSoulsII.exe", Game::DarkSouls2),
+    ("DarkSoulsIII.ex", Game::DarkSouls3),
+    ("DarkSoulsIII.exe", Game::DarkSouls3),
     ("eldenring.exe", Game::EldenRing),
     ("start_protected", Game::EldenRing),
     ("start_protected_game.exe", Game::EldenRing),
-    ("DarkSoulsII.exe", Game::DarkSouls2),
 ];
 
 fn parse_pe_for_version_and_address_size(
@@ -68,6 +70,16 @@ fn parse_pe_for_version_and_address_size(
                 }
             };
             GameVersion::DarkSouls2(version)
+        }
+        Game::DarkSouls3 => {
+            let version = match match_ds3(version_info) {
+                Ok(v) => v,
+                Err(err) => {
+                    parse_errors.push(err);
+                    DarkSouls3Version::Version1_15_2
+                }
+            };
+            GameVersion::DarkSouls3(version)
         }
         Game::EldenRing => {
             let version = match match_eldenring(version_info) {
@@ -121,6 +133,36 @@ fn match_scholar((major, minor, patch): (u16, u16, u16)) -> Result<DarkSouls2Ver
     })
 }
 
+fn match_ds3((major, minor, patch): (u16, u16, u16)) -> Result<DarkSouls3Version, ParseError> {
+    Ok(match (major, minor, patch) {
+        (1, 1, 1) => DarkSouls3Version::Version1_1_1,
+        (1, 3, 1) => DarkSouls3Version::Version1_3_1,
+        (1, 3, 2) => DarkSouls3Version::Version1_3_2,
+        (1, 4, 1) => DarkSouls3Version::Version1_4_1,
+        (1, 4, 2) => DarkSouls3Version::Version1_4_2,
+        (1, 4, 3) => DarkSouls3Version::Version1_4_3,
+        (1, 5, 0) => DarkSouls3Version::Version1_5_0,
+        (1, 5, 1) => DarkSouls3Version::Version1_5_1,
+        (1, 6, 0) => DarkSouls3Version::Version1_6_0,
+        (1, 7, 0) => DarkSouls3Version::Version1_7_0,
+        (1, 8, 0) => DarkSouls3Version::Version1_8_0,
+        (1, 9, 0) => DarkSouls3Version::Version1_9_0,
+        (1, 10, 0) => DarkSouls3Version::Version1_10_0,
+        (1, 11, 0) => DarkSouls3Version::Version1_11_0,
+        (1, 12, 0) => DarkSouls3Version::Version1_12_0,
+        (1, 13, 0) => DarkSouls3Version::Version1_13_0,
+        (1, 14, 0) => DarkSouls3Version::Version1_14_0,
+        (1, 15, 0) => DarkSouls3Version::Version1_15_0,
+        (1, 15, 1) => DarkSouls3Version::Version1_15_1,
+        (1, 15, 2) => DarkSouls3Version::Version1_15_2,
+        _ => {
+            return Err(ParseError::MatchProductVersion {
+                product_version: (major, minor, patch),
+            });
+        }
+    })
+}
+
 fn match_eldenring((major, minor, patch): (u16, u16, u16)) -> Result<EldenRingVersion, ParseError> {
     Ok(match (major, minor, patch) {
         (1, 2, 0) => EldenRingVersion::Version1_2_0,
@@ -150,6 +192,7 @@ fn match_eldenring((major, minor, patch): (u16, u16, u16)) -> Result<EldenRingVe
         (2, 6, 1) => EldenRingVersion::Version2_6_1,
         (2, 6, 2) => EldenRingVersion::Version2_6_2,
         (2, 7, 0) => EldenRingVersion::Version2_7_0,
+        (2, 7, 1) => EldenRingVersion::Version2_7_1,
         _ => {
             return Err(ParseError::MatchProductVersion {
                 product_version: (major, minor, patch),

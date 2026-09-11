@@ -2,15 +2,13 @@ use {
     crate::{
         chr_ins::ChrIns,
         resources::entity_ids,
-        target::target,
-        utils::{wait_for_cutscence_completion, wait_for_event},
+        target::{self, target},
     },
     anyhow::bail,
 };
 
 pub fn target_next_phase() -> anyhow::Result<()> {
-    let mut target_guard = target();
-    let chr = target_guard.chr_ins()?;
+    let mut chr = target()?;
     match chr.entity_id()? {
         entity_ids::MARGIT_BOSS => {
             if !chr.has_speffect(16200)? {
@@ -45,9 +43,9 @@ pub fn target_next_phase() -> anyhow::Result<()> {
             chr.set_hp_pct(55.0)?;
             let mut maliketh_ins = ChrIns::from_entity_id(entity_ids::MALIKETH)?;
             maliketh_ins.set_hp_pct(55.0)?;
-            wait_for_cutscence_completion()?;
-            wait_for_event(13002802, true, 5)?;
-            maliketh_ins.set_as_target(&mut target_guard)?
+            target::unlock()?;
+            drop(chr);
+            maliketh_ins.set_as_target()?
         }
         entity_ids::MOHG_LOB => {
             if !chr.has_speffect(10643)? {
@@ -75,8 +73,9 @@ pub fn target_next_phase() -> anyhow::Result<()> {
             let p2_max_hp = p2_ins.get_max_hp()?;
             p2_ins.set_hp(p2_max_hp - p1_max_hp)?;
             chr.set_hp(0)?;
-            wait_for_cutscence_completion()?;
-            p2_ins.set_as_target(&mut target_guard)?
+            target::unlock()?;
+            drop(chr);
+            p2_ins.set_as_target()?
         }
         entity_ids::PLACIDUSAX => {
             if !chr.has_speffect(16890)? {
@@ -94,8 +93,9 @@ pub fn target_next_phase() -> anyhow::Result<()> {
         entity_ids::GOD_SERPENT => {
             if chr.get_hp_pct()? > 1.0 {
                 chr.set_hp_pct(1.0)?;
-                wait_for_cutscence_completion()?;
-                ChrIns::from_entity_id(entity_ids::RYKARD)?.set_as_target(&mut target_guard)?;
+                target::unlock()?;
+                drop(chr);
+                ChrIns::from_entity_id(entity_ids::RYKARD)?.set_as_target()?;
             }
         }
         _ => bail!("Not implemented for current target"),

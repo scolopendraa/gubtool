@@ -11,7 +11,7 @@ use {
     },
     darksouls2::{
         item::{self, ItemSpawnRequest},
-        resources::items::{Categories, ITEMS, infusions::Infusion},
+        resources::items::{ITEMS, ItemCategory, infusions::Infusion},
     },
     nucleo_matcher::Utf32String,
     ratatui::{
@@ -192,7 +192,7 @@ impl SearchRequest for InfusionSearch {
 struct MassSpawnItems;
 impl TableController for MassSpawnItems {
     fn make_table_view(&self) -> TableView {
-        let rows = Categories::ARRAY
+        let rows = ItemCategory::ARRAY
             .iter()
             .map(|item| Row::new([item.to_string()]))
             .collect();
@@ -205,7 +205,7 @@ impl TableController for MassSpawnItems {
                 let item = guard.clone();
                 drop(guard);
                 item::mass_spawn(
-                    Categories::ARRAY[selected],
+                    ItemCategory::ARRAY[selected],
                     item.quantity,
                     item.upgrade,
                     item.infusion,

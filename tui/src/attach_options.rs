@@ -84,12 +84,14 @@ impl Screen for AttachOptions {
 
         match *self.game_screen.borrow() {
             Game::DarkSouls2 => self.ds2_tabs.draw(frame, tabs),
+            Game::DarkSouls3 => todo!(),
             Game::EldenRing => self.er_tabs.draw(frame, tabs),
         }
     }
     fn handle_keys(&mut self, ctx: &mut KeyContext) {
         match *self.game_screen.borrow() {
             Game::DarkSouls2 => self.ds2_tabs.handle_keys(ctx),
+            Game::DarkSouls3 => todo!(),
             Game::EldenRing => self.er_tabs.handle_keys(ctx),
         }
     }

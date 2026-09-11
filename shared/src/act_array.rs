@@ -29,7 +29,7 @@ impl ActArray {
 
         self.acts
             .iter()
-            .flat_map(|&x| (x as i32).to_le_bytes())
+            .flat_map(|&x| (x as u32).to_le_bytes())
             .collect()
     }
 }

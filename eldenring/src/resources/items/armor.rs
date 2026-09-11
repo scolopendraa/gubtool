@@ -1,6 +1,6 @@
 use super::Item;
 
-pub static ARMOR: [Item; 704] = [
+pub static ARMOR: [Item; 722] = [
     Item {
         id: 0x1001d588,
         name: "Alberich's Bracers",
@@ -3653,6 +3653,114 @@ pub static ARMOR: [Item; 704] = [
     Item {
         id: 0x101053b0,
         name: "Zamor Mask",
+        ..Item::default()
+    },
+    Item {
+        id: 0x10517b60,
+        name: "Broken Golden Mask",
+        tarnished_pack: true,
+        ..Item::default()
+    },
+    Item {
+        id: 0x10517bc4,
+        name: "Gold Tattoo (Chest)",
+        tarnished_pack: true,
+        ..Item::default()
+    },
+    Item {
+        id: 0x10517c28,
+        name: "Gold Tattoo (Arm)",
+        tarnished_pack: true,
+        ..Item::default()
+    },
+    Item {
+        id: 0x10517c8c,
+        name: "Gold Tattoo (Leg)",
+        tarnished_pack: true,
+        ..Item::default()
+    },
+    Item {
+        id: 0x1051a270,
+        name: "Silver Grooved Helm",
+        tarnished_pack: true,
+        ..Item::default()
+    },
+    Item {
+        id: 0x1051a2d4,
+        name: "Silver Grooved Armor",
+        tarnished_pack: true,
+        ..Item::default()
+    },
+    Item {
+        id: 0x1051a338,
+        name: "Silver Grooved Gauntlets",
+        tarnished_pack: true,
+        ..Item::default()
+    },
+    Item {
+        id: 0x1051a39c,
+        name: "Silver Grooved Greaves",
+        tarnished_pack: true,
+        ..Item::default()
+    },
+    Item {
+        id: 0x1051a6bc,
+        name: "Silver Grooved Armor (Altered)",
+        tarnished_pack: true,
+        ..Item::default()
+    },
+    Item {
+        id: 0x1051c980,
+        name: "Leontiel's Hat",
+        tarnished_pack: true,
+        ..Item::default()
+    },
+    Item {
+        id: 0x1051c9e4,
+        name: "Leontiel's Armor",
+        tarnished_pack: true,
+        ..Item::default()
+    },
+    Item {
+        id: 0x1051ca48,
+        name: "Leontiel's Leather Gloves",
+        tarnished_pack: true,
+        ..Item::default()
+    },
+    Item {
+        id: 0x1051caac,
+        name: "Leontiel's Boots",
+        tarnished_pack: true,
+        ..Item::default()
+    },
+    Item {
+        id: 0x1051cd68,
+        name: "Leontiel's Hat (Altered)",
+        tarnished_pack: true,
+        ..Item::default()
+    },
+    Item {
+        id: 0x1051f090,
+        name: "Steel Helm",
+        tarnished_pack: true,
+        ..Item::default()
+    },
+    Item {
+        id: 0x1051f0f4,
+        name: "Steel Armor",
+        tarnished_pack: true,
+        ..Item::default()
+    },
+    Item {
+        id: 0x1051f158,
+        name: "Steel Gauntlets",
+        tarnished_pack: true,
+        ..Item::default()
+    },
+    Item {
+        id: 0x1051f1bc,
+        name: "Steel Greaves",
+        tarnished_pack: true,
         ..Item::default()
     },
 ];

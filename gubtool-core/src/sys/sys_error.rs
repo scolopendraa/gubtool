@@ -1,12 +1,15 @@
 use {
     crate::{game_version::Game, slice_ops::SliceError},
-    std::{fmt::Display, io::ErrorKind, panic::Location},
-    strum::Display,
+    std::{
+        fmt::{Debug, Display},
+        io::ErrorKind,
+        panic::Location,
+    },
 };
 
 pub type SysResult<T = ()> = Result<T, SysError>;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy)]
 pub enum SysError {
     Io {
         access_type: AccessType,
@@ -29,7 +32,7 @@ pub enum SysError {
     },
     NotAttached,
     NullPointer {
-        pointer_type: PointerType,
+        pointer_type: Option<&'static dyn PointerType>,
     },
     Slice {
         slice_error: SliceError,
@@ -58,12 +61,9 @@ pub enum WriteType {
     Bytes(usize),
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Display)]
-#[strum(serialize_all = "title_case")]
-pub enum PointerType {
-    Player,
-    Target,
-    Torrent,
+pub trait PointerType: Debug + Display + Sync {
+    fn instance() -> &'static dyn PointerType
+    where Self: Sized;
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -138,9 +138,9 @@ impl SysError {
         }
     }
 
-    pub fn null_pointer(pointer_type: PointerType) -> Self {
+    pub fn null_pointer(pointer_type: &'static dyn PointerType) -> Self {
         Self::NullPointer {
-            pointer_type,
+            pointer_type: Some(pointer_type),
         }
     }
 
@@ -255,7 +255,10 @@ impl Display for SysError {
             Self::NullPointer {
                 pointer_type,
             } => {
-                write!(f, "{pointer_type} not found")
+                match pointer_type {
+                    Some(t) => write!(f, "{t}"),
+                    None => write!(f, "Dereferenced null pointer"),
+                }
             }
             Self::Slice {
                 slice_error,

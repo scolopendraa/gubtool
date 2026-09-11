@@ -12,7 +12,7 @@ add rbx, rax
 mov DWORD PTR [rbx], edx
 mov BYTE PTR [rbx+0x4], r8b
 inc edi
-and edi, 0x1FF
+and edi, 0x1ff
 mov DWORD PTR [r9], edi
 pop r9
 pop rdi

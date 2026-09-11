@@ -85,12 +85,10 @@ impl_tablecontroller_for_commands!(ToggleItems, TOGGLE_ITEMS);
 
 fn hp_line_gauge() -> LineGauge<'static> {
     let current = target::target()
-        .chr_ctrl()
-        .and_then(|t| t.get_hp())
+        .and_then(|mut t| t.get_hp())
         .unwrap_or_default();
     let max = target::target()
-        .chr_ctrl()
-        .and_then(|t| t.max_hp())
+        .and_then(|mut t| t.max_hp())
         .unwrap_or_default();
 
     let label = format!(
@@ -107,12 +105,10 @@ fn hp_line_gauge() -> LineGauge<'static> {
 
 fn poise_line_gauge() -> LineGauge<'static> {
     let current = target::target()
-        .chr_ctrl()
-        .and_then(|t| t.poise())
+        .and_then(|mut t| t.poise())
         .unwrap_or_default();
     let max = target::target()
-        .chr_ctrl()
-        .and_then(|t| t.max_poise())
+        .and_then(|mut t| t.max_poise())
         .unwrap_or_default();
     let vals = if max != 0.0 {
         format!("{:.1}/{:.1}", current, max)
@@ -127,12 +123,10 @@ fn poise_line_gauge() -> LineGauge<'static> {
 
 fn posture_line_gauge() -> LineGauge<'static> {
     let current = target::target()
-        .chr_ctrl()
-        .and_then(|t| t.posture())
+        .and_then(|mut t| t.posture())
         .unwrap_or_default();
     let max = target::target()
-        .chr_ctrl()
-        .and_then(|t| t.max_posture())
+        .and_then(|mut t| t.max_posture())
         .unwrap_or_default();
 
     let label = format!(
@@ -149,8 +143,7 @@ fn posture_line_gauge() -> LineGauge<'static> {
 
 fn chr_name_paragraph() -> Paragraph<'static> {
     let name = target::target()
-        .chr_ctrl()
-        .map(|t| t.name_from_chr_id())
+        .map(|mut t| t.name_from_chr_id())
         .unwrap_or_default();
     Paragraph::new(name)
         .centered()
@@ -159,21 +152,14 @@ fn chr_name_paragraph() -> Paragraph<'static> {
 }
 
 fn paragraph() -> Paragraph<'static> {
-    let last_act = match target::target()
-        .chr_ctrl()
-        .ok()
-        .and_then(|chr| chr.last_act())
-    {
+    let last_act = match target::target().ok().and_then(|mut chr| chr.last_act()) {
         Some(v) => format!("{v}"),
         None => "".to_string(),
     };
 
     let distance = target::target()
-        .chr_ctrl()
-        .and_then(|target| {
-            player::player()
-                .chr_ctrl()
-                .and_then(|player| target.get_distance(player))
+        .and_then(|mut target| {
+            player::player().and_then(|mut player| target.get_distance(&mut *player))
         })
         .unwrap_or_default();
 

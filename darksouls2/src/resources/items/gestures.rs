@@ -3,14 +3,14 @@ use super::Item;
 impl Item {
     const fn default_gesture() -> Self {
         Self {
-            category: super::Categories::Gestures,
+            category: super::ItemCategory::Gestures,
             stack_size: 1,
             ..Item::default()
         }
     }
 }
 
-pub static GESTURES: &[Item; 20] = &[
+pub static GESTURES: [Item; 20] = [
     Item {
         id: 63000000,
         name: "Point Gesture",

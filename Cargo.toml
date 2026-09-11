@@ -4,9 +4,11 @@ members = [
     "cli",
     "config",
     "darksouls2",
+    "darksouls3",
     "eldenring",
     "gubtool-core",
     "shared",
+    "shared/macros",
     "tui",
 ]
 resolver = "3"
@@ -36,7 +38,6 @@ glam = "0.33.0"
 tokio = { version = "1.52.3", features = ["full"] }
 strum = { version = "0.28", features = ["derive"] }
 linkme = "0.3.37"
-wayclip-global-hotkey = "0.7.0"
 
 [workspace.lints.rust]
 dead_code = "allow"

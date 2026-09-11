@@ -3,7 +3,7 @@ use super::Item;
 impl Item {
     const fn default_bell_bearing() -> Self {
         Self {
-            category: super::Categories::BellBearings,
+            category: super::ItemCategory::BellBearings,
             ..Item::default()
         }
     }

@@ -3,14 +3,14 @@ use super::Item;
 impl Item {
     const fn default_weapon() -> Self {
         Self {
-            category: super::Categories::Weapons,
+            category: super::ItemCategory::Weapons,
             stack_size: 1,
             ..Item::default()
         }
     }
 }
 
-pub static WEAPONS: &[Item; 325] = &[
+pub static WEAPONS: [Item; 325] = [
     Item {
         id: 5225000,
         name: "Aged Smelter Sword",

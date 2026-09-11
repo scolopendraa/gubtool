@@ -3,14 +3,14 @@ use super::Item;
 impl Item {
     const fn default_ring() -> Self {
         Self {
-            category: super::Categories::Rings,
+            category: super::ItemCategory::Rings,
             stack_size: 1,
             ..Item::default()
         }
     }
 }
 
-pub static RINGS: &[Item; 122] = &[
+pub static RINGS: [Item; 122] = [
     Item {
         id: 40010000,
         name: "Life Ring",

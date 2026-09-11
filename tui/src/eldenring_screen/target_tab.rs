@@ -90,12 +90,10 @@ impl_tablecontroller_for_commands!(Toggles, TOGGLES);
 
 fn hp_line_gauge() -> LineGauge<'static> {
     let current = target::target()
-        .chr_ins()
-        .and_then(|t| t.get_current_hp())
+        .and_then(|mut t| t.get_current_hp())
         .unwrap_or_default();
     let max = target::target()
-        .chr_ins()
-        .and_then(|t| t.get_max_hp())
+        .and_then(|mut t| t.get_max_hp())
         .unwrap_or_default();
 
     let label = format!(
@@ -112,12 +110,10 @@ fn hp_line_gauge() -> LineGauge<'static> {
 
 fn poise_line_gauge() -> LineGauge<'static> {
     let current = target::target()
-        .chr_ins()
-        .and_then(|t| t.get_current_poise())
+        .and_then(|mut t| t.get_current_poise())
         .unwrap_or_default();
     let max = target::target()
-        .chr_ins()
-        .and_then(|t| t.get_max_poise())
+        .and_then(|mut t| t.get_max_poise())
         .unwrap_or_default();
 
     let label = format!("{:<22}", format!("Poise: {:.1}/{:.1}", current, max));
@@ -127,8 +123,7 @@ fn poise_line_gauge() -> LineGauge<'static> {
 
 fn chr_name_paragraph() -> Paragraph<'static> {
     let name = target::target()
-        .chr_ins()
-        .map(|t| t.name_from_chr_id())
+        .map(|mut t| t.name_from_chr_id())
         .unwrap_or_default();
     Paragraph::new(name)
         .centered()
@@ -138,24 +133,18 @@ fn chr_name_paragraph() -> Paragraph<'static> {
 
 fn paragraph() -> Paragraph<'static> {
     let poise_timer = target::target()
-        .chr_ins()
-        .and_then(|t| t.get_poise_timer())
+        .and_then(|mut t| t.get_poise_timer())
         .unwrap_or_default()
         .abs();
     let last_act = target::target()
-        .chr_ins()
-        .and_then(|t| t.get_last_act())
+        .and_then(|mut t| t.get_last_act())
         .unwrap_or_default();
     let current_animation = target::target()
-        .chr_ins()
-        .and_then(|t| t.get_current_animation())
+        .and_then(|mut t| t.get_current_animation())
         .unwrap_or_default();
     let distance = target::target()
-        .chr_ins()
-        .and_then(|target| {
-            player::player()
-                .chr_ins()
-                .and_then(|player| target.get_distance(player))
+        .and_then(|mut target| {
+            player::player().and_then(|mut player| target.get_distance(&mut *player))
         })
         .unwrap_or_default();
     Paragraph::new(format!(

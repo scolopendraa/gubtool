@@ -3,13 +3,16 @@ mod scripts;
 pub use scripts::*;
 use {
     crate::{
-        mem::{read, read_address, run_custom_function, write},
-        offsets::{Offset, code_cave::CaveAddr, module_offsets::Function},
+        mem::run_custom_function,
+        offsets::{code_cave::CaveAddr, module_offsets::Function},
         resources::{asm_function, map_ids::MapId},
         utils::{area_check, player_loaded_check},
     },
     assemble::patch::DWORD,
-    gubtool_core::{address::POINTER, sys::sys_error::SysResult},
+    gubtool_core::{
+        address::{Offset, POINTER, Pointer},
+        sys::{read, read_pointer, sys_error::SysResult, write},
+    },
 };
 
 struct EsdEventScript {
@@ -84,7 +87,7 @@ impl EventCommand {
     }
 }
 
-pub fn get_obj_state_act_ctrl(map_id: MapId, obj_id: u32) -> anyhow::Result<u64> {
+pub fn get_obj_state_act_ctrl(map_id: MapId, obj_id: u32) -> anyhow::Result<Pointer> {
     player_loaded_check()?;
     area_check(map_id)?;
 
@@ -97,15 +100,15 @@ pub fn get_obj_state_act_ctrl(map_id: MapId, obj_id: u32) -> anyhow::Result<u64>
 
     run_custom_function(fun)?;
 
-    let state_act_ctrl = read_address(CaveAddr::LookedUpStateActCtrl)?;
+    let state_act_ctrl = read_pointer(CaveAddr::LookedUpStateActCtrl)?;
     Ok(state_act_ctrl)
 }
 
 const STATE_ID: Offset = Offset {
-    vanilla: 0x12,
-    scholar: 0x1e,
+    x86: 0x12,
+    x64: 0x1e,
 };
 
-pub fn get_obj_state(state_act_ctrl: u64) -> SysResult<u8> {
+pub fn get_obj_state(state_act_ctrl: Pointer) -> SysResult<u8> {
     read::<u8>(state_act_ctrl + STATE_ID.resolve())
 }

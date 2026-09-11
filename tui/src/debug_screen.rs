@@ -1,6 +1,7 @@
 use {
     crate::{
         darksouls2_screen,
+        darksouls3_screen,
         eldenring_screen,
         event::KeyContext,
         popup::{Popup, PopupState},
@@ -49,6 +50,7 @@ impl Screen for DebugPopup {
 
         match attached::game() {
             Ok(Game::DarkSouls2) => debug_info.append(&mut darksouls2_screen::dbg_lines()),
+            Ok(Game::DarkSouls3) => debug_info.append(&mut darksouls3_screen::dbg_lines()),
             Ok(Game::EldenRing) => debug_info.append(&mut eldenring_screen::dbg_lines()),
             Err(_) => (),
         }

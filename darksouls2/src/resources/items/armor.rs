@@ -3,14 +3,14 @@ use super::Item;
 impl Item {
     const fn default_armor() -> Self {
         Self {
-            category: super::Categories::Armor,
+            category: super::ItemCategory::Armor,
             stack_size: 1,
             ..Item::default()
         }
     }
 }
 
-pub static ARMOR: &[Item; 435] = &[
+pub static ARMOR: [Item; 435] = [
     Item {
         id: 25060101,
         name: "Agdayne's Black Robe",

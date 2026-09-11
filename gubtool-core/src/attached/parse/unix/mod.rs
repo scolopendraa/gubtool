@@ -116,7 +116,8 @@ fn scan_maps_for_path(pid: Pid, game: Game) -> Result<(PathBuf, u64), ParseError
 
 fn valid_exe_names(game: Game) -> &'static [&'static str] {
     match game {
-        Game::EldenRing => &["eldenring.exe", "start_protected_game.exe"],
         Game::DarkSouls2 => &["DarkSoulsII.exe"],
+        Game::DarkSouls3 => &["DarkSoulsIII.exe"],
+        Game::EldenRing => &["eldenring.exe", "start_protected_game.exe"],
     }
 }

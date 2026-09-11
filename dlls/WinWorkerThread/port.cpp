@@ -25,6 +25,13 @@ void WritePortAddress(u_short port)
         address = moduleBase + 0x1250000;
 #endif
     }
+    else if (wcscmp(processName, L"darksoulsiii") == 0 || wcscmp(processName, L"DarkSoulsIII") == 0 ||
+        wcscmp(processName, L"DarkSoulsIII.ex") == 0 ||
+        wcscmp(processName, L"DarkSoulsIII.exe") == 0 ||
+        wcscmp(processName, L"darksoulsiii.exe") == 0)
+    {
+        address = moduleBase + 0x4ccf4ed;
+    }
 
     *reinterpret_cast<u_short *>(address) = port;
 }

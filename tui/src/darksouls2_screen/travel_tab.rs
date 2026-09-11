@@ -85,7 +85,12 @@ impl TableController for BossList {
     }
     fn handle_keys_selected(&self, selected: usize, ctx: &mut KeyContext) {
         if ctx.key_enter() {
-            thread::spawn(move || bosses::BOSSES[selected].warp().send_error());
+            spawn_task! {
+                bosses::BOSSES[selected]
+                    .warp()
+                    .await
+                    .send_error()
+            }
         }
 
         if ctx.key_char('f') {
@@ -94,7 +99,10 @@ impl TableController for BossList {
 
         if ctx.key_char('r') {
             spawn_task! {
-                bosses::BOSSES[selected].revive().await.send_error();
+                bosses::BOSSES[selected]
+                    .revive()
+                    .await
+                    .send_error();
             }
         }
     }

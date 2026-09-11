@@ -1,23 +1,25 @@
 use {
     crate::{
-        POINTER_CACHE,
         enemy,
-        mem::*,
-        offsets::{
-            ChainReadExt,
-            code_cave::CaveAddr,
-            game_manager_imp,
-            module_offsets::BasePointer,
-        },
-        player::{self, player},
-        target::target,
+        is_player_loaded,
+        obj_refs::{self, PLAYER},
+        offsets::{code_cave::CaveAddr, game_manager_imp, module_offsets::BasePointer},
+        player::{self},
+        pointer_cache::pointer_cache,
         utility,
     },
-    gubtool_core::{address::Address, slice_ops::*, sys::sys_error::SysResult},
-    std::sync::{
-        LazyLock,
-        Mutex,
-        atomic::{AtomicBool, Ordering},
+    gubtool_core::{
+        address::{Address, ChainReadExt},
+        slice_ops::*,
+        sys::{read, read_pointer, sys_error::SysResult, write},
+    },
+    std::{
+        sync::{
+            LazyLock,
+            Mutex,
+            atomic::{AtomicBool, Ordering},
+        },
+        time::Duration,
     },
 };
 
@@ -46,15 +48,15 @@ impl GameState {
         }
     }
     fn on_loaded(&self) {
-        POINTER_CACHE.reset_pointers();
-        player().update();
+        pointer_cache().clear_pointers();
+        PLAYER.update();
         STATE_FLAGS.on_loaded();
         let _ = enemy::clear_disabled_targets();
     }
     fn on_unloaded(&self) {
-        POINTER_CACHE.reset_pointers();
-        player().update();
-        target().clear();
+        pointer_cache().clear_pointers();
+        PLAYER.update();
+        obj_refs::clear_target();
         enemy::act_logger().clear();
         STATE_FLAGS.on_unloaded();
     }
@@ -78,9 +80,7 @@ impl StateFlags {
 
     pub fn on_loaded(&self) {
         if self.is_flag(StateFlag::PlayerNoDeath) {
-            let _ = player::player()
-                .chr_ctrl()
-                .and_then(|chr| chr.set_no_death(true));
+            let _ = player::player().and_then(|mut chr| chr.set_no_death(true));
         }
     }
 
@@ -103,7 +103,7 @@ pub fn is_flag(flag_offset: StateFlag) -> bool {
 }
 
 pub fn set_flag(flag_offset: StateFlag, state: bool) -> SysResult {
-    write::<u8>(CaveAddr::StateHandlerFlags.add(flag_offset as u64), state as u8)
+    write::<u8>(CaveAddr::StateHandlerFlags.ptr() + flag_offset as u64, state as u8)
 }
 
 #[repr(u64)]
@@ -113,7 +113,7 @@ pub enum StateFlag {
 }
 
 fn is_loading_screen() -> bool {
-    read_address(BasePointer::GameManagerImp)
+    read_pointer(BasePointer::GameManagerImp)
         .add_offset(game_manager_imp::LOADING_FLAG)
         .read::<u8>()
         .map(|val| val == 0x1)
@@ -121,8 +121,20 @@ fn is_loading_screen() -> bool {
 }
 
 fn is_loaded() -> bool {
-    read_address(BasePointer::GameManagerImp)
-        .read_offset(game_manager_imp::PLAYER_CTRL)
+    read_pointer(BasePointer::GameManagerImp)
+        .read_ptr(game_manager_imp::PLAYER_CTRL)
         .map(|val| val != 0x0)
         .unwrap_or_default()
+}
+
+pub async fn wait_for_reload() {
+    while is_player_loaded() {
+        GAME_STATE.update();
+        tokio::time::sleep(Duration::from_millis(50)).await;
+    }
+
+    while !is_player_loaded() {
+        GAME_STATE.update();
+        tokio::time::sleep(Duration::from_millis(50)).await;
+    }
 }

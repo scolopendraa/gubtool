@@ -1,0 +1,22 @@
+include!("1_1_1.rs");
+include!("1_3_1.rs");
+include!("1_3_2.rs");
+include!("1_4_1.rs");
+include!("1_4_2.rs");
+include!("1_4_3.rs");
+include!("1_5_0.rs");
+include!("1_5_1.rs");
+include!("1_6_0.rs");
+include!("1_7_0.rs");
+include!("1_8_0.rs");
+include!("1_9_0.rs");
+include!("1_10_0.rs");
+include!("1_11_0.rs");
+include!("1_12_0.rs");
+include!("1_13_0.rs");
+include!("1_14_0.rs");
+include!("1_15_0.rs");
+include!("1_15_1.rs");
+include!("1_15_2.rs");
+
+use crate::offsets::module_offsets::r#struct::ModuleOffsets;

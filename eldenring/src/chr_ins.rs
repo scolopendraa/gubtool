@@ -3,9 +3,9 @@ use {
         ai::{CoolTime, add_cool_time, get_cool_time_list},
         emevd,
         mem::*,
+        obj_refs::TARGET,
         offsets::{
             self,
-            ChainReadExt,
             chr_ins::*,
             code_cave::CaveAddr,
             field_area,
@@ -14,37 +14,23 @@ use {
         },
         pointer_cache::ResolvedPtr,
         resources::{ASM, chr_names::CHR_NAMES},
-        target::Target,
     },
     anyhow::{bail, ensure},
     assemble::patch::DWORD,
     gubtool_core::{
-        address::{Address, POINTER},
-        sys::{ipc::FfiValue, sys_error::SysResult},
+        address::{ChainReadExt, POINTER, Pointer},
+        sys::{ipc::FfiValue, read, read_pointer, sys_error::SysResult, write_address},
     },
-    std::{collections::HashMap, sync::MutexGuard, time::Duration},
+    macros::GameObject,
+    shared::pointer_cache::{PointerCache, PointerKey},
+    std::time::Duration,
+    strum::EnumIter,
 };
 
-#[derive(Debug, Clone)]
+#[derive(GameObject)]
 pub struct ChrIns {
-    pub resolved_pointers: HashMap<ResolvedChrPtr, u64>,
-}
-
-#[derive(Debug, Hash, Eq, PartialEq, Clone, Copy)]
-pub enum ResolvedChrPtr {
-    ChrIns,
-    Modules,
-    DataModule,
-    SuperArmorModule,
-    TimeActModule,
-    BehaviourModule,
-    PhysicsModule,
-    RideModule,
-    SpecialEffect,
-    ComManipulator,
-    AiThink,
-    ChrCtrl,
-    CtrlFlags,
+    pub base:     Pointer,
+    pub pointers: PointerCache<ResolvedChrPtr>,
 }
 
 impl ChrIns {
@@ -209,14 +195,12 @@ impl ChrIns {
     }
 
     pub fn block_id(&mut self) -> SysResult<u32> {
-        self.get_ptr(ResolvedChrPtr::ChrIns)
-            .add_offset(offsets::chr_ins::BLOCK_ID)
-            .read::<u32>()
+        read::<u32>(self.base + offsets::chr_ins::BLOCK_ID)
     }
 
     pub fn map_coords(&mut self) -> anyhow::Result<[f32; 3]> {
         let block_pos = world_block_info_from_block_id(self.block_id()?)
-            .and_then(|addr| Ok(read::<[f32; 3]>(addr.saturating_add(0x70))?))?;
+            .and_then(|addr| Ok(read::<[f32; 3]>(addr + 0x70)?))?;
         let local_coords = self.local_coords()?;
         Ok([
             local_coords[0] - block_pos[0],
@@ -226,10 +210,7 @@ impl ChrIns {
     }
 
     pub fn set_speffect(&mut self, speffect_id: u32) -> anyhow::Result<()> {
-        let args = [
-            FfiValue::pointer(self.get_ptr(ResolvedChrPtr::ChrIns)?),
-            FfiValue::uint32(speffect_id),
-        ];
+        let args = [FfiValue::pointer(self.base), FfiValue::uint32(speffect_id)];
 
         run_game_function(Function::SetSpeffect, &args)
     }
@@ -247,12 +228,13 @@ impl ChrIns {
     pub fn has_speffect(&mut self, speffect_id: u32) -> SysResult<bool> {
         let mut current = self
             .get_ptr(ResolvedChrPtr::SpecialEffect)
-            .read_offset(speffect_offsets::HEAD)?;
+            .read_ptr(speffect_offsets::HEAD)?;
+
         while current != 0x0 {
-            if read::<u32>(current.saturating_add(speffect_entry::ID))? == speffect_id {
+            if read::<u32>(current + speffect_entry::ID)? == speffect_id {
                 return Ok(true);
             }
-            current = read::<u64>(current.saturating_add(speffect_entry::NEXT))?;
+            current = read_pointer(current + speffect_entry::NEXT)?;
         }
         Ok(false)
     }
@@ -293,27 +275,22 @@ impl ChrIns {
             .read::<[f32; 16]>()
     }
 
-    pub fn set_as_target(mut self, target_guard: &mut MutexGuard<'static, Target>) -> SysResult {
-        write::<u64>(CaveAddr::SavedTargetPointer, self.get_ptr(ResolvedChrPtr::ChrIns)?)?;
-        target_guard.set(self);
+    pub fn set_as_target(self) -> SysResult {
+        write_address(CaveAddr::SavedTargetPointer, self.base)?;
+        *TARGET.obj_ins.lock().unwrap() = Some(self);
         Ok(())
     }
 
     pub fn chr_id(&mut self) -> SysResult<i32> {
-        self.get_ptr(ResolvedChrPtr::ChrIns)
-            .add_offset(offsets::chr_ins::CHR_ID)
-            .read::<i32>()
+        read::<i32>(self.base + offsets::chr_ins::CHR_ID)
     }
 
-    pub fn handle(&mut self) -> SysResult<u64> {
-        self.get_ptr(ResolvedChrPtr::ChrIns)
-            .read_offset(offsets::chr_ins::HANDLE)
+    pub fn handle(&mut self) -> SysResult<Pointer> {
+        read_pointer(self.base + offsets::chr_ins::HANDLE)
     }
 
     pub fn entity_id(&mut self) -> SysResult<u32> {
-        self.get_ptr(ResolvedChrPtr::ChrIns)
-            .add_offset(offsets::chr_ins::entity_id())
-            .read::<u32>()
+        read::<u32>(self.base + offsets::chr_ins::entity_id())
     }
 
     pub fn npc_think_param_id(&mut self) -> SysResult<i32> {
@@ -329,28 +306,25 @@ impl ChrIns {
 }
 
 impl ChrIns {
-    pub fn new(pointer: impl Address) -> Self {
-        let resolved_pointers = HashMap::new();
-        let mut s = Self {
-            resolved_pointers,
-        };
-        s.resolved_pointers
-            .insert(ResolvedChrPtr::ChrIns, pointer.addr());
-        s
+    pub fn new(pointer: Pointer) -> Self {
+        ChrIns {
+            base:     pointer,
+            pointers: PointerCache::new_with_base(pointer),
+        }
     }
 
-    pub fn from_handle(handle: u64) -> Option<Self> {
+    pub fn from_handle(handle: Pointer) -> Option<Self> {
         if handle == 0 {
             return None;
         }
 
-        let pool_index = (handle >> 20) & 0xff;
-        let slot_index = handle & 0xfffff;
+        let pool_index = ((handle.address >> 20) & 0xff) as i32;
+        let slot_index = (handle.address & 0xfffff) as i32;
         let pointer = ResolvedPtr::WorldChrMan
             .get()
-            .read_offset(world_chr_man::chr_set_pool() + pool_index * 8)
-            .read_offset(world_chr_man::chr_set_offsets::CHR_SET_ENTRIES)
-            .read_offset(slot_index * 16)
+            .read_ptr(world_chr_man::chr_set_pool() + pool_index * 8)
+            .read_ptr(world_chr_man::chr_set_offsets::CHR_SET_ENTRIES)
+            .read_ptr(slot_index * 16)
             .unwrap_or_default();
         if pointer != 0 { Some(Self::new(pointer)) } else { None }
     }
@@ -365,100 +339,106 @@ impl ChrIns {
 
         run_custom_function(fun)?;
 
-        let pointer = read::<u64>(CaveAddr::LookedUpEntityId)?;
+        let pointer = read_pointer(CaveAddr::LookedUpEntityId)?;
         Ok(Self::new(pointer))
     }
 
-    pub fn pointers(&self) -> Vec<(String, u64)> {
-        self.resolved_pointers
-            .iter()
-            .map(|(name, addr)| (format!("{:?}", name), *addr))
-            .collect()
-    }
-
-    pub fn get_ptr(&mut self, pointer: ResolvedChrPtr) -> SysResult<u64> {
-        if let Some(&val) = self.resolved_pointers.get(&pointer) {
-            return Ok(val);
-        }
-
-        let resolved_pointer = match pointer {
-            ResolvedChrPtr::ChrIns => {
-                unreachable!("ChrIns struct without base pointer")
-            }
-            ResolvedChrPtr::Modules => {
-                self.get_ptr(ResolvedChrPtr::ChrIns)
-                    .read_offset(offsets::chr_ins::MODULES)
-            }
-            ResolvedChrPtr::DataModule => {
-                self.get_ptr(ResolvedChrPtr::Modules)
-                    .read_offset(offsets::chr_ins::CHR_DATA_MODULE)
-            }
-            ResolvedChrPtr::SuperArmorModule => {
-                self.get_ptr(ResolvedChrPtr::Modules)
-                    .read_offset(offsets::chr_ins::CHR_SUPER_ARMOR_MODULE)
-            }
-            ResolvedChrPtr::TimeActModule => {
-                self.get_ptr(ResolvedChrPtr::Modules)
-                    .read_offset(offsets::chr_ins::CHR_TIME_ACT_MODULE)
-            }
-            ResolvedChrPtr::BehaviourModule => {
-                self.get_ptr(ResolvedChrPtr::Modules)
-                    .read_offset(offsets::chr_ins::CHR_BEHAVIOR_MODULE)
-            }
-            ResolvedChrPtr::PhysicsModule => {
-                self.get_ptr(ResolvedChrPtr::Modules)
-                    .read_offset(offsets::chr_ins::CHR_PHYSICS_MODULE)
-            }
-            ResolvedChrPtr::RideModule => {
-                self.get_ptr(ResolvedChrPtr::Modules)
-                    .read_offset(offsets::chr_ins::CHR_RIDE_MODULE)
-            }
-            ResolvedChrPtr::SpecialEffect => {
-                self.get_ptr(ResolvedChrPtr::ChrIns)
-                    .read_offset(offsets::chr_ins::SPECIAL_EFFECT)
-            }
-            ResolvedChrPtr::ComManipulator => {
-                self.get_ptr(ResolvedChrPtr::ChrIns)
-                    .read_offset(offsets::chr_ins::com_manipulator())
-            }
-            ResolvedChrPtr::AiThink => {
-                self.get_ptr(ResolvedChrPtr::ComManipulator)
-                    .read_offset(0xc0)
-            }
-            ResolvedChrPtr::ChrCtrl => {
-                self.get_ptr(ResolvedChrPtr::ChrIns)
-                    .read_offset(offsets::chr_ins::CHR_CTRL)
-            }
-            ResolvedChrPtr::CtrlFlags => {
-                self.get_ptr(ResolvedChrPtr::ChrCtrl)
-                    .read_offset(0xc8)
-                    .add_offset(0x24)
-            }
-        }?;
-
-        if resolved_pointer != 0x0 {
-            self.resolved_pointers.insert(pointer, resolved_pointer);
-        }
-        Ok(resolved_pointer)
+    pub fn get_ptr(&mut self, pointer: ResolvedChrPtr) -> SysResult<Pointer> {
+        self.pointers.lookup(pointer)
     }
 }
 
-fn world_block_info_from_block_id(block_id: u32) -> anyhow::Result<u64> {
+#[derive(Debug, Hash, Eq, PartialEq, Clone, Copy, EnumIter)]
+pub enum ResolvedChrPtr {
+    Modules,
+    DataModule,
+    SuperArmorModule,
+    TimeActModule,
+    BehaviourModule,
+    PhysicsModule,
+    RideModule,
+    SpecialEffect,
+    ComManipulator,
+    AiThink,
+    ChrCtrl,
+    CtrlFlags,
+}
+
+impl PointerKey for ResolvedChrPtr {
+    fn lookup(
+        cache: &mut PointerCache<Self>,
+        key: Self,
+        base: Option<Pointer>,
+    ) -> SysResult<Pointer>
+    where
+        Self: Sized,
+    {
+        let base = base.unwrap();
+
+        match key {
+            ResolvedChrPtr::Modules => read_pointer(base + offsets::chr_ins::MODULES),
+            ResolvedChrPtr::DataModule => {
+                cache
+                    .lookup(ResolvedChrPtr::Modules)
+                    .read_ptr(offsets::chr_ins::CHR_DATA_MODULE)
+            }
+            ResolvedChrPtr::SuperArmorModule => {
+                cache
+                    .lookup(ResolvedChrPtr::Modules)
+                    .read_ptr(offsets::chr_ins::CHR_SUPER_ARMOR_MODULE)
+            }
+            ResolvedChrPtr::TimeActModule => {
+                cache
+                    .lookup(ResolvedChrPtr::Modules)
+                    .read_ptr(offsets::chr_ins::CHR_TIME_ACT_MODULE)
+            }
+            ResolvedChrPtr::BehaviourModule => {
+                cache
+                    .lookup(ResolvedChrPtr::Modules)
+                    .read_ptr(offsets::chr_ins::CHR_BEHAVIOR_MODULE)
+            }
+            ResolvedChrPtr::PhysicsModule => {
+                cache
+                    .lookup(ResolvedChrPtr::Modules)
+                    .read_ptr(offsets::chr_ins::CHR_PHYSICS_MODULE)
+            }
+            ResolvedChrPtr::RideModule => {
+                cache
+                    .lookup(ResolvedChrPtr::Modules)
+                    .read_ptr(offsets::chr_ins::CHR_RIDE_MODULE)
+            }
+            ResolvedChrPtr::SpecialEffect => read_pointer(base + offsets::chr_ins::SPECIAL_EFFECT),
+            ResolvedChrPtr::ComManipulator => {
+                read_pointer(base + offsets::chr_ins::com_manipulator())
+            }
+            ResolvedChrPtr::AiThink => cache.lookup(ResolvedChrPtr::ComManipulator).read_ptr(0xc0),
+            ResolvedChrPtr::ChrCtrl => read_pointer(base + offsets::chr_ins::CHR_CTRL),
+            ResolvedChrPtr::CtrlFlags => {
+                cache
+                    .lookup(ResolvedChrPtr::ChrCtrl)
+                    .read_ptr(0xc8)
+                    .add_offset(0x24)
+            }
+        }
+    }
+}
+
+fn world_block_info_from_block_id(block_id: u32) -> anyhow::Result<Pointer> {
     let target_area = (block_id >> 24) & 0xff;
-    let world_info_owner = read::<u64>(BasePointer::FieldArea)
-        .and_then(|addr| read::<u64>(addr + field_area::WORLD_INFO_OWNER))?;
+    let world_info_owner =
+        read_pointer(BasePointer::FieldArea).read_ptr(field_area::WORLD_INFO_OWNER)?;
     let area_count =
         read::<i32>(world_info_owner + field_area::world_info_owner_offsets::AREA_COUNT)?;
 
     for i in 0..area_count as u64 {
-        let area_ptr = read::<u64>(
+        let area_ptr = read_pointer(
             world_info_owner + field_area::world_info_owner_offsets::AREA_ARRAY_BASE + (i * 8),
         )?;
         let area_id = read::<u32>(area_ptr + 0xc)?;
 
         if area_id == target_area {
             let block_count = read::<i32>(area_ptr + 0x40)?;
-            let blocks_ptr = read::<u64>(area_ptr + 0x48)?;
+            let blocks_ptr = read_pointer(area_ptr + 0x48)?;
 
             for j in 0..block_count as u64 {
                 let block_info_ptr = blocks_ptr + (j * 0xe0);

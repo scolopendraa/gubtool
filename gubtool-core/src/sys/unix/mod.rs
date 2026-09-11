@@ -9,7 +9,6 @@ use {
             sys_error::{AccessType, PtraceAction, SysError, SysResult, WriteType},
         },
     },
-    assemble::patch::QWORD,
     libc::{NT_PRSTATUS, PTRACE_GETREGSET, PTRACE_SETREGSET},
     nix::sys::{
         ptrace::{
@@ -34,7 +33,9 @@ use {
 static PTRACE_MUTEX: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
 
 #[track_caller]
-pub fn read_unsafe<T>(address: impl Address) -> SysResult<T> {
+pub fn read<T>(address: impl Address) -> SysResult<T> {
+    address.validate_game()?;
+
     unsafe {
         let pid = pid()?;
         let mut value = std::mem::zeroed::<T>();
@@ -42,7 +43,7 @@ pub fn read_unsafe<T>(address: impl Address) -> SysResult<T> {
         let local_iov =
             IoSliceMut::new(slice::from_raw_parts_mut(&mut value as *mut T as *mut u8, size));
         let remote_iov = RemoteIoVec {
-            base: address.addr() as usize,
+            base: address.u64_address() as usize,
             len:  size,
         };
 
@@ -51,7 +52,7 @@ pub fn read_unsafe<T>(address: impl Address) -> SysResult<T> {
             Err(err) => {
                 return Err(SysError::io(
                     AccessType::Read(type_name::<T>()),
-                    address.addr(),
+                    address.u64_address(),
                     std::io::Error::from(err),
                 ));
             }
@@ -60,7 +61,7 @@ pub fn read_unsafe<T>(address: impl Address) -> SysResult<T> {
             return Err(SysError::partial_access(
                 AccessType::Read(type_name::<T>()),
                 nread,
-                address.addr(),
+                address.u64_address(),
             ));
         }
         Ok(value)
@@ -68,13 +69,15 @@ pub fn read_unsafe<T>(address: impl Address) -> SysResult<T> {
 }
 
 #[track_caller]
-pub fn write_unsafe<T>(address: impl Address, value: T) -> SysResult {
+pub fn write<T>(address: impl Address, value: T) -> SysResult {
+    address.validate_game()?;
+
     unsafe {
         let pid = pid()?;
         let size = std::mem::size_of::<T>();
         let local_iov = IoSlice::new(slice::from_raw_parts(&value as *const T as *const u8, size));
         let remote_iov = RemoteIoVec {
-            base: address.addr() as usize,
+            base: address.u64_address() as usize,
             len:  size,
         };
 
@@ -83,7 +86,7 @@ pub fn write_unsafe<T>(address: impl Address, value: T) -> SysResult {
             Err(err) => {
                 return Err(SysError::io(
                     AccessType::Write(WriteType::Type(type_name::<T>())),
-                    address.addr(),
+                    address.u64_address(),
                     std::io::Error::from(err),
                 ));
             }
@@ -92,7 +95,7 @@ pub fn write_unsafe<T>(address: impl Address, value: T) -> SysResult {
             return Err(SysError::partial_access(
                 AccessType::Write(WriteType::Type(type_name::<T>())),
                 nwritten,
-                address.addr(),
+                address.u64_address(),
             ));
         }
         Ok(())
@@ -100,12 +103,14 @@ pub fn write_unsafe<T>(address: impl Address, value: T) -> SysResult {
 }
 
 #[track_caller]
-pub fn write_bytes_unsafe(address: impl Address, data: &[u8]) -> SysResult {
+pub fn write_bytes(address: impl Address, data: &[u8]) -> SysResult {
+    address.validate_game()?;
+
     let pid = pid()?;
     let size = data.len();
     let local_iov = IoSlice::new(data);
     let remote_iov = RemoteIoVec {
-        base: address.addr() as usize,
+        base: address.u64_address() as usize,
         len:  size,
     };
 
@@ -114,7 +119,7 @@ pub fn write_bytes_unsafe(address: impl Address, data: &[u8]) -> SysResult {
         Err(err) => {
             return Err(SysError::io(
                 AccessType::Write(WriteType::Bytes(size)),
-                address.addr(),
+                address.u64_address(),
                 std::io::Error::from(err),
             ));
         }
@@ -123,7 +128,7 @@ pub fn write_bytes_unsafe(address: impl Address, data: &[u8]) -> SysResult {
         return Err(SysError::partial_access(
             AccessType::Write(WriteType::Bytes(size)),
             nwritten,
-            address.addr(),
+            address.u64_address(),
         ));
     }
     Ok(())
@@ -136,7 +141,7 @@ pub fn spawn_thread_release(
     create_thread_ptr_loc: impl Address,
     close_handle_ptr_loc: impl Address,
 ) -> SysResult {
-    write_bytes_unsafe(thread_start_address, &thread_code)?;
+    write_bytes(thread_start_address, &thread_code)?;
     if attached::is_32() {
         run_win32_thread(
             spawn_code_address,
@@ -161,12 +166,12 @@ pub fn spawn_thread_join(
     create_thread_ptr_loc: impl Address,
     close_handle_ptr_loc: impl Address,
 ) -> SysResult {
-    let running_flag = thread_start_address.addr().saturating_sub(1);
-    write_unsafe::<u8>(running_flag, 0x1)?;
+    let running_flag = thread_start_address.u64_address().saturating_sub(1);
+    write::<u8>(running_flag, 0x1)?;
 
     if attached::is_32() {
-        append_32bit_flag_setter(thread_start_address.addr(), &mut thread_code)?;
-        write_bytes_unsafe(thread_start_address, &thread_code)?;
+        append_32bit_flag_setter(thread_start_address.u64_address(), &mut thread_code)?;
+        write_bytes(thread_start_address, &thread_code)?;
         run_win32_thread(
             spawn_code_address,
             thread_start_address,
@@ -174,8 +179,8 @@ pub fn spawn_thread_join(
             close_handle_ptr_loc,
         )?;
     } else {
-        append_64bit_flag_setter(thread_start_address.addr(), &mut thread_code)?;
-        write_bytes_unsafe(thread_start_address, &thread_code)?;
+        append_64bit_flag_setter(thread_start_address.u64_address(), &mut thread_code)?;
+        write_bytes(thread_start_address, &thread_code)?;
         run_win64_thread(
             spawn_code_address,
             thread_start_address,
@@ -187,7 +192,7 @@ pub fn spawn_thread_join(
     let start = Instant::now();
     let timeout = Duration::from_millis(100);
     loop {
-        if read_unsafe::<u8>(running_flag)? == 0x0 {
+        if read::<u8>(running_flag)? == 0x0 {
             return Ok(());
         }
         if start.elapsed() > timeout {
@@ -230,20 +235,20 @@ fn run_win64_thread(
 
             let mut regs = original_regs;
 
-            regs.rip = spawn_code_address.addr();
+            regs.rip = spawn_code_address.u64_address();
             regs.rsp = regs.rsp.strict_sub(0x100) & !0xfu64;
 
-            let flag_loc = spawn_code_address.addr().strict_sub(1);
+            let flag_loc = spawn_code_address.u64_address().strict_sub(1);
 
             let mut fun = ASM64.get_function("run_thread");
 
-            fun.patch::<QWORD>("code_address", thread_start_address.addr());
-            fun.patch::<QWORD>("create_thread", create_thread_ptr_loc.addr());
-            fun.patch::<QWORD>("close_handle", close_handle_ptr_loc.addr());
-            fun.patch::<QWORD>("flag_loc", flag_loc);
+            fun.patch::<POINTER>("code_address", thread_start_address.u64_address());
+            fun.patch::<POINTER>("create_thread", create_thread_ptr_loc.u64_address());
+            fun.patch::<POINTER>("close_handle", close_handle_ptr_loc.u64_address());
+            fun.patch::<POINTER>("flag_loc", flag_loc);
 
-            write_unsafe::<u8>(flag_loc, 0x0)?;
-            write_bytes_unsafe(spawn_code_address, &fun.bytes)?;
+            write::<u8>(flag_loc, 0x0)?;
+            write_bytes(spawn_code_address, &fun.bytes)?;
 
             ptrace::setregset::<NT_PRSTATUS>(pid, regs)
                 .map_err(|e| SysError::ptrace(PtraceAction::SetRegs, e))?;
@@ -338,19 +343,19 @@ fn run_win32_thread(
             if start < eip && eip < start + 0x5e03000 {
                 let mut regs = original_regs.clone();
 
-                let flag_loc = spawn_code_address.addr().saturating_sub(1);
+                let flag_loc = spawn_code_address.u64_address().saturating_sub(1);
 
                 let mut fun = ASM32.get_function("run_thread");
 
-                fun.patch::<POINTER>("code_address", thread_start_address.addr());
-                fun.patch::<POINTER>("create_thread", create_thread_ptr_loc.addr());
-                fun.patch::<POINTER>("close_handle", close_handle_ptr_loc.addr());
+                fun.patch::<POINTER>("code_address", thread_start_address.u64_address());
+                fun.patch::<POINTER>("create_thread", create_thread_ptr_loc.u64_address());
+                fun.patch::<POINTER>("close_handle", close_handle_ptr_loc.u64_address());
                 fun.patch::<POINTER>("flag_loc", flag_loc);
 
-                write_unsafe::<u8>(flag_loc, 0x0)?;
-                write_bytes_unsafe(spawn_code_address, &fun.bytes)?;
+                write::<u8>(flag_loc, 0x0)?;
+                write_bytes(spawn_code_address, &fun.bytes)?;
 
-                regs.eip = spawn_code_address.addr() as u32;
+                regs.eip = spawn_code_address.u64_address() as u32;
 
                 ptr::write_unaligned(regs_ptr, regs);
 
@@ -380,7 +385,7 @@ fn run_win32_thread(
 }
 
 fn check_success_flag(flag_loc: u64) -> SysResult {
-    let flag = read_unsafe::<u8>(flag_loc)?;
+    let flag = read::<u8>(flag_loc)?;
     if flag != 0x0 {
         Ok(())
     } else {

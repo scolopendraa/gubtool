@@ -1,6 +1,6 @@
 use {
     crate::{
-        mem::{run_custom_function_in_thread, write_bytes},
+        mem::run_custom_function_in_thread,
         offsets::{
             code_cave::CaveAddr,
             module_offsets::{BasePointer, Function},
@@ -9,10 +9,12 @@ use {
         utils::player_loaded_check,
     },
     assemble::patch::DWORD,
-    gubtool_core::{address::POINTER, slice_ops::*},
+    gubtool_core::{address::POINTER, slice_ops::*, sys::write_bytes},
 };
 
 fn execute_emevd_command(group_id: i32, command_id: i32, args: &[u8]) -> anyhow::Result<()> {
+    write_bytes(CaveAddr::EmevdArgs, args)?;
+
     let mut fun = ASM.get_function("execute_emevd_command");
 
     fun.patch::<POINTER>("fn_emk_event_ins_ctor", Function::EmkEventInsCtor);
@@ -22,7 +24,6 @@ fn execute_emevd_command(group_id: i32, command_id: i32, args: &[u8]) -> anyhow:
     fun.patch::<POINTER>("cs_emk_system", BasePointer::CsEmkSystem);
     fun.patch::<POINTER>("fn_emevd_switch", Function::EmevdSwitch);
 
-    write_bytes(CaveAddr::EmevdArgs, args)?;
     run_custom_function_in_thread(fun)
 }
 

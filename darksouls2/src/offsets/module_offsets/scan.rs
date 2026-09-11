@@ -1,5 +1,5 @@
 use {
-    crate::offsets::module_offsets::structs::ModuleOffsets,
+    crate::offsets::module_offsets::r#struct::ModuleOffsets,
     gubtool_core::{
         aob_scanner::{ScanStrategy, scan_error::ScanError},
         attached::{self, AddressSize},

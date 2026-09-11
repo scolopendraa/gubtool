@@ -3,9 +3,9 @@ use gubtool_core::{
     game_version::EldenRingVersion::{self, *},
 };
 
-pub const PLAYER_GAME_DATA: u64 = 0x8;
+pub const PLAYER_GAME_DATA: i32 = 0x8;
 
-#[repr(u64)]
+#[repr(i32)]
 #[derive(Clone, Copy)]
 pub enum PlayerGameDataOffset {
     Vigor        = 0x3c,
@@ -24,16 +24,16 @@ pub enum PlayerGameDataOffset {
     RuneArc      = 0xff,
 }
 
-pub const OPTIONS: u64 = 0x58;
+pub const OPTIONS: i32 = 0x58;
 
 pub mod options_offsets {
-    pub const MUSIC: u64 = 0x4;
+    pub const MUSIC: i32 = 0x4;
 }
 
-pub const IGT: u64 = 0xa0;
-pub const NEW_GAME: u64 = 0x120;
+pub const IGT: i32 = 0xa0;
+pub const NEW_GAME: i32 = 0x120;
 
-pub fn torrent_handle() -> u64 {
+pub fn torrent_handle() -> i32 {
     match version::<EldenRingVersion>() {
         Some(v) if v <= Version2_0_1 => 0x930,
         _ => 0x950,

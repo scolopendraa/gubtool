@@ -1,9 +1,6 @@
 use {
     crate::{enemy, event, player, target, utility},
-    config::{
-        attach::{AttachEntry, apply_attach_entries},
-        impl_attach_field_bool,
-    },
+    config::attach::{AttachEntry, apply_attach_entries},
     gubtool_core::{
         attached::{self},
         game_version::Game,
@@ -16,7 +13,7 @@ pub async fn attach() -> anyhow::Result<()> {
     crate::init();
 
     tokio::time::sleep(Duration::from_secs_f64(1.0)).await;
-    let _ = utility::enable_skip_logos();
+    utility::enable_skip_logos()?;
 
     let time_to_wait = 6.0 - attached::uptime();
 
@@ -24,7 +21,7 @@ pub async fn attach() -> anyhow::Result<()> {
         tokio::time::sleep(Duration::from_secs_f64(time_to_wait)).await;
     }
 
-    if attached::game() != Ok(Game::DarkSouls2) {
+    if !matches!(attached::game(), Ok(Game::DarkSouls2)) {
         return Ok(());
     }
 
@@ -35,23 +32,29 @@ pub async fn attach() -> anyhow::Result<()> {
     Ok(())
 }
 
-impl_attach_field_bool!(NoDeath, player, dark_souls_2);
-impl_attach_field_bool!(NoDamage, player, dark_souls_2);
-impl_attach_field_bool!(InfinitePoise, player, dark_souls_2);
-impl_attach_field_bool!(InfiniteStamina, player, dark_souls_2);
-impl_attach_field_bool!(InfiniteDurability, player, dark_souls_2);
-impl_attach_field_bool!(InfiniteConsumables, player, dark_souls_2);
-impl_attach_field_bool!(NoHollowing, player, dark_souls_2);
-impl_attach_field_bool!(NoSoulLoss, player, dark_souls_2);
-impl_attach_field_bool!(Hidden, player, dark_souls_2);
-impl_attach_field_bool!(Silent, player, dark_souls_2);
-impl_attach_field_bool!(SkipCredits, utility, dark_souls_2);
-impl_attach_field_bool!(FastQuitout, utility, dark_souls_2);
-impl_attach_field_bool!(DisableRoll, utility, dark_souls_2);
-impl_attach_field_bool!(DisableBackstep, utility, dark_souls_2);
-impl_attach_field_bool!(SkipIvoryKingGauntlet, event, dark_souls_2);
-impl_attach_field_bool!(DisableLoyceKnights, event, dark_souls_2);
-impl_attach_field_bool!(StartEventLogger, event, dark_souls_2);
+macro_rules! impl_attach_field_bool {
+    ($struct_name:ident, $module_name:ident) => {
+        config::impl_attach_field_bool!($struct_name, $module_name, dark_souls_2);
+    };
+}
+
+impl_attach_field_bool!(NoDeath, player);
+impl_attach_field_bool!(NoDamage, player);
+impl_attach_field_bool!(InfinitePoise, player);
+impl_attach_field_bool!(InfiniteStamina, player);
+impl_attach_field_bool!(InfiniteDurability, player);
+impl_attach_field_bool!(InfiniteConsumables, player);
+impl_attach_field_bool!(NoHollowing, player);
+impl_attach_field_bool!(NoSoulLoss, player);
+impl_attach_field_bool!(Hidden, player);
+impl_attach_field_bool!(Silent, player);
+impl_attach_field_bool!(SkipCredits, utility);
+impl_attach_field_bool!(FastQuitout, utility);
+impl_attach_field_bool!(DisableRoll, utility);
+impl_attach_field_bool!(DisableBackstep, utility);
+impl_attach_field_bool!(SkipIvoryKingGauntlet, event);
+impl_attach_field_bool!(DisableLoyceKnights, event);
+impl_attach_field_bool!(StartEventLogger, event);
 
 #[linkme::distributed_slice]
 static DARK_SOULS_2_ATTACH_ENTRIES: [&'static dyn AttachEntry];

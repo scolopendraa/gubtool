@@ -12,12 +12,14 @@ impl PatchSize for WORD {}
 impl PatchSize for DWORD {}
 impl PatchSize for QWORD {}
 
+#[track_caller]
 pub fn patch_asm_fun(fun: &mut AsmFunction, relocation: &'static str, bytes: &[u8]) {
     let reloc = fun.reloc(relocation) as usize;
     fun.bytes[reloc..reloc + bytes.len()].copy_from_slice(bytes);
 }
 
 pub trait Patch<P: PatchSize> {
+    #[track_caller]
     fn patch(self, fun: &mut AsmFunction, relocation: &'static str);
 }
 

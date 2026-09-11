@@ -272,7 +272,7 @@ impl MemoryViewerScreen {
         if let Some(rows) = memory_viewer::READ_SIZE.checked_div(self.bytes_per_row as usize) {
             for i in 0..rows {
                 lines.push(Line::from(format!(
-                    "{:#X}",
+                    "{:#x}",
                     memory_viewer()
                         .base_address
                         .saturating_add(self.bytes_per_row as u64 * i as u64)

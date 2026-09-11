@@ -19,7 +19,7 @@ use {
         impl_tab,
         screen::Screen,
     },
-    darksouls2::{bonfire, player, target, utility},
+    darksouls2::{bonfire, menu, player, utility},
 };
 
 impl_tab!(PlayerTab, TargetTab, ItemTab, UtilityTab, TravelTab, EventTab);
@@ -49,17 +49,16 @@ impl DarkSouls2Screen {
 
 pub fn dbg_lines() -> Vec<String> {
     vec![
-        format!("target: {:#X?}", target::target()),
         format!("loaded: {}", darksouls2::is_player_loaded()),
         format!("area id: {:#X}", utility::get_area_id().unwrap_or_default()),
         format!("player coords: {:?}", player::position().unwrap_or_default()),
         format!(
             "player quaternion: {:?}",
             player::player()
-                .chr_ctrl()
-                .and_then(|chr| chr.rot_quaternion())
+                .and_then(|mut chr| chr.rot_quaternion())
                 .unwrap_or_default()
         ),
         format!("last rested bonfire id: {}", bonfire::get_last_bonfire_id().unwrap_or_default()),
+        format!("is menu open: {}", menu::is_menu_open()),
     ]
 }

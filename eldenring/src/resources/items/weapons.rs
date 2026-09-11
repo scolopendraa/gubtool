@@ -1,22 +1,22 @@
 use super::Item;
 
 impl Item {
-    const fn default_weapons() -> Self {
+    const fn default_weapon() -> Self {
         Self {
-            category: super::Categories::Weapons,
+            category: super::ItemCategory::Weapons,
             ..Item::default()
         }
     }
 }
 
-pub static WEAPONS: [Item; 479] = [
+pub static WEAPONS: [Item; 487] = [
     Item {
         id: 0x1fa9780,
         name: "Academy Glintstone Staff",
         weapon_type: Some(57),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2ed830,
@@ -24,7 +24,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(5),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x271c350,
@@ -32,7 +32,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(51),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1d9a200,
@@ -40,7 +40,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1fa7070,
@@ -48,7 +48,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(57),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x44aa20,
@@ -57,7 +57,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2796470,
@@ -66,7 +66,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1eba360,
@@ -74,7 +74,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x4ce780,
@@ -82,7 +82,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(15),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xbee330,
@@ -91,7 +91,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2915940,
@@ -99,7 +99,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(55),
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1f98610,
@@ -107,7 +107,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(57),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x15fb710,
@@ -115,7 +115,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(41),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xe57e00,
@@ -123,7 +123,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(19),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1fb0cb0,
@@ -131,7 +131,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(57),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3d83120,
@@ -140,7 +140,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x6b6c00,
@@ -148,7 +148,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(9),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2eff40,
@@ -156,7 +156,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(5),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1131db0,
@@ -164,7 +164,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(29),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1d97af0,
@@ -172,7 +172,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x10b5580,
@@ -181,7 +181,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2dc6c0,
@@ -189,7 +189,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(5),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xc6d270,
@@ -197,7 +197,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(24),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xd59f80,
@@ -205,7 +205,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(17),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xb76920,
@@ -213,7 +213,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(23),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x4153a20,
@@ -222,7 +222,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1dd4b80,
@@ -230,7 +230,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xb964f0,
@@ -238,7 +238,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(23),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x7b4a80,
@@ -246,7 +246,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(11),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x6af6d0,
@@ -254,7 +254,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(9),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1caade0,
@@ -262,7 +262,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x16f2060,
@@ -270,7 +270,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(87),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x272adb0,
@@ -278,7 +278,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(51),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xf6950,
@@ -286,7 +286,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(1),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1de35e0,
@@ -294,7 +294,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xbf0a40,
@@ -303,7 +303,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1efe920,
@@ -312,7 +312,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xa05eb0,
@@ -321,7 +321,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x11b340,
@@ -329,7 +329,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(1),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2fe9a0,
@@ -337,7 +337,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(5),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xbf3150,
@@ -346,7 +346,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xfc6160,
@@ -355,7 +355,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xfc8870,
@@ -364,7 +364,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x14fffa0,
@@ -372,7 +372,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(37),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x7a8730,
@@ -380,7 +380,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(11),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x116520,
@@ -388,7 +388,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(1),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x5b8d80,
@@ -396,7 +396,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(16),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1dd99a0,
@@ -404,7 +404,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1da8c60,
@@ -412,7 +412,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1cb4a20,
@@ -420,7 +420,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(65),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xf58390,
@@ -428,7 +428,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(25),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x269fb20,
@@ -437,7 +437,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xeca9f0,
@@ -446,7 +446,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1db0190,
@@ -454,7 +454,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1e90b50,
@@ -462,7 +462,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xba0130,
@@ -470,7 +470,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(23),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1ed2a0,
@@ -478,7 +478,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(3),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1c9c380,
@@ -486,7 +486,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(65),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xe6b680,
@@ -494,7 +494,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(19),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1406f40,
@@ -502,7 +502,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(35),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1dcd650,
@@ -510,7 +510,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x21b8d0,
@@ -518,7 +518,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(3),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1fa2250,
@@ -526,7 +526,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(57),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1fabe90,
@@ -534,7 +534,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(57),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1dbebf0,
@@ -542,7 +542,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2143a0,
@@ -550,7 +550,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(3),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1f8e9d0,
@@ -558,7 +558,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(57),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x269ad0,
@@ -567,7 +567,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3b9d3b0,
@@ -576,7 +576,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xd689e0,
@@ -584,7 +584,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(17),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xf50e60,
@@ -592,7 +592,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(25),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x102ca0,
@@ -600,7 +600,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(1),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xb916d0,
@@ -608,7 +608,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(23),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xc6f980,
@@ -616,7 +616,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(24),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3aa9170,
@@ -625,7 +625,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x10eff0,
@@ -633,7 +633,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(1),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1426b10,
@@ -641,7 +641,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(35),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x20768c0,
@@ -649,7 +649,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(61),
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x15752a0,
@@ -658,7 +658,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xf49930,
@@ -666,7 +666,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(25),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3085e0,
@@ -674,7 +674,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(5),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x4c7250,
@@ -682,7 +682,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(15),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xf4c040,
@@ -690,7 +690,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(25),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1421cf0,
@@ -698,7 +698,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(35),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xa7ffd0,
@@ -706,7 +706,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(21),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x203230,
@@ -714,7 +714,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(3),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1ccd0c0,
@@ -722,7 +722,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(65),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x11344c0,
@@ -730,7 +730,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(29),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2631d50,
@@ -738,7 +738,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(50),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xb9b310,
@@ -746,7 +746,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(23),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x291ce70,
@@ -754,7 +754,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(55),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xe556f0,
@@ -762,7 +762,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(19),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1eb5540,
@@ -770,7 +770,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xf5d1b0,
@@ -778,7 +778,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(25),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1e8bd30,
@@ -786,7 +786,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x100590,
@@ -794,7 +794,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(1),
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xf47220,
@@ -802,7 +802,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(25),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1f82680,
@@ -810,7 +810,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(57),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x20ce70,
@@ -818,7 +818,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(3),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1ec1890,
@@ -826,7 +826,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3d87f40,
@@ -835,7 +835,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xa84df0,
@@ -843,7 +843,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(21),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xb85380,
@@ -851,7 +851,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(23),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xf4240,
@@ -859,7 +859,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(1),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x72bf00,
@@ -868,7 +868,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x39b4f30,
@@ -877,7 +877,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2f2650,
@@ -885,7 +885,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(5),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3ab06a0,
@@ -894,7 +894,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xec82e0,
@@ -903,7 +903,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xdd67b0,
@@ -912,7 +912,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xf5f8c0,
@@ -920,7 +920,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(25),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x30d400,
@@ -928,7 +928,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(5),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1f874a0,
@@ -936,7 +936,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(57),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x16694e0,
@@ -945,7 +945,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xba2840,
@@ -953,7 +953,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(23),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1f95f00,
@@ -961,7 +961,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(57),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x7a6020,
@@ -969,7 +969,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(11),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1e89620,
@@ -977,7 +977,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2080500,
@@ -985,7 +985,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(61),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x15fde20,
@@ -993,7 +993,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(41),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x114cb60,
@@ -1001,7 +1001,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(29),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x5c29c0,
@@ -1009,7 +1009,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(16),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1e84800,
@@ -1017,7 +1017,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1e8e440,
@@ -1025,7 +1025,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3f6dcb0,
@@ -1034,7 +1034,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x8a65b0,
@@ -1042,7 +1042,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(13),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x39b2820,
@@ -1051,7 +1051,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x20e6da0,
@@ -1060,7 +1060,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3b9aca0,
@@ -1069,7 +1069,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x15f9000,
@@ -1077,7 +1077,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(41),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1ebf180,
@@ -1085,7 +1085,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1ddc0b0,
@@ -1093,7 +1093,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x6c5660,
@@ -1101,7 +1101,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(9),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x9959d0,
@@ -1109,7 +1109,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(14),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x15f68f0,
@@ -1117,7 +1117,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(41),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xa95f60,
@@ -1125,7 +1125,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(21),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xb98c00,
@@ -1133,7 +1133,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(23),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x118c30,
@@ -1141,7 +1141,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(1),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2721170,
@@ -1149,7 +1149,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(51),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x28153b0,
@@ -1157,7 +1157,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(53),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1e98080,
@@ -1165,7 +1165,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x207ddf0,
@@ -1173,7 +1173,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(61),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x4c4b40,
@@ -1181,7 +1181,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(15),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xa037a0,
@@ -1190,7 +1190,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xe61a40,
@@ -1198,7 +1198,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(19),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x6acfc0,
@@ -1206,7 +1206,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(9),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1602c40,
@@ -1214,7 +1214,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(41),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x7297f0,
@@ -1223,7 +1223,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xc6ab60,
@@ -1231,7 +1231,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(24),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x206cc80,
@@ -1239,7 +1239,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(61),
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1ea43d0,
@@ -1247,7 +1247,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x44f840,
@@ -1256,7 +1256,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x20e94b0,
@@ -1265,7 +1265,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x170a70,
@@ -1274,7 +1274,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3aa6a60,
@@ -1283,7 +1283,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xc68450,
@@ -1291,7 +1291,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(24),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2e8a10,
@@ -1299,7 +1299,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(5),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1dcfd60,
@@ -1307,7 +1307,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xaf79e0,
@@ -1316,7 +1316,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x6bba20,
@@ -1324,7 +1324,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(9),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2dedd0,
@@ -1332,7 +1332,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(5),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xd5c690,
@@ -1340,7 +1340,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(17),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xdddce0,
@@ -1349,7 +1349,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2082c10,
@@ -1357,7 +1357,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(61),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3aab880,
@@ -1366,7 +1366,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x81da30,
@@ -1375,7 +1375,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x4d0e90,
@@ -1383,7 +1383,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(15),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2910b20,
@@ -1391,7 +1391,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(55),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xe704a0,
@@ -1399,7 +1399,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(19),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x99f610,
@@ -1407,7 +1407,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(14),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1151980,
@@ -1415,7 +1415,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(29),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x30fb10,
@@ -1423,7 +1423,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(5),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xe6dd90,
@@ -1431,7 +1431,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(19),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x30acf0,
@@ -1439,7 +1439,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(5),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x114f270,
@@ -1447,7 +1447,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(29),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x99cf00,
@@ -1455,7 +1455,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(14),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x166e300,
@@ -1464,7 +1464,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1f84d90,
@@ -1472,7 +1472,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(57),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1607a60,
@@ -1480,7 +1480,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(41),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x16ef950,
@@ -1488,7 +1488,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(87),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x160a170,
@@ -1496,7 +1496,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(41),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1321760,
@@ -1504,7 +1504,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(39),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2071aa0,
@@ -1512,7 +1512,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(61),
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1ec66b0,
@@ -1520,7 +1520,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1cbbf50,
@@ -1528,7 +1528,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(65),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1140810,
@@ -1536,7 +1536,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(29),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1053b0,
@@ -1544,7 +1544,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(1),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1f78a40,
@@ -1552,7 +1552,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(57),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x98bd90,
@@ -1560,7 +1560,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(14),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x5bb490,
@@ -1568,7 +1568,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(16),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3e1a70,
@@ -1576,7 +1576,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(7),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x206f390,
@@ -1584,7 +1584,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(61),
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1e9a790,
@@ -1592,7 +1592,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1f95f0,
@@ -1600,7 +1600,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(3),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1ec3fa0,
@@ -1608,7 +1608,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x113e100,
@@ -1616,7 +1616,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(29),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1e11c10,
@@ -1624,7 +1624,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x305ed0,
@@ -1632,7 +1632,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(5),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x207b6e0,
@@ -1640,7 +1640,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(61),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x148aca0,
@@ -1649,7 +1649,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2810590,
@@ -1657,7 +1657,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(53),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x160c880,
@@ -1665,7 +1665,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(41),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3e8fa0,
@@ -1673,7 +1673,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(7),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x14159a0,
@@ -1681,7 +1681,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(35),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x12211d0,
@@ -1689,7 +1689,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(31),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x20741b0,
@@ -1697,7 +1697,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(61),
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x15f41e0,
@@ -1705,7 +1705,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(41),
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x5bdba0,
@@ -1713,7 +1713,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(16),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3f6b5a0,
@@ -1722,7 +1722,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x10a1d0,
@@ -1730,7 +1730,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(1),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xb80560,
@@ -1738,7 +1738,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(23),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xe52fe0,
@@ -1746,7 +1746,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(19),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xb9da20,
@@ -1754,7 +1754,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(23),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1db28a0,
@@ -1762,7 +1762,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xe4e1c0,
@@ -1770,7 +1770,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(19),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2817ac0,
@@ -1778,7 +1778,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(53),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xb74210,
@@ -1786,7 +1786,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(23),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3d0900,
@@ -1794,7 +1794,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(7),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x358ef0,
@@ -1803,7 +1803,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x456d70,
@@ -1812,7 +1812,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x451f50,
@@ -1821,7 +1821,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x362b30,
@@ -1830,7 +1830,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x6d19b0,
@@ -1838,7 +1838,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(9),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1145630,
@@ -1846,7 +1846,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(29),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x112a880,
@@ -1854,7 +1854,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(29),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1ec8dc0,
@@ -1862,7 +1862,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x12238e0,
@@ -1870,7 +1870,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(31),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xa91140,
@@ -1878,7 +1878,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(21),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xd5eda0,
@@ -1886,7 +1886,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(17),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x29f6300,
@@ -1894,7 +1894,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(56),
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x89a260,
@@ -1902,7 +1902,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(13),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x262cf30,
@@ -1910,7 +1910,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(50),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1dd2470,
@@ -1918,7 +1918,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1de0ed0,
@@ -1926,7 +1926,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x29095f0,
@@ -1934,7 +1934,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(55),
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2fc290,
@@ -1942,7 +1942,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(5),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xd72620,
@@ -1950,7 +1950,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(17),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x14fb180,
@@ -1958,7 +1958,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(37),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x271ea60,
@@ -1966,7 +1966,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(51),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x820140,
@@ -1975,7 +1975,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x72e610,
@@ -1984,7 +1984,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1dcaf40,
@@ -1992,7 +1992,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x131f050,
@@ -2000,7 +2000,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(39),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1cbe660,
@@ -2008,7 +2008,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(65),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xd6d800,
@@ -2016,7 +2016,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(17),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1ea6ae0,
@@ -2024,7 +2024,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2887fa0,
@@ -2033,7 +2033,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xf61fd0,
@@ -2041,7 +2041,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(25),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1fe410,
@@ -2049,7 +2049,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(5),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1dde7c0,
@@ -2057,7 +2057,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1eb7c50,
@@ -2065,7 +2065,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x14180b0,
@@ -2073,7 +2073,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(35),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xd63bc0,
@@ -2081,7 +2081,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(17),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2e14e0,
@@ -2089,7 +2089,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(5),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1cb9840,
@@ -2097,7 +2097,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(65),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xf66df0,
@@ -2105,7 +2105,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(25),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x113e10,
@@ -2113,7 +2113,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(1),
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x29f8a10,
@@ -2121,7 +2121,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(56),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xd614b0,
@@ -2129,7 +2129,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(17),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1ea1cc0,
@@ -2137,7 +2137,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x141f5e0,
@@ -2145,7 +2145,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(35),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1d905c0,
@@ -2153,7 +2153,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2e6300,
@@ -2161,7 +2161,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(5),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x175fe30,
@@ -2170,7 +2170,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x10450a0,
@@ -2178,7 +2178,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(28),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xb71b00,
@@ -2186,7 +2186,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(23),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1dc8830,
@@ -2194,7 +2194,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x225510,
@@ -2202,7 +2202,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(3),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x4061ef0,
@@ -2211,7 +2211,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2906ee0,
@@ -2219,7 +2219,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(55),
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3aadf90,
@@ -2228,7 +2228,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x280de80,
@@ -2236,7 +2236,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(53),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x35b600,
@@ -2245,7 +2245,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2719c40,
@@ -2253,7 +2253,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(51),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xe5a510,
@@ -2261,7 +2261,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(19),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1e8480,
@@ -2269,7 +2269,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(3),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2e3bf0,
@@ -2277,7 +2277,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(5),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1ecdbe0,
@@ -2285,7 +2285,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1f20c0,
@@ -2293,7 +2293,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(3),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1142f20,
@@ -2301,7 +2301,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(29),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x112f6a0,
@@ -2309,7 +2309,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(29),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1fb33c0,
@@ -2317,7 +2317,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(57),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xa7d8c0,
@@ -2325,7 +2325,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(21),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1488590,
@@ -2334,7 +2334,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x6b9310,
@@ -2342,7 +2342,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(9),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x131a230,
@@ -2350,7 +2350,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(39),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x7aae40,
@@ -2358,7 +2358,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(11),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x16e360,
@@ -2367,7 +2367,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3d5720,
@@ -2375,7 +2375,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(7),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1eb2e30,
@@ -2383,7 +2383,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1ca11a0,
@@ -2391,7 +2391,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(65),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x6ca480,
@@ -2399,7 +2399,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(9),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3010b0,
@@ -2407,7 +2407,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(5),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xaa22b0,
@@ -2415,7 +2415,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(21),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1d92cd0,
@@ -2423,7 +2423,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1d953e0,
@@ -2431,7 +2431,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1ff7980,
@@ -2440,7 +2440,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1e0a6e0,
@@ -2449,7 +2449,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xdd8ec0,
@@ -2458,7 +2458,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x10b2e70,
@@ -2467,7 +2467,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x89c970,
@@ -2475,7 +2475,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(13),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1fb5ad0,
@@ -2483,7 +2483,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(57),
         gem_mount_type: Some(0),
         upgrade_type: Some(2),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x405f7e0,
@@ -2492,7 +2492,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2191c0,
@@ -2500,7 +2500,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(3),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2628110,
@@ -2508,7 +2508,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(50),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xfb770,
@@ -2516,7 +2516,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(1),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1038d50,
@@ -2524,7 +2524,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(28),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x7b2370,
@@ -2532,7 +2532,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(11),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xa93850,
@@ -2540,7 +2540,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(21),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x454660,
@@ -2549,7 +2549,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x8a3ea0,
@@ -2557,7 +2557,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(13),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x7b98a0,
@@ -2565,7 +2565,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(11),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xa89c10,
@@ -2573,7 +2573,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(21),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x897b50,
@@ -2581,7 +2581,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(13),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x175d720,
@@ -2590,7 +2590,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xc65d40,
@@ -2598,7 +2598,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(24),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1136bd0,
@@ -2606,7 +2606,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(29),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x4d35a0,
@@ -2614,7 +2614,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(15),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2206f0,
@@ -2622,7 +2622,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(3),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xa9ad80,
@@ -2630,7 +2630,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(21),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1fbd00,
@@ -2638,7 +2638,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(9),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1298be0,
@@ -2647,7 +2647,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x7afc60,
@@ -2655,7 +2655,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(11),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1ea91f0,
@@ -2663,7 +2663,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x7a3910,
@@ -2671,7 +2671,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(11),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2eb120,
@@ -2679,7 +2679,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(5),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1f6ee0,
@@ -2687,7 +2687,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(3),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xf9060,
@@ -2695,7 +2695,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(1),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xf4e750,
@@ -2703,7 +2703,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(25),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1483770,
@@ -2712,7 +2712,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1c9ea90,
@@ -2720,7 +2720,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(65),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x112cf90,
@@ -2728,7 +2728,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(29),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xb93de0,
@@ -2736,7 +2736,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(23),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xf53570,
@@ -2744,7 +2744,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(25),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1ca5fc0,
@@ -2752,7 +2752,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(65),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1485e80,
@@ -2761,7 +2761,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x11a70b0,
@@ -2770,7 +2770,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x15ef3c0,
@@ -2778,7 +2778,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(41),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1fa4960,
@@ -2786,7 +2786,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(57),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x27286a0,
@@ -2794,7 +2794,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(51),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x290e410,
@@ -2802,7 +2802,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(55),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x81b320,
@@ -2811,7 +2811,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x632ea0,
@@ -2820,7 +2820,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2a70420,
@@ -2829,7 +2829,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3f703c0,
@@ -2838,7 +2838,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x4c9960,
@@ -2846,7 +2846,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(15),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x15026b0,
@@ -2854,7 +2854,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(37),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x4156130,
@@ -2863,7 +2863,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x262a820,
@@ -2871,7 +2871,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(50),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1dd7290,
@@ -2879,7 +2879,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1cad4f0,
@@ -2887,7 +2887,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(65),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1ebca70,
@@ -2895,7 +2895,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xfde80,
@@ -2903,7 +2903,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(1),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x21dfe0,
@@ -2911,7 +2911,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(3),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x4064600,
@@ -2920,7 +2920,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x297c1e0,
@@ -2929,7 +2929,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1ca38b0,
@@ -2937,7 +2937,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(65),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1cb7130,
@@ -2945,7 +2945,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(65),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xa9d490,
@@ -2953,7 +2953,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(21),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xd662d0,
@@ -2961,7 +2961,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(17),
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x11392e0,
@@ -2969,7 +2969,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(29),
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x89f080,
@@ -2977,7 +2977,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(13),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1cb2310,
@@ -2985,7 +2985,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(65),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x4cc070,
@@ -2993,7 +2993,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(15),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xd77440,
@@ -3001,7 +3001,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(17),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xba4f50,
@@ -3009,7 +3009,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(23),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xf69500,
@@ -3017,7 +3017,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(25),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1fba8f0,
@@ -3025,7 +3025,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(57),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x227c20,
@@ -3033,7 +3033,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(3),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1613db0,
@@ -3041,7 +3041,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(41),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x16116a0,
@@ -3049,7 +3049,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(41),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1da1730,
@@ -3057,7 +3057,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3df360,
@@ -3065,7 +3065,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(7),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3e4180,
@@ -3073,7 +3073,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(7),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xe5cc20,
@@ -3081,7 +3081,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(19),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2f4d60,
@@ -3089,7 +3089,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(5),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xd74d30,
@@ -3097,7 +3097,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(17),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x6c0840,
@@ -3105,7 +3105,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(9),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xa98670,
@@ -3113,7 +3113,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(21),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x6cf2a0,
@@ -3121,7 +3121,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(9),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1da3e40,
@@ -3129,7 +3129,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x107ac0,
@@ -3137,7 +3137,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(1),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1cafc00,
@@ -3145,7 +3145,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(65),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x121eac0,
@@ -3153,7 +3153,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(31),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x16f4770,
@@ -3161,7 +3161,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(87),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2723880,
@@ -3169,7 +3169,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(51),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1e0f500,
@@ -3177,7 +3177,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xcdfe60,
@@ -3186,7 +3186,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x8a8cc0,
@@ -3194,7 +3194,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(13),
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x6c7d70,
@@ -3202,7 +3202,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(9),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x103db70,
@@ -3210,7 +3210,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(28),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x166bbf0,
@@ -3219,7 +3219,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x6b44f0,
@@ -3227,7 +3227,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(9),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x148d3b0,
@@ -3235,7 +3235,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(65),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1db9dd0,
@@ -3243,7 +3243,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(65),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xf42400,
@@ -3251,7 +3251,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(25),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1eab90,
@@ -3259,7 +3259,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(3),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2625a00,
@@ -3267,7 +3267,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(50),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x6b1de0,
@@ -3275,7 +3275,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(9),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x103b460,
@@ -3283,7 +3283,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(28),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1d9f020,
@@ -3291,7 +3291,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xdd40a0,
@@ -3300,7 +3300,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3d85830,
@@ -3309,7 +3309,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3c8eee0,
@@ -3318,7 +3318,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xbebc20,
@@ -3327,7 +3327,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1d18bb0,
@@ -3336,7 +3336,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xfbc520,
@@ -3345,7 +3345,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1cc0d70,
@@ -3353,7 +3353,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(65),
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x29020c0,
@@ -3361,7 +3361,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(55),
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xf44b10,
@@ -3369,7 +3369,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(25),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x10b0760,
@@ -3378,7 +3378,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1409650,
@@ -3386,7 +3386,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(35),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xa8ea30,
@@ -3394,7 +3394,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(21),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1eae010,
@@ -3402,7 +3402,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xf646e0,
@@ -3410,7 +3410,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(25),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1cca9b0,
@@ -3418,7 +3418,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(65),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x20ebbc0,
@@ -3427,7 +3427,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x11a49a0,
@@ -3436,7 +3436,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x7270e0,
@@ -3445,7 +3445,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x297e8f0,
@@ -3454,7 +3454,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x16ed240,
@@ -3462,7 +3462,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(87),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1fbd000,
@@ -3470,7 +3470,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(57),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1600530,
@@ -3478,7 +3478,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(41),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1ff5270,
@@ -3487,7 +3487,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1fb81e0,
@@ -3495,7 +3495,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(57),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x141a7c0,
@@ -3503,7 +3503,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(35),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x2673c0,
@@ -3512,7 +3512,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3dcc50,
@@ -3520,7 +3520,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(7),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x16e8420,
@@ -3528,7 +3528,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(87),
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xa9fba0,
@@ -3536,7 +3536,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(21),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x26c1e0,
@@ -3545,7 +3545,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xd7c260,
@@ -3553,7 +3553,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(17),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1d9c910,
@@ -3561,7 +3561,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xfc1340,
@@ -3570,7 +3570,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3567e0,
@@ -3579,7 +3579,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x271000,
@@ -3588,7 +3588,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x26e8f0,
@@ -3597,7 +3597,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3037c0,
@@ -3605,7 +3605,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(5),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x90f560,
@@ -3614,7 +3614,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x20a760,
@@ -3622,7 +3622,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(3),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x216ab0,
@@ -3630,7 +3630,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(3),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1481060,
@@ -3639,7 +3639,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1317b20,
@@ -3647,7 +3647,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(39),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x138ce20,
@@ -3656,7 +3656,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x16e3600,
@@ -3664,7 +3664,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(87),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xf55c80,
@@ -3672,7 +3672,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(25),
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x10477b0,
@@ -3680,7 +3680,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(28),
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3eb6b0,
@@ -3688,7 +3688,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(7),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3d7e30,
@@ -3696,7 +3696,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(7),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x160ef90,
@@ -3704,7 +3704,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(41),
         gem_mount_type: Some(0),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1da6550,
@@ -3712,7 +3712,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x989680,
@@ -3720,7 +3720,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(14),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x990bb0,
@@ -3728,7 +3728,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(14),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x895440,
@@ -3736,7 +3736,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(13),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1323e70,
@@ -3744,7 +3744,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(39),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xa8c320,
@@ -3752,7 +3752,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(21),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x264cb0,
@@ -3761,7 +3761,7 @@ pub static WEAPONS: [Item; 479] = [
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
         dlc: true,
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x14fd890,
@@ -3769,7 +3769,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(37),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1f03740,
@@ -3777,7 +3777,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1424400,
@@ -3785,7 +3785,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(35),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1eab900,
@@ -3793,7 +3793,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x113b9f0,
@@ -3801,7 +3801,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(29),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x114a450,
@@ -3809,7 +3809,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(29),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1042990,
@@ -3817,7 +3817,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(28),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x10c8e0,
@@ -3825,7 +3825,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(1),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x222e00,
@@ -3833,7 +3833,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(3),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xe508d0,
@@ -3841,7 +3841,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(17),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xa87500,
@@ -3849,7 +3849,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(21),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3d3010,
@@ -3857,7 +3857,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(7),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x15f1ad0,
@@ -3865,7 +3865,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(41),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1f47d0,
@@ -3873,7 +3873,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(3),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1312d00,
@@ -3881,7 +3881,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(39),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x6be130,
@@ -3889,7 +3889,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(9),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0xe68f70,
@@ -3897,7 +3897,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(19),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x122d520,
@@ -3905,7 +3905,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(31),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1e0cdf0,
@@ -3913,7 +3913,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(67),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x1ecb4d0,
@@ -3921,7 +3921,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(69),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x7ad550,
@@ -3929,7 +3929,7 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(11),
         gem_mount_type: Some(0),
         upgrade_type: Some(1),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
     },
     Item {
         id: 0x3da540,
@@ -3937,6 +3937,70 @@ pub static WEAPONS: [Item; 479] = [
         weapon_type: Some(7),
         gem_mount_type: Some(2),
         upgrade_type: Some(0),
-        ..Item::default_weapons()
+        ..Item::default_weapon()
+    },
+    Item {
+        id: 3560000,
+        name: "Leontiel's Greatsword",
+        weapon_type: Some(5),
+        gem_mount_type: Some(0),
+        upgrade_type: Some(1),
+        ..Item::default_weapon()
+    },
+    Item {
+        id: 8530000,
+        name: "Hefty Scimitar",
+        weapon_type: Some(11),
+        gem_mount_type: Some(2),
+        upgrade_type: Some(0),
+        ..Item::default_weapon()
+    },
+    Item {
+        id: 13510000,
+        name: "Golden Order Flail",
+        weapon_type: Some(24),
+        gem_mount_type: Some(0),
+        upgrade_type: Some(1),
+        ..Item::default_weapon()
+    },
+    Item {
+        id: 31540000,
+        name: "Silver Grooved Shield",
+        weapon_type: Some(67),
+        gem_mount_type: Some(2),
+        upgrade_type: Some(0),
+        ..Item::default_weapon()
+    },
+    Item {
+        id: 62520000,
+        name: "Ritual Thrusting Shield",
+        weapon_type: Some(90),
+        gem_mount_type: Some(2),
+        upgrade_type: Some(0),
+        ..Item::default_weapon()
+    },
+    Item {
+        id: 64530000,
+        name: "Reverse-Bladed Sword",
+        weapon_type: Some(92),
+        gem_mount_type: Some(2),
+        upgrade_type: Some(0),
+        ..Item::default_weapon()
+    },
+    Item {
+        id: 66530000,
+        name: "Reed Great Katana",
+        weapon_type: Some(94),
+        gem_mount_type: Some(2),
+        upgrade_type: Some(0),
+        ..Item::default_weapon()
+    },
+    Item {
+        id: 67530000,
+        name: "Idus Sword",
+        weapon_type: Some(93),
+        gem_mount_type: Some(2),
+        upgrade_type: Some(0),
+        ..Item::default_weapon()
     },
 ];

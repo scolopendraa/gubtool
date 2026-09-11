@@ -15,7 +15,9 @@ use {
 };
 
 #[track_caller]
-pub fn read_unsafe<T>(address: impl Address) -> SysResult<T> {
+pub fn read<T>(address: impl Address) -> SysResult<T> {
+    address.validate_game()?;
+
     unsafe {
         let mut value = MaybeUninit::<T>::uninit();
         let size = std::mem::size_of::<T>();
@@ -23,7 +25,7 @@ pub fn read_unsafe<T>(address: impl Address) -> SysResult<T> {
 
         let result = ReadProcessMemory(
             attached::handle()?,
-            address.addr() as *const _,
+            address.u64_address() as *const _,
             value.as_mut_ptr() as *mut _,
             size,
             Some(&mut nread),
@@ -32,7 +34,7 @@ pub fn read_unsafe<T>(address: impl Address) -> SysResult<T> {
         if result.is_err() {
             return Err(SysError::io(
                 AccessType::Read(type_name::<T>()),
-                address.addr(),
+                address.u64_address(),
                 std::io::Error::last_os_error(),
             ));
         }
@@ -41,7 +43,7 @@ pub fn read_unsafe<T>(address: impl Address) -> SysResult<T> {
             return Err(SysError::partial_access(
                 AccessType::Read(type_name::<T>()),
                 nread,
-                address.addr(),
+                address.u64_address(),
             ));
         }
 
@@ -50,14 +52,16 @@ pub fn read_unsafe<T>(address: impl Address) -> SysResult<T> {
 }
 
 #[track_caller]
-pub fn write_unsafe<T>(address: impl Address, value: T) -> SysResult {
+pub fn write<T>(address: impl Address, value: T) -> SysResult {
+    address.validate_game()?;
+
     unsafe {
         let size = std::mem::size_of::<T>();
         let mut nwritten = 0;
 
         let result = WriteProcessMemory(
             attached::handle()?,
-            address.addr() as *mut _,
+            address.u64_address() as *mut _,
             &value as *const T as *const _,
             size,
             Some(&mut nwritten),
@@ -66,7 +70,7 @@ pub fn write_unsafe<T>(address: impl Address, value: T) -> SysResult {
         if result.is_err() {
             return Err(SysError::io(
                 AccessType::Write(WriteType::Type(type_name::<T>())),
-                address.addr(),
+                address.u64_address(),
                 std::io::Error::last_os_error(),
             ));
         }
@@ -75,7 +79,7 @@ pub fn write_unsafe<T>(address: impl Address, value: T) -> SysResult {
             return Err(SysError::partial_access(
                 AccessType::Write(WriteType::Type(type_name::<T>())),
                 nwritten,
-                address.addr(),
+                address.u64_address(),
             ));
         }
     }
@@ -83,14 +87,16 @@ pub fn write_unsafe<T>(address: impl Address, value: T) -> SysResult {
 }
 
 #[track_caller]
-pub fn write_bytes_unsafe(address: impl Address, data: &[u8]) -> SysResult {
+pub fn write_bytes(address: impl Address, data: &[u8]) -> SysResult {
+    address.validate_game()?;
+
     unsafe {
         let size = data.len();
         let mut nwritten = 0;
 
         let result = WriteProcessMemory(
             attached::handle()?,
-            address.addr() as *mut _,
+            address.u64_address() as *mut _,
             data.as_ptr() as *const _,
             size,
             Some(&mut nwritten),
@@ -99,7 +105,7 @@ pub fn write_bytes_unsafe(address: impl Address, data: &[u8]) -> SysResult {
         if result.is_err() {
             return Err(SysError::io(
                 AccessType::Write(WriteType::Bytes(size)),
-                address.addr(),
+                address.u64_address(),
                 std::io::Error::last_os_error(),
             ));
         }
@@ -108,7 +114,7 @@ pub fn write_bytes_unsafe(address: impl Address, data: &[u8]) -> SysResult {
             return Err(SysError::partial_access(
                 AccessType::Write(WriteType::Bytes(size)),
                 nwritten,
-                address.addr(),
+                address.u64_address(),
             ));
         }
     }
@@ -117,8 +123,9 @@ pub fn write_bytes_unsafe(address: impl Address, data: &[u8]) -> SysResult {
 
 pub fn spawn_thread_release(thread_start_address: impl Address, thread_code: Vec<u8>) -> SysResult {
     unsafe {
-        write_bytes_unsafe(thread_start_address, &thread_code)?;
-        let start: LPTHREAD_START_ROUTINE = Some(std::mem::transmute(thread_start_address.addr()));
+        write_bytes(thread_start_address, &thread_code)?;
+        let start: LPTHREAD_START_ROUTINE =
+            Some(std::mem::transmute(thread_start_address.u64_address()));
         let thread_handle = CreateRemoteThread(attached::handle()?, None, 0, start, None, 0, None)
             .map_err(|err| {
                 SysError::RemoteThreadCreate {
@@ -132,8 +139,9 @@ pub fn spawn_thread_release(thread_start_address: impl Address, thread_code: Vec
 
 pub fn spawn_thread_join(thread_start_address: impl Address, thread_code: Vec<u8>) -> SysResult {
     unsafe {
-        write_bytes_unsafe(thread_start_address, &thread_code)?;
-        let start: LPTHREAD_START_ROUTINE = Some(std::mem::transmute(thread_start_address.addr()));
+        write_bytes(thread_start_address, &thread_code)?;
+        let start: LPTHREAD_START_ROUTINE =
+            Some(std::mem::transmute(thread_start_address.u64_address()));
         let thread_handle = CreateRemoteThread(attached::handle()?, None, 0, start, None, 0, None)
             .map_err(|err| {
                 SysError::RemoteThreadCreate {

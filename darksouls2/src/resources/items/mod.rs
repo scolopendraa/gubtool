@@ -30,7 +30,7 @@ pub struct Item {
     pub id:           i32,
     pub name:         &'static str,
     pub stack_size:   i32,
-    pub category:     Categories,
+    pub category:     ItemCategory,
     pub infuse_id:    Option<i32>,
     pub max_upgrade:  Option<i32>,
     pub durability:   Option<i32>,
@@ -43,7 +43,7 @@ impl Item {
             id:           0,
             name:         "",
             stack_size:   0,
-            category:     Categories::Armor,
+            category:     ItemCategory::Armor,
             infuse_id:    None,
             max_upgrade:  None,
             durability:   None,
@@ -68,7 +68,7 @@ pub static ITEMS: Lazy<Vec<Item>> = Lazy::new(|| {
 });
 
 #[derive(Clone, Copy)]
-pub enum Categories {
+pub enum ItemCategory {
     Armor,
     Arrows,
     Consumables,
@@ -80,25 +80,25 @@ pub enum Categories {
     Weapons,
 }
 
-impl fmt::Display for Categories {
+impl fmt::Display for ItemCategory {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let name = match self {
-            Categories::Armor => "Armor",
-            Categories::Arrows => "Arrows",
-            Categories::Consumables => "Consumables",
-            Categories::Gestures => "Gestures",
-            Categories::KeyItems => "Key Items",
-            Categories::Rings => "Rings",
-            Categories::Spells => "Spells",
-            Categories::UpgradeMaterials => "Upgrade Materials",
-            Categories::Weapons => "Weapons",
+            ItemCategory::Armor => "Armor",
+            ItemCategory::Arrows => "Arrows",
+            ItemCategory::Consumables => "Consumables",
+            ItemCategory::Gestures => "Gestures",
+            ItemCategory::KeyItems => "Key Items",
+            ItemCategory::Rings => "Rings",
+            ItemCategory::Spells => "Spells",
+            ItemCategory::UpgradeMaterials => "Upgrade Materials",
+            ItemCategory::Weapons => "Weapons",
         };
         write!(f, "{}", name)
     }
 }
 
-impl Categories {
-    pub const ARRAY: &[Categories] = &[
+impl ItemCategory {
+    pub const ARRAY: &[ItemCategory] = &[
         Self::Armor,
         Self::Arrows,
         Self::Consumables,

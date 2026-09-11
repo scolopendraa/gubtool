@@ -1,21 +1,22 @@
 use {
     crate::{
-        mem::read,
-        offsets::{ChainReadExt, game_data_man, module_offsets::BasePointer},
+        obj_refs,
+        offsets::{game_data_man, module_offsets::BasePointer},
     },
-    gubtool_core::sys::sys_error::SysResult,
-    std::{
-        collections::HashMap,
-        sync::{LazyLock, Mutex},
+    gubtool_core::{
+        address::{ChainReadExt, Pointer},
+        sys::{read_pointer, sys_error::SysResult},
     },
-    strum::{EnumIter, IntoEnumIterator},
+    shared::pointer_cache::{PointerCache, PointerKey},
+    std::sync::{LazyLock, Mutex, MutexGuard},
+    strum::EnumIter,
 };
 
-pub(crate) static POINTER_CACHE: LazyLock<PointerCache> = LazyLock::new(PointerCache::default);
+pub(crate) static POINTER_CACHE: LazyLock<Mutex<PointerCache<ResolvedPtr>>> =
+    LazyLock::new(|| Mutex::new(PointerCache::new()));
 
-#[derive(Default)]
-pub struct PointerCache {
-    map: Mutex<HashMap<ResolvedPtr, u64>>,
+pub fn pointer_cache() -> MutexGuard<'static, PointerCache<ResolvedPtr>> {
+    POINTER_CACHE.lock().unwrap()
 }
 
 #[derive(Debug, Hash, Eq, PartialEq, Clone, Copy, EnumIter)]
@@ -37,63 +38,66 @@ pub(crate) enum ResolvedPtr {
     LuaEventSystem,
 }
 
-impl PointerCache {
-    pub fn lookup(&self, pointer: ResolvedPtr) -> SysResult<u64> {
-        {
-            let cache = self.map.lock().unwrap();
-            if let Some(&val) = cache.get(&pointer) {
-                return Ok(val);
-            }
-        }
-
-        let resolved_pointer = match pointer {
-            ResolvedPtr::WorldChrMan => read::<u64>(BasePointer::WorldChrMan),
-            ResolvedPtr::FieldArea => read::<u64>(BasePointer::FieldArea),
-            ResolvedPtr::GameMan => read::<u64>(BasePointer::GameMan),
-            ResolvedPtr::GameDataMan => read::<u64>(BasePointer::GameDataMan),
+impl PointerKey for ResolvedPtr {
+    fn lookup(
+        cache: &mut PointerCache<Self>,
+        key: Self,
+        _base: Option<Pointer>,
+    ) -> SysResult<Pointer>
+    where
+        Self: Sized,
+    {
+        match key {
+            ResolvedPtr::WorldChrMan => read_pointer(BasePointer::WorldChrMan),
+            ResolvedPtr::FieldArea => read_pointer(BasePointer::FieldArea),
+            ResolvedPtr::GameMan => read_pointer(BasePointer::GameMan),
+            ResolvedPtr::GameDataMan => read_pointer(BasePointer::GameDataMan),
             ResolvedPtr::PlayerGameData => {
-                self.lookup(ResolvedPtr::GameDataMan)
-                    .read_offset(game_data_man::PLAYER_GAME_DATA)
+                cache
+                    .lookup(ResolvedPtr::GameDataMan)
+                    .read_ptr(game_data_man::PLAYER_GAME_DATA)
             }
-            ResolvedPtr::MenuMan => read::<u64>(BasePointer::MenuMan),
-            ResolvedPtr::CsEmkSystem => read::<u64>(BasePointer::CsEmkSystem),
-            ResolvedPtr::VirtualMemFlag => read::<u64>(BasePointer::VirtualMemFlag),
-            ResolvedPtr::DamageManager => read::<u64>(BasePointer::DamageManager),
-            ResolvedPtr::MapItemManImpl => read::<u64>(BasePointer::MapItemManImpl),
-            ResolvedPtr::DlUserInputManagerImpl => read::<u64>(BasePointer::DlUserInputManagerImpl),
-            ResolvedPtr::CsFlipperImp => read::<u64>(BasePointer::CsFlipperImp),
-            ResolvedPtr::CsDlcImp => read::<u64>(BasePointer::CsDlcImp),
-            ResolvedPtr::LockTgtMan => read::<u64>(BasePointer::LockTgtManImp),
-            ResolvedPtr::LuaEventSystem => read::<u64>(BasePointer::LuaEventSystem),
-        }?;
-
-        let mut cache = self.map.lock().unwrap();
-        cache.insert(pointer, resolved_pointer);
-        Ok(resolved_pointer)
-    }
-
-    pub fn reset_pointers(&self) {
-        let mut cache = self.map.lock().unwrap();
-        cache.clear();
+            ResolvedPtr::MenuMan => read_pointer(BasePointer::MenuMan),
+            ResolvedPtr::CsEmkSystem => read_pointer(BasePointer::CsEmkSystem),
+            ResolvedPtr::VirtualMemFlag => read_pointer(BasePointer::VirtualMemFlag),
+            ResolvedPtr::DamageManager => read_pointer(BasePointer::DamageManager),
+            ResolvedPtr::MapItemManImpl => read_pointer(BasePointer::MapItemManImpl),
+            ResolvedPtr::DlUserInputManagerImpl => {
+                read_pointer(BasePointer::DlUserInputManagerImpl)
+            }
+            ResolvedPtr::CsFlipperImp => read_pointer(BasePointer::CsFlipperImp),
+            ResolvedPtr::CsDlcImp => read_pointer(BasePointer::CsDlcImp),
+            ResolvedPtr::LockTgtMan => read_pointer(BasePointer::LockTgtManImp),
+            ResolvedPtr::LuaEventSystem => read_pointer(BasePointer::LuaEventSystem),
+        }
     }
 }
 
 impl ResolvedPtr {
-    pub fn get(self) -> SysResult<u64> {
-        POINTER_CACHE.lookup(self)
+    pub fn get(self) -> SysResult<Pointer> {
+        pointer_cache().lookup(self)
     }
 }
 
 pub fn load_all_pointers() {
-    POINTER_CACHE.reset_pointers();
-    for ptr in ResolvedPtr::iter() {
-        let _ = POINTER_CACHE.lookup(ptr);
-    }
+    pointer_cache().load_all_pointers();
+    obj_refs::PLAYER.load_all_pointers();
+    obj_refs::TARGET.load_all_pointers();
+    obj_refs::TORRENT.load_all_pointers();
 }
 
-pub fn get_pointers() -> Vec<(String, u64)> {
-    let map = POINTER_CACHE.map.lock().unwrap();
-    map.iter()
-        .map(|(name, addr)| (format!("{:?}", name), *addr))
-        .collect()
+pub fn global_pointers() -> Vec<(String, u64)> {
+    pointer_cache().pointers()
+}
+
+pub fn player_pointers() -> Vec<(String, u64)> {
+    obj_refs::PLAYER.pointers()
+}
+
+pub fn target_pointers() -> Vec<(String, u64)> {
+    obj_refs::TARGET.pointers()
+}
+
+pub fn torrent_pointers() -> Vec<(String, u64)> {
+    obj_refs::TORRENT.pointers()
 }

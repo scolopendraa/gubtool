@@ -1,11 +1,14 @@
-use {crate::player, gubtool_core::sys::sys_error::SysResult};
+use {
+    crate::player,
+    gubtool_core::{address::Pointer, sys::sys_error::SysResult},
+};
 
 #[derive(Clone, Copy)]
 pub struct TalkCommand {
     pub name:       &'static str,
     pub command_id: i32,
     pub params:     &'static [i32],
-    pub handle:     Option<fn() -> SysResult<u64>>,
+    pub handle:     Option<fn() -> SysResult<Pointer>>,
     pub dlc:        bool,
 }
 
@@ -63,7 +66,7 @@ pub static MENUS: [TalkCommand; 12] = [
         name:       "Sell Item",
         command_id: 46,
         params:     &[-1, -1],
-        handle:     Some(|| player::player().chr_ins().and_then(|chr| chr.handle())),
+        handle:     Some(|| player::player().and_then(|mut chr| chr.handle())),
         dlc:        false,
     },
     TalkCommand {

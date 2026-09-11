@@ -511,3 +511,12 @@ pub const LUA_EVENT_SYSTEM: AobScan = AobScan {
         bytes_to_next_instr: 4,
     },
 };
+
+pub const BAD_QUIT_MESSAGE: AobScan = AobScan {
+    name:        "BadQuitMessage",
+    pattern:     "48 33 c4 48 89 45 ? 48 8b fa 48 8b f1 48 89 55 ? 45 33 f6 44 89 74 24 ? 48 8b \
+                  01 83 78 04 07 0f 85 ? ? ? ? e8 ? ? ? ?",
+    scan_origin: 0x824d89,
+    offset:      45,
+    scan_mode:   AddressingMode::Absolute,
+};

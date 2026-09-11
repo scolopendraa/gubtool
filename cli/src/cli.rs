@@ -14,6 +14,9 @@ pub struct Cli {
     #[arg(long = "ds2")]
     darksouls2: Option<String>,
 
+    #[arg(long = "ds3")]
+    darksouls3: Option<String>,
+
     #[arg(long = "any")]
     any: Option<String>,
 
@@ -43,30 +46,43 @@ pub fn run() -> anyhow::Result<()> {
     if let Ok(game) = attached::game() {
         match game {
             Game::DarkSouls2 => darksouls2::init(),
+            Game::DarkSouls3 => darksouls3::init(),
             Game::EldenRing => eldenring::init(),
         }
     }
 
-    match (&cli.eldenring, &cli.darksouls2, &cli.any, &cli.arg, &cli.command) {
-        (Some(name), None, None, arg, None) => {
+    match (
+        &cli.eldenring,
+        &cli.darksouls2,
+        &cli.darksouls3,
+        &cli.any,
+        &cli.arg,
+        &cli.command,
+    ) {
+        (Some(name), None, None, arg, None, None) => {
             execute_command_from_registry(&eldenring::COMMAND_REGISTER, name.clone(), arg.clone())
         }
 
-        (None, Some(name), None, arg, None) => {
+        (None, Some(name), None, arg, None, None) => {
             execute_command_from_registry(&darksouls2::COMMAND_REGISTER, name.clone(), arg.clone())
         }
 
-        (None, None, Some(name), arg, None) => {
+        (None, None, Some(name), arg, None, None) => {
+            execute_command_from_registry(&darksouls3::COMMAND_REGISTER, name.clone(), arg.clone())
+        }
+
+        (None, None, None, Some(name), arg, None) => {
             let registry = match attached::game() {
                 Ok(Game::DarkSouls2) => &darksouls2::COMMAND_REGISTER,
+                Ok(Game::DarkSouls3) => &darksouls3::COMMAND_REGISTER,
                 Ok(Game::EldenRing) => &eldenring::COMMAND_REGISTER,
                 Err(_) => bail!("not attached to any game"),
             };
             execute_command_from_registry(registry, name.clone(), arg.clone())
         }
-        (None, None, None, _, Some(command)) => handle_enum_command(command),
+        (None, None, None, None, _, Some(command)) => handle_enum_command(command),
 
-        (None, None, None, None, None) => {
+        (None, None, None, None, None, None) => {
             if let Err(e) = tui::run() {
                 eprintln!("{e:?}");
             }
@@ -83,17 +99,22 @@ fn handle_enum_command(command: &CliCommand) -> anyhow::Result<()> {
         CliCommand::AsmSizes => {
             gubtool_core::sys::print_asm_sizes();
             darksouls2::utils::print_asm_sizes();
+            darksouls3::utils::print_asm_sizes();
             eldenring::utils::print_asm_sizes();
         }
         CliCommand::ListGameCommands {
             game,
         } => {
             match game {
-                GameArg::DarkSouls2 => darksouls2::COMMAND_REGISTER.print_commands(),
-                GameArg::EldenRing => eldenring::COMMAND_REGISTER.print_commands(),
+                GameArg::Darksouls2 => darksouls2::COMMAND_REGISTER.print_commands(),
+                GameArg::Darksouls3 => darksouls3::COMMAND_REGISTER.print_commands(),
+                GameArg::Eldenring => eldenring::COMMAND_REGISTER.print_commands(),
             }
         }
-        CliCommand::Test => {}
+        CliCommand::Test => {
+            let s = eldenring::utils::scan_mem_exhaustive()?;
+            println!("{:#x?}",s);
+        }
     }
     Ok(())
 }
@@ -114,6 +135,7 @@ fn execute_command_from_registry(
 
 #[derive(Clone, ValueEnum)]
 enum GameArg {
-    DarkSouls2,
-    EldenRing,
+    Darksouls2,
+    Darksouls3,
+    Eldenring,
 }
