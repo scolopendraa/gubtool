@@ -2,9 +2,9 @@ mov eax, DWORD PTR [esi]
 mov edx, DWORD PTR [eax+0x1c]
 push eax
 push edi
-cmp BYTE PTR ds:OFFSET disable_all_flag, 0x0
+cmp BYTE PTR [disable_all_flag], 0x0
 je check_individual
-mov eax, ds:OFFSET target_loc
+mov eax, [target_loc]
 test eax, eax
 je skip_call
 mov eax, DWORD PTR [eax+0xac]

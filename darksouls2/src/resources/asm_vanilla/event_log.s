@@ -6,7 +6,7 @@ mov ecx, OFFSET write_index
 mov edi, DWORD PTR [ecx]
 mov eax, edi
 imul eax, eax, 0x5
-lea ebx, ds: OFFSET buffer
+lea ebx, [buffer]
 add ebx, eax
 mov DWORD PTR [ebx], esi
 mov al, BYTE PTR [ebp+0xC]

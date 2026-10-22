@@ -2,7 +2,7 @@ push ebp
 push ebx
 push esi
 push edi
-mov ebx, DWORD PTR ds:OFFSET game_man_imp
+mov ebx, DWORD PTR [game_man_imp]
 mov edi, ebx
 mov ebx, DWORD PTR [ebx+0x60]
 mov ebx, DWORD PTR [ebx+0x8]

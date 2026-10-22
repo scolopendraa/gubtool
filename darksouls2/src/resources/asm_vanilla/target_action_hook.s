@@ -3,12 +3,12 @@ mov ebp, esp
 mov eax, DWORD PTR [ebp+0x8]
 push edx
 push ebx
-cmp BYTE PTR ds:OFFSET force_act_flag, 0x1
+cmp BYTE PTR [force_act_flag], 0x1
 jne log
-mov edx, ds:OFFSET repeating_chr_ai
+mov edx, [repeating_chr_ai]
 cmp edx, ecx
 jne log
-mov eax, ds:OFFSET force_act_id
+mov eax, [force_act_id]
 log:
 mov edx, OFFSET buffer
 mov ebx, DWORD PTR [edx]

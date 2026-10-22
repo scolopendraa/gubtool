@@ -1,5 +1,5 @@
 push eax
-mov eax, ds:OFFSET game_man_imp
+mov eax, [game_man_imp]
 mov eax, DWORD PTR [eax+0x74]
 cmp eax, esi
 jne exit
