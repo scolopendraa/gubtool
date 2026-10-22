@@ -193,6 +193,7 @@ fn match_eldenring((major, minor, patch): (u16, u16, u16)) -> Result<EldenRingVe
         (2, 6, 2) => EldenRingVersion::Version2_6_2,
         (2, 7, 0) => EldenRingVersion::Version2_7_0,
         (2, 7, 1) => EldenRingVersion::Version2_7_1,
+        (2, 7, 2) => EldenRingVersion::Version2_7_2,
         _ => {
             return Err(ParseError::MatchProductVersion {
                 product_version: (major, minor, patch),

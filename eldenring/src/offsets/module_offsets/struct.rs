@@ -94,6 +94,7 @@ pub(super) fn module_offsets() -> &'static ModuleOffsets {
         Some(Version2_6_2) => &versions::OFFSETS_2_6_2,
         Some(Version2_7_0) => &versions::OFFSETS_2_7_0,
         Some(Version2_7_1) => &versions::OFFSETS_2_7_1,
-        _ => &versions::OFFSETS_2_7_1,
+        Some(Version2_7_2) => &versions::OFFSETS_2_7_2,
+        _ => &versions::OFFSETS_2_7_2,
     }
 }
