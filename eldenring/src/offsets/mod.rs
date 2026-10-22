@@ -57,8 +57,24 @@ pub mod game_man {
 }
 
 pub mod damage_manager {
-    pub const HITBOXVIEW_A: i32 = 0xa0;
-    pub const HITBOXVIEW_B: i32 = 0xa1;
+    use gubtool_core::{
+        attached::version,
+        game_version::EldenRingVersion::{self, *},
+    };
+
+    pub fn hitbox_view_a() -> i32 {
+        match version::<EldenRingVersion>() {
+            Some(v) if v <= Version2_7_1 => 0xa0,
+            _ => 0xa8,
+        }
+    }
+
+    pub fn hitbox_view_b() -> i32 {
+        match version::<EldenRingVersion>() {
+            Some(v) if v <= Version2_7_1 => 0xa1,
+            _ => 0xa9,
+        }
+    }
 }
 
 pub mod cs_flipper_imp {

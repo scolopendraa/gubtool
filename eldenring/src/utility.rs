@@ -140,14 +140,14 @@ impl DrawHitboxes {
     pub fn get_in_game(&self) -> SysResult<bool> {
         ResolvedPtr::DamageManager
             .get()
-            .add_offset(damage_manager::HITBOXVIEW_A)
+            .add_offset(damage_manager::hitbox_view_a())
             .read::<u8>()
             .map(|val| val != 0x0)
     }
     pub fn set_in_game(&self, state: bool) -> SysResult {
         ResolvedPtr::DamageManager
             .get()
-            .add_offset(damage_manager::HITBOXVIEW_A)
+            .add_offset(damage_manager::hitbox_view_a())
             .write::<i64>(state as i64)
     }
 }

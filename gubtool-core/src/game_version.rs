@@ -164,8 +164,9 @@ pub enum EldenRingVersion {
     Version2_6_1,
     Version2_6_2,
     Version2_7_0,
-    #[default]
     Version2_7_1,
+    #[default]
+    Version2_7_2,
 }
 
 impl Version for EldenRingVersion {
@@ -208,6 +209,7 @@ impl Display for EldenRingVersion {
             Self::Version2_6_2 => "Elden Ring v1.16.2",
             Self::Version2_7_0 => "Elden Ring v1.17",
             Self::Version2_7_1 => "Elden Ring v1.17.1",
+            Self::Version2_7_2 => "Elden Ring v1.17.2",
         };
         write!(f, "{}", name)
     }
